@@ -153,19 +153,23 @@ export function QtyStepper({
   onChange: (q: number) => void;
 }) {
   return (
-    <div className="flex items-center rounded-lg border border-border">
+    <div className="flex select-none items-center rounded-lg border border-border">
       <button
+        type="button"
         onClick={() => onChange(value - 1)}
         aria-label="Disminuir cantidad"
-        className="px-2.5 py-1 text-muted transition hover:text-foreground"
+        className="flex h-10 w-10 items-center justify-center text-lg leading-none text-muted transition [touch-action:manipulation] hover:text-foreground active:bg-surface-2"
       >
         −
       </button>
-      <span className="min-w-8 text-center text-sm font-medium">{value}</span>
+      <span className="min-w-7 text-center text-sm font-medium tabular-nums">
+        {value}
+      </span>
       <button
+        type="button"
         onClick={() => onChange(value + 1)}
         aria-label="Aumentar cantidad"
-        className="px-2.5 py-1 text-muted transition hover:text-foreground"
+        className="flex h-10 w-10 items-center justify-center text-lg leading-none text-muted transition [touch-action:manipulation] hover:text-foreground active:bg-surface-2"
       >
         +
       </button>

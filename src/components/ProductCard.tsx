@@ -55,7 +55,7 @@ export function ProductCard({ product }: { product: Product }) {
           Solo para uso de investigación
         </p>
 
-        <div className="mt-4 flex items-center justify-between gap-2">
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-x-2 gap-y-2">
           {product.price > 0 ? (
             <>
               <span className="text-lg font-bold">{formatPrice(product.price)}</span>
