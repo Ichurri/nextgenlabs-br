@@ -2,13 +2,26 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 import type { Product } from "@/data/products";
 import { useCart } from "@/lib/cart";
 import { formatPrice } from "@/lib/format";
 import { buildWhatsAppUrl } from "@/config/site";
+import { QtyStepper } from "@/components/CartDrawer";
 
 export function ProductCard({ product }: { product: Product }) {
   const addItem = useCart((s) => s.addItem);
+  const setQuantity = useCart((s) => s.setQuantity);
+  const removeItem = useCart((s) => s.removeItem);
+  const items = useCart((s) => s.items);
+
+  // Evita desajuste de hidratación: el carrito se rehidrata desde localStorage
+  // sólo en el cliente, así que hasta montar mostramos siempre "Añadir".
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const inCart = mounted
+    ? items.find((i) => i.slug === product.slug)
+    : undefined;
 
   return (
     <div className="group flex flex-col overflow-hidden rounded-xl border border-border bg-surface transition hover:border-accent/50 hover:shadow-lg hover:shadow-accent/5">
@@ -46,12 +59,21 @@ export function ProductCard({ product }: { product: Product }) {
           {product.price > 0 ? (
             <>
               <span className="text-lg font-bold">{formatPrice(product.price)}</span>
-              <button
-                onClick={() => addItem(product)}
-                className="rounded-lg bg-accent px-3 py-2 text-xs font-semibold text-white transition hover:bg-accent-light"
-              >
-                Añadir
-              </button>
+              {inCart ? (
+                <QtyStepper
+                  value={inCart.quantity}
+                  onChange={(q) =>
+                    q < 1 ? removeItem(product.slug) : setQuantity(product.slug, q)
+                  }
+                />
+              ) : (
+                <button
+                  onClick={() => addItem(product)}
+                  className="rounded-lg bg-accent px-3 py-2 text-xs font-semibold text-white transition hover:bg-accent-light"
+                >
+                  Añadir
+                </button>
+              )}
             </>
           ) : (
             <>

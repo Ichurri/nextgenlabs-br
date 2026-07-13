@@ -14,6 +14,11 @@ export type CartItem = {
 type CartState = {
   items: CartItem[];
   isDrawerOpen: boolean;
+  // Aviso breve ("añadido al carrito"): guardamos el último nombre y un contador
+  // que se incrementa en cada adición para poder re-disparar el toast aunque sea
+  // el mismo producto.
+  lastAddedName: string | null;
+  addNonce: number;
   addItem: (product: Product, quantity?: number) => void;
   removeItem: (slug: string) => void;
   setQuantity: (slug: string, quantity: number) => void;
@@ -27,33 +32,35 @@ export const useCart = create<CartState>()(
     (set) => ({
       items: [],
       isDrawerOpen: false,
+      lastAddedName: null,
+      addNonce: 0,
 
+      // Añadir NO abre el carrito: solo acumula el ítem y dispara un aviso breve.
+      // El carrito se abre únicamente cuando el usuario pulsa el ícono del carrito.
       addItem: (product, quantity = 1) =>
         set((state) => {
           const existing = state.items.find((i) => i.slug === product.slug);
-          if (existing) {
-            return {
-              items: state.items.map((i) =>
+          const items = existing
+            ? state.items.map((i) =>
                 i.slug === product.slug
                   ? { ...i, quantity: i.quantity + quantity }
                   : i
-              ),
-              isDrawerOpen: true,
-            };
-          }
+              )
+            : [
+                ...state.items,
+                {
+                  slug: product.slug,
+                  name: product.name,
+                  dose: product.dose,
+                  price: product.price,
+                  image: product.image,
+                  quantity,
+                },
+              ];
           return {
-            items: [
-              ...state.items,
-              {
-                slug: product.slug,
-                name: product.name,
-                dose: product.dose,
-                price: product.price,
-                image: product.image,
-                quantity,
-              },
-            ],
-            isDrawerOpen: true,
+            items,
+            lastAddedName: product.name,
+            addNonce: state.addNonce + 1,
           };
         }),
 

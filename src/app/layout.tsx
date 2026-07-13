@@ -7,6 +7,7 @@ import { Footer } from "@/components/Footer";
 import { AgeGate } from "@/components/AgeGate";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { CartDrawer } from "@/components/CartDrawer";
+import { CartToast } from "@/components/CartToast";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -60,6 +61,7 @@ export default function RootLayout({
         <Footer />
         <WhatsAppButton />
         <CartDrawer />
+        <CartToast />
       </body>
     </html>
   );
