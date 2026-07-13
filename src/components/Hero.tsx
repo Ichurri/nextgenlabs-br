@@ -1,28 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
+import { HeroVideo } from "@/components/HeroVideo";
 
 export function Hero() {
   return (
     <section className="relative flex min-h-[88vh] items-center justify-center overflow-hidden">
-      {/* Poster de respaldo: fotograma real del video, visible al instante */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: "url('/hero-poster.jpg')" }}
-      />
-      {/* Video de fondo. El atributo poster (mismo fotograma) evita cualquier
-          destello de "cargando": se ve el hero desde el primer instante. */}
-      <video
-        className="absolute inset-0 h-full w-full object-cover"
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="auto"
-        poster="/hero-poster.jpg"
-      >
-        <source src="/hero-loop.mp4" type="video/mp4" />
-      </video>
+      {/* Video de fondo con poster de fotograma real (ver HeroVideo) */}
+      <HeroVideo />
 
       {/* Overlay oscuro + viñeta */}
       <div className="absolute inset-0 bg-black/60" />
