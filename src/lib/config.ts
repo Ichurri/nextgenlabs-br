@@ -4,7 +4,7 @@
  */
 
 // TODO: PLACEHOLDER — reemplazar con el número real de WhatsApp (código de país + número, sin "+", espacios ni guiones)
-export const WHATSAPP_NUMBER = "591XXXXXXXX";
+export const WHATSAPP_NUMBER = "59178184211";
 
 export const SITE_NAME = "Nextgen Labs";
 export const SITE_TAGLINE = "Péptidos de grado investigación — Bolivia";

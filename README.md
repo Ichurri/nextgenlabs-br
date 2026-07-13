@@ -31,7 +31,7 @@ Todos los valores a editar están marcados en el código con `// TODO:` o
 
 ### 1. Número de WhatsApp — `src/config/site.ts`
 ```ts
-export const WHATSAPP_NUMBER = "591XXXXXXXX"; // ← número real, solo dígitos, con código de país
+export const WHATSAPP_NUMBER = "59178184211"; // ← número real, solo dígitos, con código de país
 ```
 Formato internacional sin `+`, espacios ni guiones. Ejemplo Bolivia: `59171234567`.
 
