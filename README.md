@@ -43,12 +43,13 @@ Formato internacional sin `+`, espacios ni guiones. Ejemplo Bolivia: `5917123456
 - `url` — dominio final del sitio (para SEO / Open Graph)
 
 ### 3. Productos y precios — `src/data/products.ts`
-La lista actual es **placeholder** (mismos compuestos que onyxresearch.shop, con
-precios de ejemplo). Reemplaza con los productos y **precios reales en Bs**.
+El catálogo ya trae los **10 productos reales** del cliente con sus precios en Bs.
+Revisa/ajusta precios, viñetas o categorías y agrega nuevos productos editando el
+array `products` (ver "Cómo agregar o editar productos" más abajo).
 
 ### 4. Imágenes de producto — `public/products/`
-Actualmente hay **viales SVG generados como placeholder**. Reemplázalos por fotos
-reales usando **el mismo nombre de archivo** (o cambia la ruta en el campo `image`).
+Las **fotos reales de los viales** ya están cargadas (`.webp`). Para cambiar una,
+reemplaza el archivo con el mismo nombre (o actualiza la ruta en el campo `image`).
 
 ### 5. Certificados de Análisis (COA)
 En cada producto, el campo opcional `coaUrl` apunta al PDF del lote. Mientras esté
