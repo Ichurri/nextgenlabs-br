@@ -6,15 +6,14 @@ import { useEffect, useRef, useState } from "react";
  * Video de fondo del hero.
  *
  * Estrategia anti-"cargando":
- *  - El poster (`/hero-poster.jpg`, un fotograma real del propio video) se pinta
- *    como fondo desde el primer instante.
- *  - El elemento <video> permanece invisible (opacity 0) hasta que realmente está
- *    reproduciéndose (readyState suficiente, no pausado y con avance de tiempo).
- *    Así nunca se ve el recuadro negro/"cargando" del video en móvil: solo el
- *    poster, y luego el video ya en movimiento.
- *  - La revelación es instantánea (sin transición CSS, que en algunos entornos
- *    se queda "colgada"); como el poster y el video comparten imagen, el cambio
- *    es imperceptible.
+ *  - El poster (`/hero-poster.jpg`, un fotograma real del propio video,
+ *    comprimido a ~58 KB) se pinta como fondo desde el primer instante.
+ *  - El <video> permanece invisible hasta que el navegador emite `playing`,
+ *    es decir, hasta que de verdad hay movimiento. Si el autoplay está
+ *    bloqueado (p. ej. iOS en modo de ahorro de batería), el video NUNCA se
+ *    revela: se queda el poster, sin recuadro negro ni glifo ▶ de iOS.
+ *  - Al primer toque/click en la página se reintenta `play()` — iOS permite
+ *    reproducir tras un gesto del usuario — y ahí recién se revela.
  */
 export function HeroVideo() {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -24,24 +23,41 @@ export function HeroVideo() {
     const video = videoRef.current;
     if (!video) return;
 
-    // Algunos navegadores móviles no autoreproducen sin un empujón explícito.
-    video.play?.().catch(() => {});
-
-    let raf = 0;
-    const start = performance.now();
-    const check = () => {
-      const reallyPlaying =
-        video.readyState >= 3 && !video.paused && video.currentTime > 0;
-      // Fallback: si tras 4s no logró reproducirse (autoplay bloqueado), dejamos
-      // de sondear y revelamos el video igualmente (mostrará su propio poster).
-      if (reallyPlaying || performance.now() - start > 4000) {
-        setPlaying(true);
-        return;
-      }
-      raf = requestAnimationFrame(check);
+    const onPlaying = () => setPlaying(true);
+    video.addEventListener("playing", onPlaying);
+    // Si el video se pausa o se estanca en t=0 (p. ej. buffer vacío al
+    // reiniciar el loop en conexiones lentas), volver al poster para no
+    // dejar un fotograma congelado/negro en pantalla.
+    const onStall = () => {
+      if (video.currentTime === 0) setPlaying(false);
     };
-    check();
-    return () => cancelAnimationFrame(raf);
+    video.addEventListener("pause", onStall);
+    video.addEventListener("waiting", onStall);
+    // El autoplay puede haber arrancado antes de la hidratación de React
+    // (el evento `playing` ya pasó): comprobar el estado actual también.
+    if (!video.paused && video.readyState >= 3 && video.currentTime > 0) {
+      setPlaying(true);
+    }
+
+    const tryPlay = () => video.play().catch(() => {});
+    tryPlay();
+
+    // Autoplay bloqueado (ahorro de batería / data saver): reintentar al
+    // primer gesto del usuario, que es cuando iOS/Android lo permiten.
+    const onFirstGesture = () => tryPlay();
+    window.addEventListener("touchstart", onFirstGesture, {
+      once: true,
+      passive: true,
+    });
+    window.addEventListener("click", onFirstGesture, { once: true });
+
+    return () => {
+      video.removeEventListener("playing", onPlaying);
+      video.removeEventListener("pause", onStall);
+      video.removeEventListener("waiting", onStall);
+      window.removeEventListener("touchstart", onFirstGesture);
+      window.removeEventListener("click", onFirstGesture);
+    };
   }, []);
 
   return (
@@ -61,7 +77,6 @@ export function HeroVideo() {
         loop
         playsInline
         preload="auto"
-        poster="/hero-poster.jpg"
       >
         <source src="/hero-loop.mp4" type="video/mp4" />
       </video>
