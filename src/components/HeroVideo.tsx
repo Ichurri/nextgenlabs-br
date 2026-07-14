@@ -62,15 +62,18 @@ export function HeroVideo() {
 
   return (
     <>
-      {/* Poster de respaldo: fotograma real del video, visible al instante */}
+      {/* Poster de respaldo: fotograma real del video, visible al instante.
+          En móvil el encuadre se corre hacia la derecha del cuadro (donde está
+          el vial); en pantallas anchas (md+) se mantiene centrado. El poster y
+          el video usan la misma posición para que el cambio sea imperceptible. */}
       <div
         aria-hidden="true"
-        className="absolute inset-0 bg-cover bg-center"
+        className="absolute inset-0 bg-cover bg-[position:72%_center] md:bg-center"
         style={{ backgroundImage: "url('/hero-poster.jpg')" }}
       />
       <video
         ref={videoRef}
-        className="absolute inset-0 h-full w-full object-cover"
+        className="absolute inset-0 h-full w-full object-cover object-[72%_center] md:object-center"
         style={{ opacity: playing ? 1 : 0 }}
         autoPlay
         muted
