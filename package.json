@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:preview": "WATCHPACK_POLLING=true next dev --webpack",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
