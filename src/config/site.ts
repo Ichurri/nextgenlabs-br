@@ -21,7 +21,7 @@ export const siteConfig = {
   contact: {
     email: "PLACEHOLDER@nextgenlabs.bo",
     city: "Santa Cruz de la Sierra, Bolivia",
-    whatsappDisplay: "+591 69499593", // número visible
+    whatsappDisplay: "+591 69437674", // número visible
   },
 
   // TODO: reemplazar por las redes reales (o dejar vacío para ocultar)
