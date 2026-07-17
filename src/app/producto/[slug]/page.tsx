@@ -74,8 +74,11 @@ export default async function ProductPage({
       </nav>
 
       <div className="grid gap-8 md:grid-cols-2 md:gap-10">
-        {/* Imagen */}
-        <div className="relative aspect-square overflow-hidden rounded-2xl border border-border bg-surface-2">
+        {/* Imagen: cuadrada en móvil (una sola columna). En desktop se
+            estira a la altura real de la columna de info (más alta por su
+            contenido) en vez de quedar cuadrada con un hueco vacío debajo;
+            object-cover recorta el encuadre sin deformarlo. */}
+        <div className="relative aspect-square overflow-hidden rounded-2xl border border-border bg-surface-2 md:aspect-auto">
           <Image
             src={product.image}
             alt={`Vial de ${product.name} ${product.dose}`}
