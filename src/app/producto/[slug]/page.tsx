@@ -73,7 +73,7 @@ export default async function ProductPage({
         </Link>
       </nav>
 
-      <div className="grid gap-10 md:grid-cols-2">
+      <div className="grid gap-8 md:grid-cols-2 md:gap-10">
         {/* Imagen */}
         <div className="relative aspect-square overflow-hidden rounded-2xl border border-border bg-surface-2">
           <Image
@@ -171,7 +171,7 @@ export default async function ProductPage({
           </div>
 
           {/* COA */}
-          <div className="mt-10 rounded-xl border border-border bg-surface p-5">
+          <div className="mt-8 rounded-xl border border-border bg-surface p-5">
             <h2 className="text-sm font-semibold tracking-wide">
               Certificado de Análisis (COA)
             </h2>
