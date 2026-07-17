@@ -9,6 +9,7 @@ export function WhatsAppButton() {
       href={buildWhatsAppUrl(DEFAULT_MESSAGE)}
       label="Contactar por WhatsApp"
       variant="floating"
+      analyticsEvent="whatsapp_click_floating"
     />
   );
 }

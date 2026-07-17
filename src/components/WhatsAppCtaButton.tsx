@@ -1,3 +1,6 @@
+"use client";
+
+import { track } from "@vercel/analytics";
 import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 
 type WhatsAppCtaButtonProps = {
@@ -7,6 +10,8 @@ type WhatsAppCtaButtonProps = {
   /** Solo aplica a variant="solid". Por defecto ocupa el ancho del contenedor. */
   fullWidth?: boolean;
   className?: string;
+  /** Nombre del evento de analítica disparado al hacer clic (@vercel/analytics). */
+  analyticsEvent?: string;
 };
 
 const variantClasses: Record<NonNullable<WhatsAppCtaButtonProps["variant"]>, string> = {
@@ -31,6 +36,7 @@ export function WhatsAppCtaButton({
   variant = "solid",
   fullWidth = true,
   className = "",
+  analyticsEvent,
 }: WhatsAppCtaButtonProps) {
   const widthClass = variant === "solid" ? (fullWidth ? "w-full" : "w-auto") : "";
 
@@ -40,6 +46,7 @@ export function WhatsAppCtaButton({
       target="_blank"
       rel="noopener noreferrer"
       aria-label={label ?? "Contactar por WhatsApp"}
+      onClick={analyticsEvent ? () => track(analyticsEvent) : undefined}
       className={`focus-ring ${variantClasses[variant]} ${widthClass} ${className}`.trim()}
     >
       <WhatsAppIcon className={iconSizeByVariant[variant]} />

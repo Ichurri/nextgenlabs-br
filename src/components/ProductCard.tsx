@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import type { Product } from "@/data/products";
+import { isInStock, type Product } from "@/data/products";
 import { useCart } from "@/lib/cart";
 import { formatPrice } from "@/lib/format";
 import { buildWhatsAppUrl } from "@/config/site";
@@ -23,6 +23,7 @@ export function ProductCard({ product }: { product: Product }) {
   const inCart = mounted
     ? items.find((i) => i.slug === product.slug)
     : undefined;
+  const inStock = isInStock(product);
 
   return (
     <div className="group flex flex-col overflow-hidden rounded-xl border border-border bg-surface transition hover:border-accent/50 hover:shadow-lg hover:shadow-accent/5">
@@ -35,7 +36,7 @@ export function ProductCard({ product }: { product: Product }) {
           alt={`Vial de ${product.name} ${product.dose}`}
           fill
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          className="object-cover transition duration-500 group-hover:scale-105"
+          className={`object-cover transition duration-500 group-hover:scale-105 ${inStock ? "" : "opacity-50 grayscale"}`}
         />
         <span className="absolute left-3 top-3 rounded-md bg-accent/90 px-2 py-1 text-[11px] font-bold tracking-wide text-white">
           {product.dose}
@@ -43,6 +44,16 @@ export function ProductCard({ product }: { product: Product }) {
         <span className="absolute right-3 top-3 rounded-md border border-white/20 bg-background/60 px-2 py-1 text-[11px] font-semibold text-white backdrop-blur">
           {product.purity}
         </span>
+        {product.isNew && inStock && (
+          <span className="absolute bottom-3 left-3 rounded-md bg-success px-2 py-1 text-[11px] font-bold tracking-wide text-white">
+            Nuevo
+          </span>
+        )}
+        {!inStock && (
+          <span className="absolute bottom-3 left-3 rounded-md border border-border bg-background/90 px-2 py-1 text-[11px] font-bold uppercase tracking-wide text-foreground backdrop-blur">
+            Agotado
+          </span>
+        )}
       </Link>
 
       <div className="flex flex-1 flex-col p-4">
@@ -57,7 +68,17 @@ export function ProductCard({ product }: { product: Product }) {
         </p>
 
         <div className="mt-4 flex flex-wrap items-center justify-between gap-x-2 gap-y-2">
-          {product.price > 0 ? (
+          {!inStock ? (
+            <>
+              <span className="text-sm font-semibold text-muted">No disponible</span>
+              <button
+                disabled
+                className="cursor-not-allowed rounded-lg border border-border px-3 py-2 text-xs font-semibold text-muted"
+              >
+                Agotado
+              </button>
+            </>
+          ) : product.price > 0 ? (
             <>
               <span className="text-lg font-bold">{formatPrice(product.price)}</span>
               {inCart ? (
@@ -85,6 +106,7 @@ export function ProductCard({ product }: { product: Product }) {
                 )}
                 label="Consultar"
                 variant="compact"
+                analyticsEvent="whatsapp_click_consult"
               />
             </>
           )}

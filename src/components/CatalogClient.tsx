@@ -22,12 +22,21 @@ export function CatalogClient({ products }: { products: Product[] }) {
     const result = products.filter((p) => {
       const matchesCategory =
         activeCategory === "Todos" || p.category === activeCategory;
-      const matchesQuery = q === "" || p.name.toLowerCase().includes(q);
+      const matchesQuery =
+        q === "" ||
+        p.name.toLowerCase().includes(q) ||
+        p.category.toLowerCase().includes(q) ||
+        p.highlights.some((h) => h.toLowerCase().includes(q));
       return matchesCategory && matchesQuery;
     });
 
     result.sort((a, b) => {
-      if (sort === "precio-asc") return a.price - b.price;
+      if (sort === "precio-asc") {
+        // Precio 0 = "a consultar": va al final, no es el más barato.
+        const priceA = a.price === 0 ? Infinity : a.price;
+        const priceB = b.price === 0 ? Infinity : b.price;
+        return priceA - priceB;
+      }
       if (sort === "precio-desc") return b.price - a.price;
       return a.name.localeCompare(b.name, "es");
     });
@@ -52,7 +61,7 @@ export function CatalogClient({ products }: { products: Product[] }) {
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Buscar por nombre…"
+            placeholder="Buscar por nombre, categoría o beneficio…"
             aria-label="Buscar productos"
             className="focus-ring w-full rounded-lg border border-border bg-surface py-2.5 pl-10 pr-3 text-sm text-foreground outline-none transition placeholder:text-muted focus:border-accent"
           />

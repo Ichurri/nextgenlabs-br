@@ -5,6 +5,7 @@ import { products } from "@/data/products";
 const staticRoutes: { path: string; priority: number; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"] }[] = [
   { path: "", priority: 1, changeFrequency: "weekly" },
   { path: "/catalogo", priority: 0.9, changeFrequency: "weekly" },
+  { path: "/envios", priority: 0.5, changeFrequency: "monthly" },
   { path: "/contacto", priority: 0.5, changeFrequency: "monthly" },
   { path: "/preguntas-frecuentes", priority: 0.5, changeFrequency: "monthly" },
   { path: "/carrito", priority: 0.3, changeFrequency: "monthly" },

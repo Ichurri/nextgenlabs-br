@@ -37,6 +37,7 @@ export function Footer() {
             <ul className="space-y-2 text-sm text-muted">
               <li><Link href="/catalogo" className="focus-ring rounded hover:text-foreground">Catálogo</Link></li>
               <li><Link href="/carrito" className="focus-ring rounded hover:text-foreground">Carrito</Link></li>
+              <li><Link href="/envios" className="focus-ring rounded hover:text-foreground">Envíos</Link></li>
               <li><Link href="/contacto" className="focus-ring rounded hover:text-foreground">Contacto</Link></li>
               <li><Link href="/preguntas-frecuentes" className="focus-ring rounded hover:text-foreground">Preguntas frecuentes</Link></li>
             </ul>

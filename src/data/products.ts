@@ -28,7 +28,14 @@ export type Product = {
   description?: string; // párrafo opcional
   coaUrl?: string; // PLACEHOLDER: enlace al PDF del COA del lote
   featured?: boolean; // se muestra en el grid destacado del home
+  inStock?: boolean; // default true (undefined = en stock)
+  isNew?: boolean; // default false: muestra el badge "Nuevo"
 };
+
+/** `inStock` es opcional y por defecto true: solo `false` explícito marca "Agotado". */
+export function isInStock(product: Product): boolean {
+  return product.inStock !== false;
+}
 
 export const categories: ProductCategory[] = [
   "Péptidos",
@@ -224,4 +231,11 @@ export function getProductBySlug(slug: string): Product | undefined {
 
 export function getFeaturedProducts(): Product[] {
   return products.filter((p) => p.featured);
+}
+
+/** Productos de la misma categoría, excluyendo el actual, máximo 4. */
+export function getRelatedProducts(product: Product, max = 4): Product[] {
+  return products
+    .filter((p) => p.slug !== product.slug && p.category === product.category)
+    .slice(0, max);
 }

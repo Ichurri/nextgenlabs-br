@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { getProductBySlug, products } from "@/data/products";
+import { getProductBySlug, getRelatedProducts, isInStock, products } from "@/data/products";
 import { formatPrice } from "@/lib/format";
 import { AddToCartControls } from "@/components/AddToCartControls";
+import { ProductCard } from "@/components/ProductCard";
 import { ProductCoaViewer } from "@/components/ProductCoaViewer";
 import { WhatsAppCtaButton } from "@/components/WhatsAppCtaButton";
 import { buildWhatsAppUrl, siteConfig } from "@/config/site";
@@ -37,6 +38,9 @@ export default async function ProductPage({
   const product = getProductBySlug(slug);
   if (!product) notFound();
 
+  const inStock = isInStock(product);
+  const relatedProducts = getRelatedProducts(product);
+
   const productJsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -49,7 +53,9 @@ export default async function ProductPage({
         "@type": "Offer",
         priceCurrency: "BOB",
         price: product.price,
-        availability: "https://schema.org/InStock",
+        availability: inStock
+          ? "https://schema.org/InStock"
+          : "https://schema.org/OutOfStock",
         url: `${siteConfig.url}/producto/${product.slug}`,
       },
     }),
@@ -75,12 +81,22 @@ export default async function ProductPage({
             alt={`Vial de ${product.name} ${product.dose}`}
             fill
             sizes="(max-width: 768px) 100vw, 50vw"
-            className="object-cover"
+            className={`object-cover ${inStock ? "" : "opacity-50 grayscale"}`}
             priority
           />
           <span className="absolute left-4 top-4 rounded-md bg-accent/90 px-2.5 py-1 text-xs font-bold text-white">
             {product.dose}
           </span>
+          {product.isNew && inStock && (
+            <span className="absolute bottom-4 left-4 rounded-md bg-success px-2.5 py-1 text-xs font-bold text-white">
+              Nuevo
+            </span>
+          )}
+          {!inStock && (
+            <span className="absolute bottom-4 left-4 rounded-md border border-border bg-background/90 px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-foreground backdrop-blur">
+              Agotado
+            </span>
+          )}
         </div>
 
         {/* Info */}
@@ -133,7 +149,14 @@ export default async function ProductPage({
           </div>
 
           <div className="mt-8">
-            {product.price > 0 ? (
+            {!inStock ? (
+              <button
+                disabled
+                className="w-full cursor-not-allowed rounded-lg border border-border px-6 py-3.5 text-sm font-semibold text-muted"
+              >
+                Agotado — vuelve pronto
+              </button>
+            ) : product.price > 0 ? (
               <AddToCartControls product={product} />
             ) : (
               <WhatsAppCtaButton
@@ -142,6 +165,7 @@ export default async function ProductPage({
                 )}
                 label="Consultar precio por WhatsApp"
                 variant="solid"
+                analyticsEvent="whatsapp_click_consult"
               />
             )}
           </div>
@@ -167,6 +191,19 @@ export default async function ProductPage({
           </div>
         </div>
       </div>
+
+      {relatedProducts.length > 0 && (
+        <section className="mt-20">
+          <h2 className="mb-6 text-xl font-bold tracking-tight sm:text-2xl">
+            Productos relacionados
+          </h2>
+          <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
+            {relatedProducts.map((related) => (
+              <ProductCard key={related.slug} product={related} />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

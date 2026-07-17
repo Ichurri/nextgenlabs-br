@@ -124,6 +124,7 @@ export function CartDrawer() {
                 href={buildOrderWhatsAppUrl(items)}
                 label="Finalizar pedido por WhatsApp"
                 variant="solid"
+                analyticsEvent="whatsapp_click_checkout"
               />
               <Link
                 href="/carrito"
@@ -131,6 +132,13 @@ export function CartDrawer() {
                 className="focus-ring mt-2 block rounded text-center text-xs text-muted transition hover:text-foreground"
               >
                 Ver carrito completo
+              </Link>
+              <Link
+                href="/envios"
+                onClick={closeDrawer}
+                className="focus-ring mt-1 block rounded text-center text-xs text-muted transition hover:text-foreground"
+              >
+                Cobertura y tiempos de envío
               </Link>
             </div>
           </>

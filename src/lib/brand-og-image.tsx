@@ -46,7 +46,8 @@ export async function renderBrandOgImage() {
         >
           PÉPTIDOS PARA INVESTIGACIÓN · BOLIVIA
         </div>
-        <img src={logoSrc} width={420} height={98} />
+        {/* eslint-disable-next-line @next/next/no-img-element -- ImageResponse (satori) requires a raw <img>, not next/image */}
+        <img src={logoSrc} alt="" width={420} height={98} />
         <div
           style={{
             display: "flex",

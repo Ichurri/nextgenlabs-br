@@ -32,6 +32,7 @@ export default function ContactoPage() {
             label="Escribir por WhatsApp"
             variant="solid"
             fullWidth={false}
+            analyticsEvent="whatsapp_click_contact"
             className="mt-4"
           />
         </div>
