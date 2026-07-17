@@ -13,21 +13,20 @@ export const siteConfig = {
   shortName: "Nextgen Labs",
   description:
     "Nextgen Labs — péptidos exclusivamente para uso de investigación en Bolivia. Distribuidor oficial de Onyx Research. Calidad verificada, pureza garantizada y transparencia total.",
-  url: "https://nextgenlabs.bo", // TODO: dominio real
+  url: "https://nextgenlabsbo.vercel.app",
   locale: "es_BO",
   currency: "Bs",
 
-  // TODO: reemplazar por los datos de contacto reales
   contact: {
-    email: "PLACEHOLDER@nextgenlabs.bo",
+    email: "Quiquequiroga@icloud.com",
     city: "Santa Cruz de la Sierra, Bolivia",
     whatsappDisplay: "+591 69437674", // número visible
   },
 
-  // TODO: reemplazar por las redes reales (o dejar vacío para ocultar)
+  // Redes sociales: vacío = oculto. Agregar la URL real cuando exista.
   social: {
-    instagram: "https://instagram.com/PLACEHOLDER",
-    facebook: "https://facebook.com/PLACEHOLDER",
+    instagram: "",
+    facebook: "",
     tiktok: "",
   },
 
