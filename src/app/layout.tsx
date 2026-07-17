@@ -36,15 +36,28 @@ export const metadata: Metadata = {
     siteName: siteConfig.name,
     title: `${siteConfig.name} — Péptidos para investigación`,
     description: siteConfig.description,
-    images: [{ url: "/logo.svg", width: 1200, height: 630, alt: siteConfig.name }],
   },
   twitter: {
     card: "summary_large_image",
     title: `${siteConfig.name} — Péptidos para investigación`,
     description: siteConfig.description,
-    images: ["/logo.svg"],
   },
   icons: { icon: "/logo.svg" },
+};
+
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: siteConfig.name,
+  url: siteConfig.url,
+  logo: `${siteConfig.url}/logo.svg`,
+  description: siteConfig.description,
+  email: siteConfig.contact.email,
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: siteConfig.contact.city,
+    addressCountry: "BO",
+  },
 };
 
 export default function RootLayout({
@@ -55,6 +68,10 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${inter.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-background text-foreground">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
         <a href="#main-content" className="skip-link">
           Saltar al contenido
         </a>

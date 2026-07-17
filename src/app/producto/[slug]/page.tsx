@@ -7,7 +7,7 @@ import { formatPrice } from "@/lib/format";
 import { AddToCartControls } from "@/components/AddToCartControls";
 import { ProductCoaViewer } from "@/components/ProductCoaViewer";
 import { WhatsAppCtaButton } from "@/components/WhatsAppCtaButton";
-import { buildWhatsAppUrl } from "@/config/site";
+import { buildWhatsAppUrl, siteConfig } from "@/config/site";
 
 export function generateStaticParams() {
   return products.map((p) => ({ slug: p.slug }));
@@ -37,8 +37,30 @@ export default async function ProductPage({
   const product = getProductBySlug(slug);
   if (!product) notFound();
 
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: `${product.name} ${product.dose}`,
+    image: `${siteConfig.url}${product.image}`,
+    description: product.description ?? product.highlights.join(" "),
+    category: product.category,
+    ...(product.price > 0 && {
+      offers: {
+        "@type": "Offer",
+        priceCurrency: "BOB",
+        price: product.price,
+        availability: "https://schema.org/InStock",
+        url: `${siteConfig.url}/producto/${product.slug}`,
+      },
+    }),
+  };
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+      />
       <nav className="mb-8 text-sm text-muted">
         <Link href="/catalogo" className="focus-ring rounded transition hover:text-foreground">
           ← Volver al catálogo
