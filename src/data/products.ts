@@ -52,7 +52,7 @@ export const products: Product[] = [
       "Aceleración drástica de la recuperación física y del tejido muscular.",
       "Mejora la calidad del sueño profundo y la densidad ósea.",
     ],
-    coaUrl: undefined, // TODO: enlace al COA del lote
+    coaUrl: "/coa/cjc_coa.pdf",
   },
   {
     slug: "ghk-cu",
@@ -70,7 +70,7 @@ export const products: Product[] = [
       "Cicatrización acelerada y reparación de la barrera cutánea.",
       "Remodelación del tejido y potente efecto antioxidante.",
     ],
-    coaUrl: undefined,
+    coaUrl: "/coa/ghk_coa.pdf",
     featured: true,
   },
   {
@@ -88,7 +88,7 @@ export const products: Product[] = [
       "Recuperación física: acelera la reparación de músculos y articulaciones tras el ejercicio, disminuyendo el malestar general.",
       "Vitalidad celular: apoya la regeneración y el rejuvenecimiento biológico del organismo.",
     ],
-    coaUrl: undefined,
+    coaUrl: "/coa/glow_coa.pdf",
     featured: true,
   },
   {
@@ -106,7 +106,7 @@ export const products: Product[] = [
       "Control glucémico total y optimización metabólica.",
       "Quema calórica acelerada dirigida a la grasa persistente.",
     ],
-    coaUrl: undefined,
+    coaUrl: "/coa/glp3_coa.pdf",
     featured: true,
   },
   {
@@ -124,7 +124,7 @@ export const products: Product[] = [
       "Apoyo para tejidos y tendones.",
       "Favorece una respuesta antiinflamatoria equilibrada.",
     ],
-    coaUrl: undefined,
+    coaUrl: "/coa/klow_coa.pdf",
     featured: true,
   },
   {
@@ -142,7 +142,7 @@ export const products: Product[] = [
       "Claridad mental: protege tus neuronas y elimina la \"niebla mental\", mejorando el enfoque.",
       "Máximo rendimiento: acelera la recuperación física y optimiza el metabolismo.",
     ],
-    coaUrl: undefined,
+    coaUrl: "/coa/nadq_coa.pdf",
     featured: true,
   },
   {
@@ -160,7 +160,7 @@ export const products: Product[] = [
       "Mantiene un estado de \"alerta relajado\" ideal para el día a día.",
       "Estabilidad emocional y mejora el estado de ánimo.",
     ],
-    coaUrl: undefined,
+    coaUrl: "/coa/selank_coa.pdf",
   },
   {
     slug: "semax",
@@ -177,7 +177,7 @@ export const products: Product[] = [
       "Aumento de la productividad bajo condiciones de estrés mental.",
       "Protección y regeneración de las neuronas (soporte nootrópico).",
     ],
-    coaUrl: undefined,
+    coaUrl: "/coa/semax_coa.pdf",
     featured: true,
   },
   {
@@ -195,7 +195,7 @@ export const products: Product[] = [
       "Ataque directo a la grasa abdominal persistente (grasa visceral).",
       "Promueve una composición corporal limpia y mejora la recuperación.",
     ],
-    coaUrl: undefined,
+    coaUrl: "/coa/tesamorelin_coa.pdf",
     featured: true,
   },
   {
@@ -213,7 +213,7 @@ export const products: Product[] = [
       "Potente acción antiinflamatoria y reparación del tejido dañado.",
       "El combo definitivo para atletas de alto rendimiento y biohackers.",
     ],
-    coaUrl: undefined,
+    coaUrl: "/coa/wolverine_coa.pdf",
     featured: true,
   },
 ];

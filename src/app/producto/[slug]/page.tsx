@@ -5,6 +5,7 @@ import Link from "next/link";
 import { getProductBySlug, products } from "@/data/products";
 import { formatPrice } from "@/lib/format";
 import { AddToCartControls } from "@/components/AddToCartControls";
+import { ProductCoaViewer } from "@/components/ProductCoaViewer";
 import { buildWhatsAppUrl } from "@/config/site";
 
 export function generateStaticParams() {
@@ -135,14 +136,7 @@ export default async function ProductPage({
               identidad y pureza.
             </p>
             {product.coaUrl ? (
-              <a
-                href={product.coaUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-4 inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-semibold transition hover:bg-surface-2"
-              >
-                Ver COA (PDF)
-              </a>
+              <ProductCoaViewer coaUrl={product.coaUrl} productName={product.name} />
             ) : (
               // PLACEHOLDER: sin COA cargado todavía para este lote.
               <p className="mt-4 inline-flex items-center gap-2 rounded-lg border border-dashed border-border px-4 py-2 text-sm text-muted">
