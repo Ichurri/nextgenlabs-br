@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { useCart, cartTotal, cartCount } from "@/lib/cart";
 import { formatPrice } from "@/lib/format";
 import { buildOrderWhatsAppUrl } from "@/lib/whatsapp";
+import { WhatsAppCtaButton } from "@/components/WhatsAppCtaButton";
 
 export function CartDrawer() {
   const { items, isDrawerOpen, closeDrawer, setQuantity, removeItem } = useCart();
@@ -27,7 +28,7 @@ export function CartDrawer() {
       <div
         onClick={closeDrawer}
         aria-hidden="true"
-        className={`fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm transition-opacity ${
+        className={`fixed inset-0 z-[60] bg-background/60 backdrop-blur-sm transition-opacity ${
           isDrawerOpen ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
       />
@@ -47,7 +48,7 @@ export function CartDrawer() {
           <button
             onClick={closeDrawer}
             aria-label="Cerrar carrito"
-            className="rounded-lg p-2 text-muted transition hover:bg-surface-2 hover:text-foreground"
+            className="focus-ring rounded-lg p-3 text-muted transition hover:bg-surface-2 hover:text-foreground"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
               <line x1="18" y1="6" x2="6" y2="18" />
@@ -62,7 +63,7 @@ export function CartDrawer() {
             <Link
               href="/catalogo"
               onClick={closeDrawer}
-              className="rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-light"
+              className="focus-ring rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-light"
             >
               Ver catálogo
             </Link>
@@ -73,7 +74,7 @@ export function CartDrawer() {
               <ul className="space-y-4">
                 {items.map((item) => (
                   <li key={item.slug} className="flex gap-3">
-                    <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-border bg-black">
+                    <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-border bg-surface-2">
                       <Image
                         src={item.image}
                         alt={item.name}
@@ -91,7 +92,7 @@ export function CartDrawer() {
                         <button
                           onClick={() => removeItem(item.slug)}
                           aria-label={`Quitar ${item.name}`}
-                          className="text-muted transition hover:text-red-400"
+                          className="focus-ring rounded p-1 text-muted transition hover:text-danger"
                         >
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
                             <polyline points="3 6 5 6 21 6" />
@@ -119,21 +120,15 @@ export function CartDrawer() {
                 <span>Total</span>
                 <span>{formatPrice(total)}</span>
               </div>
-              <a
+              <WhatsAppCtaButton
                 href={buildOrderWhatsAppUrl(items)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#25D366] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#20bd5a]"
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff" aria-hidden="true">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347" />
-                </svg>
-                Finalizar pedido por WhatsApp
-              </a>
+                label="Finalizar pedido por WhatsApp"
+                variant="solid"
+              />
               <Link
                 href="/carrito"
                 onClick={closeDrawer}
-                className="mt-2 block text-center text-xs text-muted transition hover:text-foreground"
+                className="focus-ring mt-2 block rounded text-center text-xs text-muted transition hover:text-foreground"
               >
                 Ver carrito completo
               </Link>
@@ -158,7 +153,7 @@ export function QtyStepper({
         type="button"
         onClick={() => onChange(value - 1)}
         aria-label="Disminuir cantidad"
-        className="flex h-10 w-10 items-center justify-center text-lg leading-none text-muted transition [touch-action:manipulation] hover:text-foreground active:bg-surface-2"
+        className="focus-ring flex h-11 w-11 items-center justify-center rounded-l-lg text-lg leading-none text-muted transition [touch-action:manipulation] hover:text-foreground active:bg-surface-2"
       >
         −
       </button>
@@ -169,7 +164,7 @@ export function QtyStepper({
         type="button"
         onClick={() => onChange(value + 1)}
         aria-label="Aumentar cantidad"
-        className="flex h-10 w-10 items-center justify-center text-lg leading-none text-muted transition [touch-action:manipulation] hover:text-foreground active:bg-surface-2"
+        className="focus-ring flex h-11 w-11 items-center justify-center rounded-r-lg text-lg leading-none text-muted transition [touch-action:manipulation] hover:text-foreground active:bg-surface-2"
       >
         +
       </button>

@@ -49,7 +49,7 @@ export function CartToast() {
             setVisible(false);
             openDrawer();
           }}
-          className="ml-1 shrink-0 rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-accent-light"
+          className="focus-ring ml-1 shrink-0 rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-accent-light"
         >
           Ver carrito
         </button>

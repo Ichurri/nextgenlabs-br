@@ -21,7 +21,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-border/80 bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
-        <Link href="/" className="flex items-center gap-2" aria-label="Nextgen Labs — inicio">
+        <Link href="/" className="focus-ring rounded flex items-center gap-2" aria-label="Nextgen Labs — inicio">
           <Image
             src="/logo.svg"
             alt="Nextgen Labs"
@@ -37,7 +37,7 @@ export function Header() {
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm font-medium text-muted transition hover:text-foreground"
+              className="focus-ring rounded text-sm font-medium text-muted transition hover:text-foreground"
             >
               {link.label}
             </Link>
@@ -48,7 +48,7 @@ export function Header() {
           <button
             onClick={openDrawer}
             aria-label="Abrir carrito"
-            className="relative rounded-lg border border-border p-2.5 text-foreground transition hover:bg-surface-2"
+            className="focus-ring relative rounded-lg border border-border p-3 text-foreground transition hover:bg-surface-2"
           >
             <CartIcon />
             {count > 0 && (
@@ -62,7 +62,7 @@ export function Header() {
             onClick={() => setMobileOpen((v) => !v)}
             aria-label="Abrir menú"
             aria-expanded={mobileOpen}
-            className="rounded-lg border border-border p-2.5 text-foreground transition hover:bg-surface-2 md:hidden"
+            className="focus-ring rounded-lg border border-border p-3 text-foreground transition hover:bg-surface-2 md:hidden"
           >
             <MenuIcon open={mobileOpen} />
           </button>
@@ -77,7 +77,7 @@ export function Header() {
                 key={link.href}
                 href={link.href}
                 onClick={() => setMobileOpen(false)}
-                className="border-b border-border/50 py-3 text-sm font-medium text-muted transition hover:text-foreground"
+                className="focus-ring rounded border-b border-border/50 py-3 text-sm font-medium text-muted transition hover:text-foreground"
               >
                 {link.label}
               </Link>

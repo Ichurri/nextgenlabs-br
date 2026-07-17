@@ -13,6 +13,10 @@
   --muted: #a1a1aa;
   --accent: #3b82f6;
   --accent-light: #60a5fa;
+  --success: #25d366;
+  --success-hover: #20bd5a;
+  --danger: #f87171;
+  --danger-hover: #ef4444;
 }
 
 @theme inline {
@@ -24,6 +28,10 @@
   --color-muted: var(--muted);
   --color-accent: var(--accent);
   --color-accent-light: var(--accent-light);
+  --color-success: var(--success);
+  --color-success-hover: var(--success-hover);
+  --color-danger: var(--danger);
+  --color-danger-hover: var(--danger-hover);
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
@@ -57,6 +65,37 @@ body {
 /* Scrollbar oscura */
 * {
   scrollbar-color: var(--border) transparent;
+}
+
+/* Anillo de foco consistente para todos los elementos interactivos.
+   Solo visible en navegación por teclado (:focus-visible), nunca en click/tap. */
+.focus-ring {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+.focus-ring:focus-visible {
+  outline: 2px solid var(--accent-light);
+  outline-offset: 2px;
+}
+
+/* Enlace "saltar al contenido" para navegación por teclado */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 1rem;
+  z-index: 200;
+  border-radius: 0.5rem;
+  background: var(--accent);
+  color: #fff;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+  top: 1rem;
 }
 
 @keyframes fade-in {

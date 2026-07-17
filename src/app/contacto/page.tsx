@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { siteConfig, buildWhatsAppUrl } from "@/config/site";
+import { WhatsAppCtaButton } from "@/components/WhatsAppCtaButton";
 
 export const metadata: Metadata = {
   title: "Contacto",
@@ -26,16 +27,13 @@ export default function ContactoPage() {
           <p className="mt-1 text-sm text-muted">
             {siteConfig.contact.whatsappDisplay}
           </p>
-          <a
-            href={buildWhatsAppUrl(
-              "Hola Nextgen Labs, tengo una consulta."
-            )}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-4 inline-block rounded-lg bg-[#25D366] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#20bd5a]"
-          >
-            Escribir por WhatsApp
-          </a>
+          <WhatsAppCtaButton
+            href={buildWhatsAppUrl("Hola Nextgen Labs, tengo una consulta.")}
+            label="Escribir por WhatsApp"
+            variant="solid"
+            fullWidth={false}
+            className="mt-4"
+          />
         </div>
 
         <div className="rounded-xl border border-border bg-surface p-6">

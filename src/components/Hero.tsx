@@ -9,8 +9,8 @@ export function Hero() {
       <HeroVideo />
 
       {/* Overlay oscuro + viñeta */}
-      <div className="absolute inset-0 bg-black/60" />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-background" />
+      <div className="absolute inset-0 bg-background/60" />
+      <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-transparent to-background" />
 
       <div className="relative z-10 mx-auto max-w-3xl px-4 text-center">
         <Image
@@ -34,13 +34,13 @@ export function Hero() {
         <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Link
             href="/catalogo"
-            className="w-full rounded-lg bg-accent px-8 py-3.5 text-sm font-semibold text-white transition hover:bg-accent-light sm:w-auto"
+            className="focus-ring w-full rounded-lg bg-accent px-8 py-3.5 text-sm font-semibold text-white transition hover:bg-accent-light sm:w-auto"
           >
             Ver catálogo
           </Link>
           <Link
             href="#sobre"
-            className="w-full rounded-lg border border-white/20 bg-white/5 px-8 py-3.5 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/10 sm:w-auto"
+            className="focus-ring w-full rounded-lg border border-white/20 bg-white/5 px-8 py-3.5 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/10 sm:w-auto"
           >
             Conocer más
           </Link>

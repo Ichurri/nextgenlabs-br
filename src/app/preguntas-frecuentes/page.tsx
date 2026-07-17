@@ -49,7 +49,7 @@ export default function FaqPage() {
             key={item.q}
             className="group rounded-xl border border-border bg-surface p-5 [&_summary::-webkit-details-marker]:hidden"
           >
-            <summary className="flex cursor-pointer items-center justify-between gap-4 text-base font-semibold">
+            <summary className="focus-ring flex cursor-pointer items-center justify-between gap-4 rounded text-base font-semibold">
               {item.q}
               <span className="text-muted transition group-open:rotate-45">+</span>
             </summary>
@@ -62,7 +62,7 @@ export default function FaqPage() {
         <p className="text-sm text-muted">¿No encontraste tu respuesta?</p>
         <Link
           href="/contacto"
-          className="mt-3 inline-block rounded-lg bg-accent px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-light"
+          className="focus-ring mt-3 inline-block rounded-lg bg-accent px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-light"
         >
           Contáctanos
         </Link>

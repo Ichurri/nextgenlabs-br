@@ -24,7 +24,7 @@ export function Footer() {
                 href={siteConfig.partner.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-accent-light hover:underline"
+                className="focus-ring rounded text-accent-light hover:underline"
               >
                 {siteConfig.partner.name}
               </a>{" "}
@@ -35,18 +35,18 @@ export function Footer() {
           <div>
             <h3 className="mb-4 text-sm font-semibold tracking-wide">Tienda</h3>
             <ul className="space-y-2 text-sm text-muted">
-              <li><Link href="/catalogo" className="hover:text-foreground">Catálogo</Link></li>
-              <li><Link href="/carrito" className="hover:text-foreground">Carrito</Link></li>
-              <li><Link href="/contacto" className="hover:text-foreground">Contacto</Link></li>
-              <li><Link href="/preguntas-frecuentes" className="hover:text-foreground">Preguntas frecuentes</Link></li>
+              <li><Link href="/catalogo" className="focus-ring rounded hover:text-foreground">Catálogo</Link></li>
+              <li><Link href="/carrito" className="focus-ring rounded hover:text-foreground">Carrito</Link></li>
+              <li><Link href="/contacto" className="focus-ring rounded hover:text-foreground">Contacto</Link></li>
+              <li><Link href="/preguntas-frecuentes" className="focus-ring rounded hover:text-foreground">Preguntas frecuentes</Link></li>
             </ul>
           </div>
 
           <div>
             <h3 className="mb-4 text-sm font-semibold tracking-wide">Legal</h3>
             <ul className="space-y-2 text-sm text-muted">
-              <li><Link href="/terminos" className="hover:text-foreground">Términos y condiciones</Link></li>
-              <li><Link href="/privacidad" className="hover:text-foreground">Política de privacidad</Link></li>
+              <li><Link href="/terminos" className="focus-ring rounded hover:text-foreground">Términos y condiciones</Link></li>
+              <li><Link href="/privacidad" className="focus-ring rounded hover:text-foreground">Política de privacidad</Link></li>
             </ul>
           </div>
         </div>

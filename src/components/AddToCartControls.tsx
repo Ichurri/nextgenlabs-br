@@ -17,7 +17,7 @@ export function AddToCartControls({ product }: { product: Product }) {
       </div>
       <button
         onClick={() => addItem(product, qty)}
-        className="flex-1 rounded-lg bg-accent px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-accent-light"
+        className="focus-ring flex-1 rounded-lg bg-accent px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-accent-light"
       >
         Añadir al carrito
       </button>

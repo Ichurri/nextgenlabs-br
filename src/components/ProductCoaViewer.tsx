@@ -30,14 +30,14 @@ export function ProductCoaViewer({ coaUrl, productName }: ProductCoaViewerProps)
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="mt-4 inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-semibold transition hover:bg-surface-2"
+        className="focus-ring mt-4 inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-semibold transition hover:bg-surface-2"
       >
         Ver COA
       </button>
 
       {isOpen && (
         <div
-          className="fixed inset-0 z-[80] flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm"
+          className="fixed inset-0 z-[80] flex items-center justify-center bg-background/70 px-4 backdrop-blur-sm"
           role="dialog"
           aria-modal="true"
           aria-label={`COA de ${productName}`}
@@ -55,7 +55,7 @@ export function ProductCoaViewer({ coaUrl, productName }: ProductCoaViewerProps)
                 type="button"
                 onClick={() => setIsOpen(false)}
                 aria-label="Cerrar COA"
-                className="rounded-lg p-2 text-muted transition hover:bg-surface-2 hover:text-foreground"
+                className="focus-ring rounded-lg p-3 text-muted transition hover:bg-surface-2 hover:text-foreground"
               >
                 <svg
                   width="18"
@@ -84,7 +84,7 @@ export function ProductCoaViewer({ coaUrl, productName }: ProductCoaViewerProps)
                 href={coaUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs font-semibold text-accent-light transition hover:text-accent"
+                className="focus-ring rounded text-xs font-semibold text-accent-light transition hover:text-accent"
               >
                 Abrir PDF en una pestaña nueva
               </a>

@@ -6,6 +6,7 @@ import { getProductBySlug, products } from "@/data/products";
 import { formatPrice } from "@/lib/format";
 import { AddToCartControls } from "@/components/AddToCartControls";
 import { ProductCoaViewer } from "@/components/ProductCoaViewer";
+import { WhatsAppCtaButton } from "@/components/WhatsAppCtaButton";
 import { buildWhatsAppUrl } from "@/config/site";
 
 export function generateStaticParams() {
@@ -39,14 +40,14 @@ export default async function ProductPage({
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <nav className="mb-8 text-sm text-muted">
-        <Link href="/catalogo" className="transition hover:text-foreground">
+        <Link href="/catalogo" className="focus-ring rounded transition hover:text-foreground">
           ← Volver al catálogo
         </Link>
       </nav>
 
       <div className="grid gap-10 md:grid-cols-2">
         {/* Imagen */}
-        <div className="relative aspect-square overflow-hidden rounded-2xl border border-border bg-black">
+        <div className="relative aspect-square overflow-hidden rounded-2xl border border-border bg-surface-2">
           <Image
             src={product.image}
             alt={`Vial de ${product.name} ${product.dose}`}
@@ -113,16 +114,13 @@ export default async function ProductPage({
             {product.price > 0 ? (
               <AddToCartControls product={product} />
             ) : (
-              <a
+              <WhatsAppCtaButton
                 href={buildWhatsAppUrl(
                   `Hola Nextgen Labs, quiero consultar el precio de ${product.name} ${product.dose}.`
                 )}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#25D366] px-6 py-3.5 text-sm font-bold text-white transition hover:bg-[#20bd5a]"
-              >
-                Consultar precio por WhatsApp
-              </a>
+                label="Consultar precio por WhatsApp"
+                variant="solid"
+              />
             )}
           </div>
 

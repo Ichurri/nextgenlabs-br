@@ -6,6 +6,7 @@ import { useCart, cartTotal } from "@/lib/cart";
 import { formatPrice } from "@/lib/format";
 import { buildOrderWhatsAppUrl } from "@/lib/whatsapp";
 import { QtyStepper } from "@/components/CartDrawer";
+import { WhatsAppCtaButton } from "@/components/WhatsAppCtaButton";
 
 export default function CarritoPage() {
   const { items, setQuantity, removeItem, clear } = useCart();
@@ -22,7 +23,7 @@ export default function CarritoPage() {
           <p className="text-muted">Tu carrito está vacío.</p>
           <Link
             href="/catalogo"
-            className="mt-5 inline-block rounded-lg bg-accent px-6 py-3 text-sm font-semibold text-white transition hover:bg-accent-light"
+            className="focus-ring mt-5 inline-block rounded-lg bg-accent px-6 py-3 text-sm font-semibold text-white transition hover:bg-accent-light"
           >
             Ver catálogo
           </Link>
@@ -36,7 +37,7 @@ export default function CarritoPage() {
                 <li key={item.slug} className="flex gap-4 p-4">
                   <Link
                     href={`/producto/${item.slug}`}
-                    className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg border border-border bg-black"
+                    className="focus-ring relative h-24 w-24 shrink-0 overflow-hidden rounded-lg border border-border bg-surface-2"
                   >
                     <Image
                       src={item.image}
@@ -51,7 +52,7 @@ export default function CarritoPage() {
                       <div>
                         <Link
                           href={`/producto/${item.slug}`}
-                          className="font-semibold transition hover:text-accent-light"
+                          className="focus-ring rounded font-semibold transition hover:text-accent-light"
                         >
                           {item.name}
                         </Link>
@@ -68,7 +69,7 @@ export default function CarritoPage() {
                       />
                       <button
                         onClick={() => removeItem(item.slug)}
-                        className="text-sm text-muted transition hover:text-red-400"
+                        className="focus-ring rounded text-sm text-muted transition hover:text-danger"
                       >
                         Quitar
                       </button>
@@ -80,7 +81,7 @@ export default function CarritoPage() {
 
             <button
               onClick={clear}
-              className="mt-4 text-sm text-muted transition hover:text-foreground"
+              className="focus-ring mt-4 rounded text-sm text-muted transition hover:text-foreground"
             >
               Vaciar carrito
             </button>
@@ -98,20 +99,15 @@ export default function CarritoPage() {
                 No hay pago en línea. Al finalizar, se abrirá WhatsApp con el
                 detalle de tu pedido para coordinar el pago y la entrega.
               </p>
-              <a
+              <WhatsAppCtaButton
                 href={buildOrderWhatsAppUrl(items)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg bg-[#25D366] px-5 py-3.5 text-sm font-bold text-white transition hover:bg-[#20bd5a]"
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff" aria-hidden="true">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347" />
-                </svg>
-                Finalizar pedido por WhatsApp
-              </a>
+                label="Finalizar pedido por WhatsApp"
+                variant="solid"
+                className="mt-5"
+              />
               <Link
                 href="/catalogo"
-                className="mt-3 block text-center text-sm text-muted transition hover:text-foreground"
+                className="focus-ring mt-3 block rounded text-center text-sm text-muted transition hover:text-foreground"
               >
                 Seguir viendo productos
               </Link>

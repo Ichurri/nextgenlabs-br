@@ -85,7 +85,7 @@ export default function HomePage() {
             </div>
             <Link
               href="/catalogo"
-              className="rounded-lg border border-border px-5 py-2.5 text-sm font-semibold transition hover:bg-surface-2"
+              className="focus-ring rounded-lg border border-border px-5 py-2.5 text-sm font-semibold transition hover:bg-surface-2"
             >
               Ver todo el catálogo
             </Link>
@@ -107,7 +107,7 @@ export default function HomePage() {
             href={siteConfig.partner.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex flex-col items-center gap-3"
+            className="focus-ring group flex flex-col items-center gap-3 rounded-lg"
           >
             <OnyxLogo />
             <span className="text-sm text-muted transition group-hover:text-foreground">

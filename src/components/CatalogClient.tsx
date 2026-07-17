@@ -54,14 +54,14 @@ export function CatalogClient({ products }: { products: Product[] }) {
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Buscar por nombre…"
             aria-label="Buscar productos"
-            className="w-full rounded-lg border border-border bg-surface py-2.5 pl-10 pr-3 text-sm text-foreground outline-none transition placeholder:text-muted focus:border-accent"
+            className="focus-ring w-full rounded-lg border border-border bg-surface py-2.5 pl-10 pr-3 text-sm text-foreground outline-none transition placeholder:text-muted focus:border-accent"
           />
         </div>
         <select
           value={sort}
           onChange={(e) => setSort(e.target.value as SortKey)}
           aria-label="Ordenar"
-          className="rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-foreground outline-none transition focus:border-accent"
+          className="focus-ring rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-foreground outline-none transition focus:border-accent"
         >
           {sortOptions.map((o) => (
             <option key={o.value} value={o.value}>
@@ -77,7 +77,7 @@ export function CatalogClient({ products }: { products: Product[] }) {
           <button
             key={tab}
             onClick={() => setActiveCategory(tab)}
-            className={`rounded-full border px-4 py-1.5 text-sm font-medium transition ${
+            className={`focus-ring rounded-full border px-4 py-1.5 text-sm font-medium transition ${
               activeCategory === tab
                 ? "border-accent bg-accent text-white"
                 : "border-border text-muted hover:border-accent/50 hover:text-foreground"

@@ -57,7 +57,7 @@ export function AgeGate() {
       role="dialog"
       aria-modal="true"
       aria-labelledby="age-gate-title"
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 px-4 backdrop-blur-sm"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-background/95 px-4 backdrop-blur-sm"
     >
       <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-8 text-center shadow-2xl animate-fade-in">
         <Image
@@ -88,13 +88,13 @@ export function AgeGate() {
             <div className="flex flex-col gap-3">
               <button
                 onClick={() => setStep(2)}
-                className="w-full rounded-lg bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-accent-light"
+                className="focus-ring w-full rounded-lg bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-accent-light"
               >
                 Soy mayor de 21 años · Continuar
               </button>
               <button
                 onClick={leave}
-                className="w-full rounded-lg border border-border px-5 py-3 text-sm font-medium text-muted transition hover:bg-surface-2"
+                className="focus-ring w-full rounded-lg border border-border px-5 py-3 text-sm font-medium text-muted transition hover:bg-surface-2"
               >
                 Salir
               </button>
@@ -130,13 +130,13 @@ export function AgeGate() {
             <div className="flex flex-col gap-3">
               <button
                 onClick={enter}
-                className="w-full rounded-lg bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-accent-light"
+                className="focus-ring w-full rounded-lg bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-accent-light"
               >
                 Ingresar
               </button>
               <button
                 onClick={() => setStep(1)}
-                className="w-full rounded-lg border border-border px-5 py-3 text-sm font-medium text-muted transition hover:bg-surface-2"
+                className="focus-ring w-full rounded-lg border border-border px-5 py-3 text-sm font-medium text-muted transition hover:bg-surface-2"
               >
                 Volver
               </button>
