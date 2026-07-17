@@ -27,7 +27,9 @@ export function CartToast() {
 
   return (
     <div
+      role="status"
       aria-live="polite"
+      aria-atomic="true"
       className={`fixed bottom-24 right-5 z-40 transition-all duration-300 sm:bottom-5 sm:right-24 ${
         visible ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-2 opacity-0"
       }`}
@@ -38,7 +40,9 @@ export function CartToast() {
             <polyline points="20 6 9 17 4 12" />
           </svg>
         </span>
-        <div className="min-w-0">
+        {/* key=addNonce fuerza un remount del texto para que el lector de
+            pantalla vuelva a anunciarlo aunque se repita el mismo producto. */}
+        <div className="min-w-0" key={addNonce}>
           <p className="text-sm font-semibold leading-tight">Añadido al carrito</p>
           {lastAddedName && (
             <p className="truncate text-xs text-muted">{lastAddedName}</p>

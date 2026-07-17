@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { useFocusTrap } from "@/lib/useFocusTrap";
 
 const STORAGE_KEY = "nextgen-age-verified";
 
@@ -50,10 +51,13 @@ export function AgeGate() {
     window.location.href = "https://www.google.com";
   }
 
+  const dialogRef = useFocusTrap<HTMLDivElement>(verified === false);
+
   if (verified === null || verified === true) return null;
 
   return (
     <div
+      ref={dialogRef}
       role="dialog"
       aria-modal="true"
       aria-labelledby="age-gate-title"
