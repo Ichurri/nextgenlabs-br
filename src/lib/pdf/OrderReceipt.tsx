@@ -1,0 +1,289 @@
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
+import {
+  Document,
+  Font,
+  Image,
+  Page,
+  StyleSheet,
+  Text,
+  View,
+  renderToBuffer,
+} from "@react-pdf/renderer";
+import { formatPrice } from "@/lib/format";
+import { siteConfig } from "@/config/site";
+import { PAYMENT } from "@/config/payment";
+import type { OrderRecord } from "@/lib/orders-data";
+
+// Si alguna vez agregás un test que llame a renderOrderReceiptPdf(), no lo
+// corras bajo el `environment: "jsdom"` de vitest.config.ts: el stream
+// FlateDecode de las imágenes sale corrupto ahí (confirmado con pypdf/poppler
+// — Node 20 y 24 producen un PDF válido corriendo el script directo, pero
+// vitest+jsdom corrompe el mismo render). Usá `// @vitest-environment node`
+// en ese archivo, o probá contra la Route Handler real.
+const ACCENT = "#3b82f6";
+const INK = "#111113";
+const MUTED = "#6b7280";
+const BORDER = "#e5e7eb";
+
+const styles = StyleSheet.create({
+  page: {
+    fontFamily: "Inter",
+    fontSize: 10,
+    color: INK,
+    backgroundColor: "#ffffff",
+  },
+  headerBand: {
+    backgroundColor: ACCENT,
+    paddingHorizontal: 32,
+    paddingVertical: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  logo: { height: 22 },
+  headerTitle: {
+    color: "#ffffff",
+    fontFamily: "Inter",
+    fontWeight: 700,
+    fontSize: 14,
+    textAlign: "right",
+  },
+  content: { paddingHorizontal: 32, paddingTop: 24, paddingBottom: 16 },
+  row: { flexDirection: "row", justifyContent: "space-between" },
+  section: {
+    borderBottomWidth: 1,
+    borderBottomColor: BORDER,
+    paddingBottom: 14,
+    marginBottom: 14,
+  },
+  label: { color: MUTED, fontSize: 9 },
+  value: { fontSize: 11, marginTop: 2 },
+  bold: { fontFamily: "Inter", fontWeight: 700 },
+  table: { borderWidth: 1, borderColor: BORDER, borderRadius: 4 },
+  tableHeaderRow: {
+    flexDirection: "row",
+    backgroundColor: "#f4f4f5",
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+  },
+  tableRow: {
+    flexDirection: "row",
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderTopWidth: 1,
+    borderTopColor: BORDER,
+  },
+  colProduct: { flex: 3 },
+  colQty: { flex: 1, textAlign: "right" },
+  colUnit: { flex: 1.4, textAlign: "right" },
+  colTotal: { flex: 1.4, textAlign: "right" },
+  tableHeaderText: { color: MUTED, fontSize: 8, fontFamily: "Inter", fontWeight: 700 },
+  totalsBlock: { marginTop: 14, alignSelf: "flex-end", width: 220 },
+  totalsRow: { flexDirection: "row", justifyContent: "space-between", marginTop: 4 },
+  grandTotalRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: BORDER,
+  },
+  grandTotalLabel: { fontSize: 12, fontFamily: "Inter", fontWeight: 700 },
+  grandTotalValue: { fontSize: 16, fontFamily: "Inter", fontWeight: 700, color: ACCENT },
+  paymentBox: {
+    marginTop: 18,
+    backgroundColor: "#f4f4f5",
+    borderRadius: 4,
+    padding: 14,
+  },
+  paymentTitle: {
+    fontSize: 9,
+    fontFamily: "Inter",
+    fontWeight: 700,
+    color: ACCENT,
+    marginBottom: 6,
+    letterSpacing: 1,
+  },
+  footer: {
+    marginTop: 20,
+    paddingHorizontal: 32,
+    paddingBottom: 24,
+  },
+  footerText: { fontSize: 8, color: MUTED, lineHeight: 1.5 },
+});
+
+const STATUS_LABEL: Record<OrderRecord["status"], string> = {
+  pending: "Pendiente de pago",
+  paid: "Pagado",
+  cancelled: "Cancelado",
+};
+
+function formatOrderDate(iso: string): string {
+  return new Date(iso).toLocaleDateString("es-BO", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+}
+
+async function readImageBuffers() {
+  const [logo, qr] = await Promise.all([
+    readFile(join(process.cwd(), "public/logo-pdf.png")),
+    readFile(join(process.cwd(), "public/pago/qr.png")),
+  ]);
+  return { logo, qr };
+}
+
+function OrderReceiptDocument({
+  order,
+  logoData,
+  qrData,
+}: {
+  order: OrderRecord;
+  logoData: Buffer;
+  qrData: Buffer;
+}) {
+  return (
+    <Document title={`Pedido ${order.orderNumber}`}>
+      <Page size="A4" style={styles.page}>
+        <View style={styles.headerBand}>
+          {/* eslint-disable-next-line jsx-a11y/alt-text -- Image de @react-pdf/renderer, no <img>: no tiene prop alt */}
+          <Image src={{ data: logoData, format: "png" }} style={styles.logo} />
+          <View>
+            <Text style={styles.headerTitle}>{siteConfig.name.toUpperCase()}</Text>
+            <Text style={styles.headerTitle}>COMPROBANTE DE PEDIDO</Text>
+          </View>
+        </View>
+
+        <View style={styles.content}>
+          <View style={[styles.row, styles.section]}>
+            <View>
+              <Text style={styles.label}>Pedido</Text>
+              <Text style={[styles.value, styles.bold]}>{order.orderNumber}</Text>
+            </View>
+            <View>
+              <Text style={styles.label}>Fecha</Text>
+              <Text style={styles.value}>{formatOrderDate(order.createdAt)}</Text>
+            </View>
+            <View>
+              <Text style={styles.label}>Estado</Text>
+              <Text style={styles.value}>{STATUS_LABEL[order.status]}</Text>
+            </View>
+          </View>
+
+          <View style={[styles.row, styles.section]}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.label}>Cliente</Text>
+              <Text style={styles.value}>{order.customerName}</Text>
+              <Text style={[styles.label, { marginTop: 6 }]}>WhatsApp</Text>
+              <Text style={styles.value}>{order.customerPhone}</Text>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.label}>Ciudad</Text>
+              <Text style={styles.value}>{order.customerCity}</Text>
+              {order.customerAddress && (
+                <>
+                  <Text style={[styles.label, { marginTop: 6 }]}>Dirección</Text>
+                  <Text style={styles.value}>{order.customerAddress}</Text>
+                </>
+              )}
+            </View>
+          </View>
+
+          <View style={styles.table}>
+            <View style={styles.tableHeaderRow}>
+              <Text style={[styles.colProduct, styles.tableHeaderText]}>PRODUCTO</Text>
+              <Text style={[styles.colQty, styles.tableHeaderText]}>CANT.</Text>
+              <Text style={[styles.colUnit, styles.tableHeaderText]}>P. UNIT.</Text>
+              <Text style={[styles.colTotal, styles.tableHeaderText]}>TOTAL</Text>
+            </View>
+            {order.items.map((item) => (
+              <View key={item.slug} style={styles.tableRow}>
+                <Text style={styles.colProduct}>
+                  {item.name} {item.dose}
+                </Text>
+                <Text style={styles.colQty}>{item.quantity}</Text>
+                <Text style={styles.colUnit}>{formatPrice(item.unitPrice)}</Text>
+                <Text style={styles.colTotal}>{formatPrice(item.lineTotal)}</Text>
+              </View>
+            ))}
+          </View>
+
+          <View style={styles.totalsBlock}>
+            <View style={styles.totalsRow}>
+              <Text style={styles.label}>Subtotal</Text>
+              <Text style={styles.value}>{formatPrice(order.subtotal)}</Text>
+            </View>
+            {order.discount > 0 && (
+              <View style={styles.totalsRow}>
+                <Text style={styles.label}>
+                  Descuento{order.discountCodeLabel ? ` (${order.discountCodeLabel})` : ""}
+                </Text>
+                <Text style={styles.value}>−{formatPrice(order.discount)}</Text>
+              </View>
+            )}
+            <View style={styles.totalsRow}>
+              <Text style={styles.label}>Envío</Text>
+              <Text style={styles.value}>{formatPrice(order.shipping)}</Text>
+            </View>
+            <View style={styles.grandTotalRow}>
+              <Text style={styles.grandTotalLabel}>TOTAL</Text>
+              <Text style={styles.grandTotalValue}>{formatPrice(order.total)}</Text>
+            </View>
+          </View>
+
+          <View style={styles.paymentBox}>
+            <Text style={styles.paymentTitle}>CÓMO PAGAR</Text>
+            <Text style={styles.value}>
+              {PAYMENT.bank} · {PAYMENT.accountType}
+            </Text>
+            <Text style={styles.value}>Titular: {PAYMENT.accountHolder}</Text>
+            <Text style={styles.value}>Cuenta: {PAYMENT.accountNumber}</Text>
+            <View style={{ flexDirection: "row", alignItems: "center", marginTop: 10 }}>
+              {/* eslint-disable-next-line jsx-a11y/alt-text -- Image de @react-pdf/renderer, no <img>: no tiene prop alt */}
+              <Image src={{ data: qrData, format: "png" }} style={{ width: 72, height: 72 }} />
+              <Text style={[styles.value, { marginLeft: 12, flex: 1 }]}>
+                Enviá la captura de tu pago por WhatsApp al {siteConfig.contact.whatsappDisplay}{" "}
+                junto con tu número de pedido ({order.orderNumber}).
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>
+            Este documento es un comprobante de pedido y NO constituye factura fiscal.
+          </Text>
+          <Text style={styles.footerText}>
+            Productos para uso exclusivo de investigación. No apto para consumo humano.
+          </Text>
+        </View>
+      </Page>
+    </Document>
+  );
+}
+
+/**
+ * Renderiza el comprobante de un pedido a un Buffer PDF. Registra las
+ * fuentes Inter (regular + bold) leyendo los .ttf locales, mismo patrón que
+ * `renderBrandOgImage()` en brand-og-image.tsx — sin esto los acentos y la
+ * ñ salen rotos.
+ */
+export async function renderOrderReceiptPdf(order: OrderRecord): Promise<Buffer> {
+  const { logo, qr } = await readImageBuffers();
+
+  // Font.register acepta un path local (fontkit.open) además de URL/data-uri;
+  // a diferencia de next/og (satori), acá no hace falta leer el buffer.
+  Font.register({
+    family: "Inter",
+    fonts: [
+      { src: join(process.cwd(), "src/assets/fonts/Inter-Regular.ttf"), fontWeight: 400 },
+      { src: join(process.cwd(), "src/assets/fonts/Inter-Bold.ttf"), fontWeight: 700 },
+    ],
+  });
+
+  return renderToBuffer(
+    <OrderReceiptDocument order={order} logoData={logo} qrData={qr} />
+  );
+}

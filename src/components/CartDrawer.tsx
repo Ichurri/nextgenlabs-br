@@ -120,12 +120,21 @@ export function CartDrawer() {
                 <span>Total</span>
                 <span>{formatPrice(total)}</span>
               </div>
-              <WhatsAppCtaButton
-                href={buildOrderWhatsAppUrl(items)}
-                label="Finalizar pedido por WhatsApp"
-                variant="solid"
-                analyticsEvent="whatsapp_click_checkout"
-              />
+              <Link
+                href="/checkout"
+                onClick={closeDrawer}
+                className="focus-ring flex w-full items-center justify-center rounded-lg bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-accent-light"
+              >
+                Continuar al pedido
+              </Link>
+              <div className="mt-2.5 flex justify-center">
+                <WhatsAppCtaButton
+                  href={buildOrderWhatsAppUrl(items)}
+                  label="Finalizar pedido por WhatsApp"
+                  variant="compact"
+                  analyticsEvent="whatsapp_click_checkout"
+                />
+              </div>
               <Link
                 href="/carrito"
                 onClick={closeDrawer}
