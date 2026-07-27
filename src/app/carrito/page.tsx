@@ -96,20 +96,28 @@ export default function CarritoPage() {
                 <span>{formatPrice(total)}</span>
               </div>
               <p className="mt-3 text-xs leading-relaxed text-muted">
-                No hay pago en línea. Al finalizar, se abrirá WhatsApp con el
-                detalle de tu pedido para coordinar el pago y la entrega.{" "}
+                No hay pago en línea. Al continuar recibís un número de
+                pedido y las instrucciones para pagar por QR o
+                transferencia.{" "}
                 <Link href="/envios" className="focus-ring rounded text-accent-light hover:underline">
                   Ver cobertura y tiempos de envío
                 </Link>
                 .
               </p>
-              <WhatsAppCtaButton
-                href={buildOrderWhatsAppUrl(items)}
-                label="Finalizar pedido por WhatsApp"
-                variant="solid"
-                analyticsEvent="whatsapp_click_checkout"
-                className="mt-5"
-              />
+              <Link
+                href="/checkout"
+                className="focus-ring mt-5 flex w-full items-center justify-center rounded-lg bg-accent px-6 py-3 text-sm font-semibold text-white transition hover:bg-accent-light"
+              >
+                Continuar al pedido
+              </Link>
+              <div className="mt-3 flex justify-center">
+                <WhatsAppCtaButton
+                  href={buildOrderWhatsAppUrl(items)}
+                  label="Finalizar pedido por WhatsApp"
+                  variant="compact"
+                  analyticsEvent="whatsapp_click_checkout"
+                />
+              </div>
               <Link
                 href="/catalogo"
                 className="focus-ring mt-3 block rounded text-center text-sm text-muted transition hover:text-foreground"
