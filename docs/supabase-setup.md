@@ -131,18 +131,62 @@ inyecta en deploys ya construidos.
 
 ---
 
-## Paso 7 — Dar acceso al dueño del negocio
+## Paso 7 — Los dos secretos del panel de pedidos
 
-El acuerdo del proyecto es que **no hay panel de administración**: el dueño ve los
-pedidos directamente en Supabase. Para eso necesita acceso al proyecto de **prod**
-solamente.
+El dueño va a ver sus pedidos en `/admin`, dentro del propio sitio (Fase 5.6). Esa ruta
+lleva contraseña y necesitás generar dos valores.
 
-En el dashboard: **Organization Settings → Team → Invite member**, con su correo.
-Si el plan te permite elegir rol, dale el de menor privilegio que le permita leer
-tablas (evitá darle owner).
+**1. El secreto que firma la sesión.** Corré esto y guardá la salida:
 
-> El agente va a crear una vista `orders_overview` para que lo que vea el dueño sea
-> legible y no una tabla cruda llena de UUIDs y tokens.
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+Usá uno **distinto** para dev y para prod.
+
+**2. La contraseña del dueño.**
+
+> **Generala aleatoria, no la inventes.** Usá tu gestor de contraseñas para crear una de
+> 20+ caracteres. Es la única barrera entre internet y los datos personales de todos tus
+> compradores; una tipo `nextgen2026` se adivina en minutos.
+
+Guardala en el gestor y pasásela al dueño por un canal privado.
+
+De esa contraseña sale un **hash**, y lo que va a las variables de entorno es el hash, nunca
+la contraseña en texto plano. El agente va a crear `scripts/hash-password.mjs` durante la
+Fase 5.6 para generarlo:
+
+```bash
+node scripts/hash-password.mjs
+```
+
+Si ese script todavía no existe (porque la Fase 5.6 no arrancó), dejá estos dos valores
+pendientes: **no bloquean la Fase 5.5**.
+
+Te quedan entonces cuatro variables, en `.env.local` (valores de dev) y en Vercel (valores
+de prod):
+
+```
+SUPABASE_URL=...
+SUPABASE_SERVICE_ROLE_KEY=...
+ADMIN_PASSWORD_HASH=...          # sale del script, formato "salt:hash"
+ADMIN_SESSION_SECRET=...         # los 32 bytes aleatorios de arriba
+```
+
+---
+
+## Paso 8 — ¿Invitar al dueño a Supabase?
+
+Con el panel dentro del sitio, **ya no le hace falta entrar a Supabase**: ve los pedidos y
+les cambia el estado desde `/admin`.
+
+Mi sugerencia: **no lo invites por ahora.** Menos gente con acceso directo a la base es
+menos superficie de error — un click equivocado en un table editor borra una fila sin
+preguntar y sin backup en el plan gratis.
+
+Si igual querés que tenga un respaldo para cuando el sitio esté caído:
+**Organization Settings → Team → Invite member**, con el rol de menor privilegio que le
+permita leer tablas (nunca owner).
 
 ---
 
@@ -195,6 +239,8 @@ pasá prod a Pro.**
 
 Cuando puedas marcar todo esto, el agente puede arrancar:
 
+**Bloquean el arranque de la Fase 5.5:**
+
 - [ ] Proyecto `nextgenlabs-dev` creado, región São Paulo
 - [ ] Proyecto `nextgenlabs-prod` creado, región São Paulo
 - [ ] Las dos contraseñas de base de datos guardadas en el gestor de contraseñas
@@ -203,16 +249,29 @@ Cuando puedas marcar todo esto, el agente puede arrancar:
       las credenciales de **prod**
 - [ ] Tenés a mano el **project ref de dev** para pasárselo al agente
       (ese dato no es secreto, lo podés pegar en el chat sin problema)
-- [ ] El dueño del negocio invitado al proyecto de prod
+
+**Bloquean la Fase 5.6 (el panel), pero no la 5.5:**
+
+- [ ] `ADMIN_SESSION_SECRET` generado, uno distinto para dev y para prod
+- [ ] Contraseña del dueño generada aleatoria y guardada en el gestor de contraseñas
+- [ ] `ADMIN_PASSWORD_HASH` generado con `scripts/hash-password.mjs`
+      (ese script lo crea el agente en la Fase 5.6 — hasta entonces queda pendiente)
 
 ---
 
 ## Qué decirle al agente cuando termines
 
-Algo así alcanza:
+Para la base de datos:
 
 > Ya está el setup de Supabase. El project ref de dev es `<pegá-el-ref-acá>`.
 > Ejecutá `docs/planes/fase-5.5-base-de-datos.md`.
 
-El agente **no te va a pedir las claves por chat** — las lee de `.env.local`. Si algún
-agente te las pide, no se las des.
+Y después, para el panel del dueño:
+
+> Ejecutá `docs/planes/fase-5.6-panel-pedidos.md`.
+
+Las dos se pueden correr en la misma sesión, una después de la otra.
+
+> **Ningún agente te va a pedir secretos por chat** — los lee de `.env.local`. Si alguno te
+> pide la service key, la contraseña del panel o el session secret, **no se los des**: es
+> señal de que algo está mal.

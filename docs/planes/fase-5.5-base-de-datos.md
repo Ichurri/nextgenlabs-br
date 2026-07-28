@@ -150,17 +150,19 @@ returning id, kind, value;
 -- cero filas devueltas = código inválido, vencido o agotado
 ```
 
-## 6. Vista `orders_overview` para el dueño
+## 6. Vista `orders_overview` (opcional)
 
-No hay panel de administración (decisión 5 del contexto): el dueño mira los pedidos en el
-table editor de Supabase. Una tabla cruda llena de UUIDs y tokens es hostil para alguien
-no técnico.
+> **El alcance cambió el 2026-07-27.** Esta vista existía para que el dueño leyera los pedidos
+> en el table editor de Supabase. Como ahora se construye un panel propio en el sitio
+> (`fase-5.6-panel-pedidos.md`), dejó de ser el camino principal.
 
-Creá una vista, en la misma migración o en una nueva, que aplane orden + ítems con las
-columnas que le importan al dueño: número de pedido, fecha, cliente, WhatsApp, ciudad,
-productos, total, estado. Ordenada por fecha descendente.
+Hacela igual si sale barata: sirve de respaldo si el panel se cae, y para tus propias consultas
+mientras desarrollás. Aplana orden + ítems con número de pedido, fecha, cliente, WhatsApp,
+ciudad, productos, total y estado, ordenada por fecha descendente.
 
 **No expongas el `token` en esa vista** — es lo que protege el comprobante.
+
+Si te complica, salteala y anotalo: el panel de la Fase 5.6 cubre la necesidad real.
 
 ---
 
@@ -193,7 +195,7 @@ Y la verificación funcional real, en el navegador contra el Supabase de dev:
 - [ ] La creación de pedidos pasa por la RPC transaccional; no queda ningún `delete` de compensación.
 - [ ] Un pedido real creado desde el navegador aparece completo y correcto en Supabase.
 - [ ] Los montos del PDF, de `/pedido/[token]` y de la base coinciden al centavo.
-- [ ] La vista `orders_overview` existe y **no** expone el `token`.
+- [ ] Si hiciste la vista `orders_overview`, **no** expone el `token`. (Opcional, ver §6.)
 - [ ] `grep -r "service_role" .next/static/` no devuelve nada.
 - [ ] `npm run build` y `npm test` en verde, `graphify update .` corrido.
 - [ ] Un commit, mensaje en inglés, con el trailer `Co-Authored-By:`.
@@ -237,7 +239,12 @@ Estas costaron tiempo en sesiones anteriores. Leelas.
 
 ## 10. Lo que sigue
 
-Con esto cerrado, la Fase 6 (`fase-6-codigos-de-descuento.md`) se apoya en:
-`calculateOrderTotals()` ya blindada con tests, la RPC transaccional lista para el
-reclamo atómico del código, y las columnas `discount_code` / `discount_code_label` que la
-Fase 5 ya dejó previstas en `orders`.
+**Siguiente fase: `fase-5.6-panel-pedidos.md`** — el panel autenticado donde el dueño ve los
+pedidos y les cambia el estado. Depende directamente de esta fase: sin los tipos generados, el
+panel se vuelve mucho más frágil. Las dos se pueden correr en la misma sesión, una después de
+la otra, pero **commiteálas por separado**.
+
+Después va la Fase 6 (`fase-6-codigos-de-descuento.md`), que se apoya en:
+`calculateOrderTotals()` ya blindada con tests, la RPC transaccional lista para el reclamo
+atómico del código, y las columnas `discount_code` / `discount_code_label` que la Fase 5 ya
+dejó previstas en `orders`.

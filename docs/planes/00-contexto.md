@@ -37,18 +37,29 @@ si algo parece incoherente, preguntá antes de cambiarlo por tu cuenta.
    depósito en su app bancaria.
 4. **Solo QR y transferencia.** No hay tarjeta → no hay contracargos, no hay PCI, no hay
    agregador.
-5. **Las confirmaciones se hacen únicamente por WhatsApp.** → No se construye panel de
-   administración de pedidos, ni envío de correos, ni notificaciones automáticas. El comprador
-   paga, manda la captura por WhatsApp, y el dueño responde por ahí.
+5. **Las confirmaciones se hacen únicamente por WhatsApp.** → No hay envío de correos ni
+   notificaciones automáticas. El comprador paga, manda la captura por WhatsApp, y el dueño
+   responde por ahí.
+
+   > **Revisado el 2026-07-27.** Esta decisión originalmente también excluía el panel de
+   > administración. El cliente pidió ver los pedidos en el sitio, así que **sí se construye**
+   > un panel autenticado (Fase 5.6). Lo que sigue en pie es que **la confirmación del pago la
+   > hace el dueño a ojo**, mirando su app bancaria: no hay pasarela, ni webhook, ni
+   > verificación automática del depósito.
 6. **Envío nacional con costo adicional**, monto a definir por el cliente. Va como línea propia
    en el comprobante.
 
 ### Consecuencia importante de la decisión 5
 
-**El sistema nunca se entera de si una orden fue pagada.** Toda orden nace y muere en estado
-`pending` salvo que alguien la cambie a mano en Supabase. Eso significa que la atribución de la
-Fase 6 cuenta **pedidos generados con un código**, no ventas cobradas. Es un dato útil pero
-sobreestima. Está aceptado; no lo "arregles" agregando un panel sin que el cliente lo pida.
+**El sistema nunca se entera solo de si una orden fue pagada.** No hay ninguna señal automática
+que mueva una orden de `pending` a `paid`: siempre es el dueño el que lo marca, después de ver
+el depósito en su banco. Desde la Fase 5.6 lo hace desde el panel en vez de entrar a Supabase,
+pero el juicio sigue siendo humano.
+
+Eso significa que la atribución de la Fase 6 sobre pedidos `paid` **depende de que el dueño sea
+disciplinado marcándolos**. Si querés un número que no dependa de eso, contá pedidos generados
+con el código (`pending` incluidos) y asumí que sobreestima. Las dos métricas son legítimas
+mientras digas cuál estás mostrando.
 
 ---
 
@@ -59,9 +70,11 @@ Si alguna de estas aparece en una conversación, anotala y seguí con la fase ac
 - Pasarela de pago / QR dinámico / webhook de confirmación
 - Pagos con tarjeta
 - Facturación electrónica SIN
-- Panel de administración de pedidos
 - Envío de correos (Resend o similar)
-- Cuentas de usuario / login del comprador
+- Cuentas de usuario / login **del comprador** (el panel del dueño sí tiene login desde la
+  Fase 5.6, pero es una sola credencial compartida, no un sistema de usuarios)
+- Roles y permisos: el panel tiene un único nivel de acceso. Si algún día entra personal con
+  permisos distintos, eso es migrar a Supabase Auth y es otra fase
 - API de WhatsApp Business (por `wa.me` **no se puede adjuntar un archivo**; solo se manda el
   link al comprobante)
 - Control de stock real (`inStock` sigue siendo un booleano manual en `products.ts`)
@@ -111,6 +124,15 @@ carrito (zustand)
 /pedido/[token]  ──── GET /api/pedido/[token]/comprobante ─────────► lee orden → PDF
    │                                                                  (@react-pdf/renderer)
    └── botón WhatsApp con nº de pedido + link al comprobante
+
+Panel del dueño (Fase 5.6, autenticado)
+   │
+   ├── POST /admin/login ────────────► verifica contraseña ─────────► (sin DB: env var)
+   │   ◄── cookie de sesión firmada
+   │
+   ├── /admin ───────────────────────► lista paginada ──────────────► orders + order_items
+   │
+   └── POST /api/admin/pedidos/[id]/estado ──► pending|paid|cancelled ──► orders.status
 ```
 
 **Stack añadido**: Supabase (Postgres), `@react-pdf/renderer`, `zod`.
@@ -127,21 +149,33 @@ Alcance real: 3 tablas, plan gratis de sobra.
 
 ### Cómo se habla con Supabase
 
-**Solo desde Route Handlers, con la `service_role key`. El navegador nunca toca Supabase.**
+**Solo desde el servidor (Route Handlers y Server Components), con la `service_role key`.
+El navegador nunca toca Supabase.**
 
 Eso permite la política de seguridad más simple y más segura que hay: **RLS activo en las tres
 tablas, sin ninguna policy para `anon` ni `authenticated`.** Nadie puede leer ni escribir desde
 afuera; solo el servidor, que salta RLS con la service key.
+
+> El panel del dueño (Fase 5.6) **no cambia esto**: es un Server Component que lee con la
+> misma service key. Por eso el login es una contraseña propia y no Supabase Auth — meter
+> Supabase Auth obligaría a poner un cliente de Supabase en el navegador y rompería la
+> invariante de arriba.
 
 Variables de entorno (`.env.local`, y en Vercel):
 
 ```
 SUPABASE_URL=...
 SUPABASE_SERVICE_ROLE_KEY=...     # NUNCA con prefijo NEXT_PUBLIC_
+
+# Panel del dueño (Fase 5.6)
+ADMIN_PASSWORD_HASH=...           # scrypt, formato "salt:hash" en hex
+ADMIN_SESSION_SECRET=...          # 32 bytes aleatorios, firma la cookie de sesión
 ```
 
-Si en algún momento ves `NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY`, es un bug de seguridad grave:
-ese prefijo publica la variable en el bundle del navegador y esa key salta todo RLS.
+**Ninguna de las cuatro lleva `NEXT_PUBLIC_`.** Si en algún momento ves
+`NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY` (o cualquiera de las otras con ese prefijo), es un bug
+de seguridad grave: ese prefijo publica la variable en el bundle del navegador. La service key
+salta todo RLS y el `ADMIN_SESSION_SECRET` expuesto permite forjar una sesión de administrador.
 
 ---
 
@@ -197,10 +231,15 @@ El umbral de envío gratis se evalúa **después** del descuento (más conservad
 ## 8. Estados de una orden
 
 ```
-pending    ── se crea acá y se queda acá salvo intervención manual
-paid       ── el dueño la marca a mano en Supabase después de ver el depósito
-cancelled  ── el dueño la marca a mano
+pending    ── se crea acá y se queda acá hasta que el dueño intervenga
+paid       ── el dueño la marca desde el panel, después de ver el depósito en su banco
+cancelled  ── el dueño la marca desde el panel
 ```
 
-No hay transiciones automáticas. No construyas una máquina de estados elaborada para tres
-valores; un `check` constraint en Postgres alcanza.
+No hay transiciones automáticas: ninguna señal del sistema mueve una orden sola. Cualquier
+transición **la dispara el dueño desde el panel** (Fase 5.6), o a mano en Supabase como
+respaldo.
+
+No construyas una máquina de estados elaborada para tres valores; el `check` constraint en
+Postgres alcanza. Las tres transiciones son libres y reversibles entre sí — si el dueño marca
+`paid` por error, tiene que poder volver a `pending` sin pedirle nada a nadie.

@@ -246,6 +246,13 @@ inválido, no muestres un error agresivo al entrar al catálogo — simplemente 
 No se construye CRUD propio en esta fase. El dueño usa el editor de tablas de Supabase.
 Escribile estas instrucciones en un documento aparte, en lenguaje llano:
 
+> **Nota agregada el 2026-07-27.** Este plan se escribió antes de que existiera el panel del
+> dueño (`fase-5.6-panel-pedidos.md`). Ahora hay una tensión a resolver: `docs/supabase-setup.md`
+> le recomienda al dueño **no** entrar a Supabase, y esta sección lo manda al table editor.
+> Las dos salidas son razonables — dejarlo así (los códigos se tocan poco) o agregar una
+> pantalla de códigos al panel, que ya tiene login. **Preguntale al humano cuál prefiere antes
+> de ejecutar esta sección**; no lo decidas por tu cuenta ni amplíes el alcance en silencio.
+
 1. Entrar a supabase.com → el proyecto → **Table Editor** → tabla `discount_codes`
 2. **Insert row** y llenar:
    - `code`: en MAYÚSCULAS, sin espacios. Ej: `MAFE10`
