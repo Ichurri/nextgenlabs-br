@@ -133,8 +133,12 @@ inyecta en deploys ya construidos.
 
 ## Paso 7 — Los dos secretos del panel de pedidos
 
-El dueño va a ver sus pedidos en `/admin`, dentro del propio sitio (Fase 5.6). Esa ruta
-lleva contraseña y necesitás generar dos valores.
+> **Nada de este paso tiene que ver con Supabase**, y **el panel todavía no existe**: lo
+> construye el agente en la Fase 5.6. Lo que hacés acá es preparar los dos valores que esa
+> fase va a necesitar. Si querés arrancar ya con la Fase 5.5, saltealo y volvé después.
+
+Cuando la Fase 5.6 esté lista, el dueño va a ver sus pedidos entrando a `/admin` en el propio
+sitio. Esa ruta va a pedir una contraseña, y necesitás generar dos valores para que funcione.
 
 **1. El secreto que firma la sesión.** Corré esto y guardá la salida:
 
@@ -144,24 +148,44 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 
 Usá uno **distinto** para dev y para prod.
 
-**2. La contraseña del dueño.**
+**2. La contraseña con la que entra el dueño al panel.**
 
-> **Generala aleatoria, no la inventes.** Usá tu gestor de contraseñas para crear una de
-> 20+ caracteres. Es la única barrera entre internet y los datos personales de todos tus
-> compradores; una tipo `nextgen2026` se adivina en minutos.
+> **Ojo, que esto confunde:** no es una contraseña que el dueño ya tenga en algún lado.
+> **Es una nueva, que estás inventando ahora**, para una pantalla de login que todavía no
+> existe — la construye el agente en la Fase 5.6.
 
-Guardala en el gestor y pasásela al dueño por un canal privado.
+Cuando esa fase esté lista, el dueño va a entrar a `tusitio.com/admin` y se va a encontrar
+con un único campo de contraseña. Lo que escriba ahí es esto que estás generando ahora.
+No hay usuario, no hay email, no hay registro: **una sola contraseña para todo el panel**.
 
-De esa contraseña sale un **hash**, y lo que va a las variables de entorno es el hash, nunca
-la contraseña en texto plano. El agente va a crear `scripts/hash-password.mjs` durante la
-Fase 5.6 para generarlo:
+**Generala con el botón de "generar contraseña" de tu gestor**, de 20+ caracteres. No elijas
+una vos de la cabeza (`nextgen2026`, `Quique123`): las que inventamos las personas siguen
+patrones y se adivinan. Esta contraseña es la única barrera entre internet y el nombre,
+teléfono y dirección de todos tus compradores.
 
-```bash
-node scripts/hash-password.mjs
-```
+Ahora, el recorrido completo. Digamos que tu gestor te da `k7$mQ2vP!xR9nZ4wL8tB`:
 
-Si ese script todavía no existe (porque la Fase 5.6 no arrancó), dejá estos dos valores
-pendientes: **no bloquean la Fase 5.5**.
+1. **Guardala en tu gestor**, con un nombre tipo "Panel pedidos Nextgen Labs".
+2. **Pasásela al dueño** por un canal privado. Él la va a tipear cada vez que entre a `/admin`.
+3. **Sacá el hash** con el script (existe recién a partir de la Fase 5.6):
+   ```bash
+   node scripts/hash-password.mjs
+   ```
+   Le pegás la contraseña y te devuelve algo como `a3f81c9e...:9d2e7b04...`
+4. **Ese resultado** es lo que va a `ADMIN_PASSWORD_HASH`. La contraseña en texto plano no
+   entra nunca ni al repo ni a las variables de entorno.
+
+Entonces la contraseña vive en **dos lugares**: tu gestor y la cabeza del dueño. En el
+servidor vive solo el hash.
+
+> **Por qué un hash y no la contraseña**: el servidor guarda una huella matemática que no se
+> puede revertir. Cuando el dueño escribe la contraseña, el servidor recalcula la huella y
+> compara. Si alguien te roba las variables de entorno, se lleva el hash y no puede sacar la
+> contraseña de ahí.
+
+Si el script todavía no existe porque la Fase 5.6 no arrancó, **dejá estos dos valores
+pendientes: no bloquean la Fase 5.5**. Podés generar la contraseña ahora y guardarla, y sacar
+el hash más adelante.
 
 Te quedan entonces cuatro variables, en `.env.local` (valores de dev) y en Vercel (valores
 de prod):
@@ -253,7 +277,9 @@ Cuando puedas marcar todo esto, el agente puede arrancar:
 **Bloquean la Fase 5.6 (el panel), pero no la 5.5:**
 
 - [ ] `ADMIN_SESSION_SECRET` generado, uno distinto para dev y para prod
-- [ ] Contraseña del dueño generada aleatoria y guardada en el gestor de contraseñas
+- [ ] Inventaste la contraseña con la que el dueño va a entrar a `/admin`
+      (generada con el gestor, 20+ caracteres) y la guardaste ahí
+- [ ] Se la pasaste al dueño por un canal privado
 - [ ] `ADMIN_PASSWORD_HASH` generado con `scripts/hash-password.mjs`
       (ese script lo crea el agente en la Fase 5.6 — hasta entonces queda pendiente)
 
