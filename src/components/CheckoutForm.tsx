@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useCart, cartTotal } from "@/lib/cart";
 import { formatPrice } from "@/lib/format";
 import { round2 } from "@/lib/money";
 import { checkoutSchema } from "@/lib/orders.schema";
+import { normalizeCode } from "@/lib/discounts";
 import { SHIPPING } from "@/config/shipping";
 import { buildWhatsAppUrl, siteConfig } from "@/config/site";
 
@@ -20,14 +21,25 @@ type FormState = {
 
 const emptyForm: FormState = { name: "", phone: "", city: "", address: "", note: "" };
 
+type AppliedDiscount = { code: string; amount: number; label: string };
+type DiscountFieldState = "idle" | "validating" | "applied" | "error";
+
 export function CheckoutForm() {
   const router = useRouter();
   const items = useCart((s) => s.items);
+  const pendingCode = useCart((s) => s.pendingCode);
+  const clearPendingCode = useCart((s) => s.clearPendingCode);
   const [hydrated, setHydrated] = useState(false);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [discountInput, setDiscountInput] = useState("");
+  const [discountState, setDiscountState] = useState<DiscountFieldState>("idle");
+  const [discountMessage, setDiscountMessage] = useState<string | null>(null);
+  const [appliedDiscount, setAppliedDiscount] = useState<AppliedDiscount | null>(null);
+  const [discountAnnounceKey, setDiscountAnnounceKey] = useState(0);
 
   // El carrito persiste en localStorage y se rehidrata después del primer
   // render: hay que esperar esa rehidratación antes de decidir si el
@@ -45,18 +57,81 @@ export function CheckoutForm() {
     if (hydrated && items.length === 0) router.replace("/catalogo");
   }, [hydrated, items.length, router]);
 
+  const sellableItems = items.filter((i) => i.price > 0);
+
+  // Link con código pre-aplicado (?codigo=MAFE10 en /catalogo): se valida
+  // una sola vez al montar, silenciosamente si falla — no es el comprador
+  // quien lo escribió, así que un error agresivo acá sería confuso.
+  const autoApplyRan = useRef(false);
+  useEffect(() => {
+    if (!hydrated || autoApplyRan.current || !pendingCode || sellableItems.length === 0) return;
+    autoApplyRan.current = true;
+    const code = pendingCode;
+    clearPendingCode();
+    setDiscountInput(code);
+    void applyDiscountCode(code);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- corre una sola vez al hidratar, ver autoApplyRan
+  }, [hydrated, pendingCode, sellableItems.length]);
+
   if (!hydrated || items.length === 0) return null;
 
   const consultaItems = items.filter((i) => i.price === 0);
-  const sellableItems = items.filter((i) => i.price > 0);
 
   const subtotal = cartTotal(sellableItems);
-  const freeShipping = SHIPPING.freeOver !== null && subtotal >= SHIPPING.freeOver;
+  const discountAmount = appliedDiscount?.amount ?? 0;
+  const subtotalAfterDiscount = round2(subtotal - discountAmount);
+  const freeShipping = SHIPPING.freeOver !== null && subtotalAfterDiscount >= SHIPPING.freeOver;
   const shipping = sellableItems.length > 0 && !freeShipping ? SHIPPING.nationalCost : 0;
-  const total = round2(subtotal + shipping);
+  const total = round2(subtotalAfterDiscount + shipping);
 
   function updateField<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((f) => ({ ...f, [key]: value }));
+  }
+
+  async function applyDiscountCode(rawCode: string) {
+    const code = normalizeCode(rawCode);
+    if (!code) return;
+
+    setDiscountState("validating");
+    setDiscountMessage(null);
+
+    try {
+      const res = await fetch("/api/descuentos/validar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code,
+          items: sellableItems.map((i) => ({ slug: i.slug, quantity: i.quantity })),
+        }),
+      });
+
+      const body = await res.json().catch(() => null);
+
+      if (!res.ok || !body || body.valid !== true) {
+        setAppliedDiscount(null);
+        setDiscountState("error");
+        setDiscountMessage(body?.message ?? "No pudimos validar el código. Probá de nuevo.");
+        setDiscountAnnounceKey((k) => k + 1);
+        return;
+      }
+
+      setAppliedDiscount({ code: body.code, amount: body.amount, label: body.label });
+      setDiscountState("applied");
+      setDiscountMessage(null);
+      setDiscountAnnounceKey((k) => k + 1);
+    } catch {
+      setAppliedDiscount(null);
+      setDiscountState("error");
+      setDiscountMessage("No pudimos conectar con el servidor. Probá de nuevo.");
+      setDiscountAnnounceKey((k) => k + 1);
+    }
+  }
+
+  function removeDiscount() {
+    setAppliedDiscount(null);
+    setDiscountInput("");
+    setDiscountState("idle");
+    setDiscountMessage(null);
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -72,6 +147,7 @@ export function CheckoutForm() {
         address: form.address,
         note: form.note,
       },
+      ...(appliedDiscount ? { discountCode: appliedDiscount.code } : {}),
     };
 
     const parsed = checkoutSchema.safeParse(payload);
@@ -101,6 +177,20 @@ export function CheckoutForm() {
 
       if (!res.ok) {
         const errorBody = await res.json().catch(() => null);
+        // 409 = el código dejó de ser válido entre que se aplicó y se
+        // confirmó (venció, se agotó...). Se quita del resumen y el
+        // comprador tiene que confirmar de nuevo con el total real: nunca
+        // se le cobra más de lo que vio sin que lo apruebe explícitamente.
+        if (res.status === 409 && appliedDiscount) {
+          setAppliedDiscount(null);
+          setDiscountState("error");
+          setDiscountMessage(errorBody?.error ?? "Ese código dejó de ser válido.");
+          setDiscountAnnounceKey((k) => k + 1);
+          setSubmitError(
+            "Tu código de descuento dejó de ser válido y lo quitamos del pedido. Revisá el nuevo total y confirmá de nuevo."
+          );
+          return;
+        }
         setSubmitError(errorBody?.error ?? "No pudimos registrar el pedido. Probá de nuevo.");
         return;
       }
@@ -222,11 +312,72 @@ export function CheckoutForm() {
               </li>
             ))}
           </ul>
+
+          {sellableItems.length > 0 && (
+            <div className="mt-4 border-t border-border pt-4">
+              {appliedDiscount ? (
+                <div className="flex items-center justify-between gap-2 rounded-lg border border-accent/30 bg-accent/5 px-3 py-2 text-sm">
+                  <span className="font-medium text-accent-light">
+                    {appliedDiscount.code} · −{formatPrice(appliedDiscount.amount)}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={removeDiscount}
+                    aria-label="Quitar código de descuento"
+                    className="focus-ring rounded text-muted transition hover:text-foreground"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <input
+                    value={discountInput}
+                    onChange={(e) => setDiscountInput(e.target.value.toUpperCase())}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        void applyDiscountCode(discountInput);
+                      }
+                    }}
+                    placeholder="Código de descuento"
+                    className={inputClass(discountState === "error")}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => applyDiscountCode(discountInput)}
+                    disabled={discountState === "validating" || discountInput.trim().length === 0}
+                    className="focus-ring shrink-0 rounded-lg border border-border px-4 py-3 text-sm font-medium transition hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {discountState === "validating" ? "…" : "Aplicar"}
+                  </button>
+                </div>
+              )}
+              {/* aria-live: mismo patrón que CartToast.tsx — key fuerza el
+                  remount para que un lector de pantalla vuelva a anunciarlo
+                  aunque el mensaje se repita. */}
+              <p role="status" aria-live="polite" className="mt-1.5 min-h-4 text-xs" key={discountAnnounceKey}>
+                {discountState === "error" && discountMessage && (
+                  <span className="text-danger">{discountMessage}</span>
+                )}
+                {discountState === "applied" && (
+                  <span className="text-accent-light">Código aplicado.</span>
+                )}
+              </p>
+            </div>
+          )}
+
           <div className="mt-4 space-y-2 border-t border-border pt-4 text-sm">
             <div className="flex justify-between">
               <span className="text-muted">Subtotal</span>
               <span>{formatPrice(subtotal)}</span>
             </div>
+            {appliedDiscount && (
+              <div className="flex justify-between">
+                <span className="text-muted">Descuento</span>
+                <span className="text-accent-light">−{formatPrice(discountAmount)}</span>
+              </div>
+            )}
             <div className="flex justify-between">
               <span className="text-muted">{SHIPPING.label}</span>
               <span>{shipping === 0 ? "Gratis" : formatPrice(shipping)}</span>

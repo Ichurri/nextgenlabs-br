@@ -39,6 +39,9 @@ export const orderItemInputSchema = z.object({
 export const checkoutSchema = z.object({
   items: z.array(orderItemInputSchema).min(1, "El carrito está vacío."),
   customer: customerSchema,
+  // Solo el string del código. El monto del descuento lo calcula siempre el
+  // servidor con evaluateDiscount() — nunca se acepta un monto del cliente.
+  discountCode: z.string().trim().min(1).max(40).optional(),
 });
 
 export type CheckoutInput = z.infer<typeof checkoutSchema>;

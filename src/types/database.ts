@@ -14,6 +14,110 @@ export type Database = {
   }
   public: {
     Tables: {
+      discount_codes: {
+        Row: {
+          code: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          max_discount: number | null
+          max_uses: number | null
+          min_order_total: number | null
+          owner_label: string
+          starts_at: string | null
+          type: string
+          used_count: number
+          value: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_discount?: number | null
+          max_uses?: number | null
+          min_order_total?: number | null
+          owner_label: string
+          starts_at?: string | null
+          type: string
+          used_count?: number
+          value: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_discount?: number | null
+          max_uses?: number | null
+          min_order_total?: number | null
+          owner_label?: string
+          starts_at?: string | null
+          type?: string
+          used_count?: number
+          value?: number
+        }
+        Relationships: []
+      }
+      discount_redemptions: {
+        Row: {
+          code: string
+          code_id: string
+          created_at: string
+          discount_amount: number
+          id: string
+          order_id: string
+        }
+        Insert: {
+          code: string
+          code_id: string
+          created_at?: string
+          discount_amount: number
+          id?: string
+          order_id: string
+        }
+        Update: {
+          code?: string
+          code_id?: string
+          created_at?: string
+          discount_amount?: number
+          id?: string
+          order_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discount_redemptions_code_id_fkey"
+            columns: ["code_id"]
+            isOneToOne: false
+            referencedRelation: "discount_code_attribution"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "discount_redemptions_code_id_fkey"
+            columns: ["code_id"]
+            isOneToOne: false
+            referencedRelation: "discount_codes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "discount_redemptions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "discount_redemptions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "orders_overview"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_items: {
         Row: {
           dose: string
@@ -121,6 +225,29 @@ export type Database = {
       }
     }
     Views: {
+      discount_code_attribution: {
+        Row: {
+          code: string | null
+          created_at: string | null
+          discount_total: number | null
+          expires_at: string | null
+          id: string | null
+          is_active: boolean | null
+          max_discount: number | null
+          max_uses: number | null
+          min_order_total: number | null
+          owner_label: string | null
+          paid_redemption_count: number | null
+          paid_revenue_total: number | null
+          redemption_count: number | null
+          revenue_total: number | null
+          starts_at: string | null
+          type: string | null
+          used_count: number | null
+          value: number | null
+        }
+        Relationships: []
+      }
       orders_overview: {
         Row: {
           created_at: string | null

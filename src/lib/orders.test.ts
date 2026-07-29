@@ -117,6 +117,17 @@ describe("calculateOrderTotals — umbral de envío gratis", () => {
     const totals = calc([{ slug: "a", quantity: 1 }]); // subtotal 100 < freeOver
     expect(totals.shipping).toBe(30);
   });
+
+  it("con un descuento, el umbral se evalúa después de aplicarlo, no sobre el subtotal crudo", async () => {
+    vi.doMock("@/config/shipping", () => ({
+      SHIPPING: { nationalCost: 30, freeOver: 100, label: "Envío nacional" },
+    }));
+    const { calculateOrderTotals: calc } = await import("@/lib/orders");
+    // subtotal crudo 150 ≥ freeOver, pero 150 - 60 = 90 < freeOver: se cobra envío.
+    const totals = calc([{ slug: "a", quantity: 1 }, { slug: "b", quantity: 1 }], 60);
+    expect(totals.subtotal).toBe(150);
+    expect(totals.shipping).toBe(30);
+  });
 });
 
 describe("generateOrderNumber", () => {

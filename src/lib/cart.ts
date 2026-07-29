@@ -19,12 +19,18 @@ type CartState = {
   // el mismo producto.
   lastAddedName: string | null;
   addNonce: number;
+  // Código de descuento que llegó por `?codigo=` (Fase 6). Vive solo en
+  // memoria, no en localStorage: es un puente de una sola pasada entre el
+  // catálogo y el checkout, no algo que deba sobrevivir a cerrar la pestaña.
+  pendingCode: string | null;
   addItem: (product: Product, quantity?: number) => void;
   removeItem: (slug: string) => void;
   setQuantity: (slug: string, quantity: number) => void;
   clear: () => void;
   openDrawer: () => void;
   closeDrawer: () => void;
+  setPendingCode: (code: string) => void;
+  clearPendingCode: () => void;
 };
 
 export const useCart = create<CartState>()(
@@ -34,6 +40,7 @@ export const useCart = create<CartState>()(
       isDrawerOpen: false,
       lastAddedName: null,
       addNonce: 0,
+      pendingCode: null,
 
       // Añadir NO abre el carrito: solo acumula el ítem y dispara un aviso breve.
       // El carrito se abre únicamente cuando el usuario pulsa el ícono del carrito.
@@ -81,6 +88,8 @@ export const useCart = create<CartState>()(
       clear: () => set({ items: [] }),
       openDrawer: () => set({ isDrawerOpen: true }),
       closeDrawer: () => set({ isDrawerOpen: false }),
+      setPendingCode: (code) => set({ pendingCode: code }),
+      clearPendingCode: () => set({ pendingCode: null }),
     }),
     {
       name: "nextgen-cart",
