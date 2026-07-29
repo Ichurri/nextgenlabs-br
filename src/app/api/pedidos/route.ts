@@ -47,54 +47,45 @@ export async function POST(request: Request) {
   const orderNumber = generateOrderNumber();
   const token = generateToken();
 
-  const { data: order, error: orderError } = await supabaseAdmin
-    .from("orders")
-    .insert({
-      order_number: orderNumber,
-      token,
-      customer_name: customer.name,
-      customer_phone: customer.phone,
-      customer_city: customer.city,
-      customer_address: customer.address ?? null,
-      customer_note: customer.note ?? null,
-      subtotal: totals.subtotal,
-      discount: totals.discount,
-      shipping: totals.shipping,
-      total: totals.total,
+  // orders + order_items se insertan en una sola transacción dentro de la
+  // función de Postgres — sin delete de compensación si algo falla a mitad
+  // de camino.
+  const { data: created, error: rpcError } = await supabaseAdmin
+    .rpc("create_order", {
+      payload: {
+        order_number: orderNumber,
+        token,
+        customer_name: customer.name,
+        customer_phone: customer.phone,
+        customer_city: customer.city,
+        customer_address: customer.address ?? null,
+        customer_note: customer.note ?? null,
+        subtotal: totals.subtotal,
+        discount: totals.discount,
+        shipping: totals.shipping,
+        total: totals.total,
+        items: totals.lines.map((line) => ({
+          slug: line.slug,
+          name: line.name,
+          dose: line.dose,
+          unit_price: line.unitPrice,
+          quantity: line.quantity,
+          line_total: line.lineTotal,
+        })),
+      },
     })
-    .select("id")
     .single();
 
-  if (orderError || !order) {
-    console.error("create_order_failed", orderError);
+  if (rpcError || !created) {
+    console.error("create_order_failed", rpcError);
     return NextResponse.json(
       { error: "No pudimos registrar el pedido. Probá de nuevo." },
       { status: 500 }
     );
   }
 
-  const { error: itemsError } = await supabaseAdmin.from("order_items").insert(
-    totals.lines.map((line) => ({
-      order_id: order.id,
-      slug: line.slug,
-      name: line.name,
-      dose: line.dose,
-      unit_price: line.unitPrice,
-      quantity: line.quantity,
-      line_total: line.lineTotal,
-    }))
+  return NextResponse.json(
+    { token: created.token, orderNumber: created.order_number },
+    { status: 201 }
   );
-
-  if (itemsError) {
-    console.error("create_order_items_failed", itemsError);
-    // Compensación: si los ítems no se pudieron insertar, no dejamos una
-    // orden huérfana sin productos.
-    await supabaseAdmin.from("orders").delete().eq("id", order.id);
-    return NextResponse.json(
-      { error: "No pudimos registrar el pedido. Probá de nuevo." },
-      { status: 500 }
-    );
-  }
-
-  return NextResponse.json({ token, orderNumber }, { status: 201 });
 }

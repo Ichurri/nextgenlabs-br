@@ -43,3 +43,7 @@ next-env.d.ts
 
 # graphify knowledge graph (generado localmente)
 /graphify-out/
+
+# supabase CLI (generado localmente, supabase/migrations/ sí se versiona)
+/supabase/.temp/
+/supabase/.branches/

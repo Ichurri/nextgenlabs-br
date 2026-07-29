@@ -1,5 +1,18 @@
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
+const ORDER_STATUSES = ["pending", "paid", "cancelled"] as const;
+type OrderStatus = (typeof ORDER_STATUSES)[number];
+
+// El CHECK constraint de Postgres garantiza estos tres valores, pero
+// `gen types` no lee CHECK constraints — la columna sale tipada como
+// `string` genérico. Se angosta acá con una guarda real, no con un `as`.
+function parseOrderStatus(status: string): OrderStatus {
+  if ((ORDER_STATUSES as readonly string[]).includes(status)) {
+    return status as OrderStatus;
+  }
+  throw new Error(`Estado de orden desconocido: "${status}".`);
+}
+
 export type OrderItemRecord = {
   slug: string;
   name: string;
@@ -66,7 +79,7 @@ export async function getOrderByToken(token: string): Promise<OrderRecord | null
     total: Number(order.total),
     discountCode: order.discount_code,
     discountCodeLabel: order.discount_code_label,
-    status: order.status,
+    status: parseOrderStatus(order.status),
     createdAt: order.created_at,
     items: (items ?? []).map((item) => ({
       slug: item.slug,
