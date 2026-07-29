@@ -19,8 +19,10 @@ export default function PrivacidadPage() {
         {
           heading: "1. Datos que recopilamos",
           body: [
-            "Este sitio no cuenta con registro de usuarios ni procesa pagos en línea. La información del carrito se guarda únicamente en tu propio navegador (localStorage) y no se envía a ningún servidor.",
-            "Cuando nos escribes por WhatsApp o correo, recibimos los datos que decidas compartir (por ejemplo, nombre y ciudad) con el único fin de coordinar tu pedido.",
+            "Este sitio no cuenta con registro de usuarios ni procesa pagos en línea: el pago se coordina por transferencia o QR y se confirma por WhatsApp. La información del carrito se guarda únicamente en tu propio navegador (localStorage) y no se envía a ningún servidor.",
+            "Cuando completas un pedido en el checkout, guardamos tu nombre, WhatsApp, ciudad, dirección (si la compartes), nota opcional y el detalle de los productos pedidos, con el único fin de procesar, entregar y darte seguimiento a ese pedido. Solo el equipo de Nextgen Labs accede a esos datos, desde un panel protegido con contraseña.",
+            "Guardamos estos datos mientras sean necesarios para gestionar tu pedido y cumplir obligaciones administrativas. No tenemos un borrado automático programado; si querés que eliminemos tu información, escribinos a la dirección de contacto de abajo.",
+            "Cuando nos escribes por WhatsApp o correo fuera de un pedido, recibimos los datos que decidas compartir con el único fin de responderte.",
           ],
         },
         {

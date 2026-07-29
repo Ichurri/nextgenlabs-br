@@ -1,0 +1,72 @@
+import { formatPrice } from "@/lib/format";
+import { parseOrderStatus } from "@/lib/orders-data";
+import type { Database } from "@/types/database";
+import { OrderStatusControl } from "@/components/admin/OrderStatusControl";
+
+export type OrderWithItems = Database["public"]["Tables"]["orders"]["Row"] & {
+  order_items: Database["public"]["Tables"]["order_items"]["Row"][];
+};
+
+// wa.me al comprador (no al negocio, a diferencia de buildWhatsAppUrl() en
+// src/config/site.ts) — customer_phone ya viene normalizado a solo dígitos
+// por phoneSchema en orders.schema.ts.
+function buildCustomerWhatsAppUrl(phoneDigits: string, orderNumber: string): string {
+  const message = `Hola, te escribo por tu pedido ${orderNumber}.`;
+  return `https://wa.me/${phoneDigits}?text=${encodeURIComponent(message)}`;
+}
+
+export function OrderCard({ order }: { order: OrderWithItems }) {
+  const status = parseOrderStatus(order.status);
+  const createdAt = new Date(order.created_at).toLocaleString("es-BO", {
+    dateStyle: "short",
+    timeStyle: "short",
+  });
+
+  return (
+    <article className="rounded-xl border border-border bg-surface p-4 sm:p-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="font-mono text-sm font-semibold">{order.order_number}</p>
+          <p className="text-xs text-muted">{createdAt}</p>
+        </div>
+        <OrderStatusControl orderId={order.id} status={status} />
+      </div>
+
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <div className="space-y-1 text-sm">
+          <p className="font-medium">{order.customer_name}</p>
+          <a
+            href={buildCustomerWhatsAppUrl(order.customer_phone, order.order_number)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="focus-ring block rounded text-accent-light hover:underline"
+          >
+            {order.customer_phone}
+          </a>
+          <p className="text-muted">{order.customer_city}</p>
+          {order.customer_address && <p className="text-muted">{order.customer_address}</p>}
+        </div>
+
+        <div className="space-y-1 text-sm text-muted">
+          {order.order_items.map((item) => (
+            <p key={item.id}>
+              {item.name} {item.dose} x{item.quantity}
+            </p>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3">
+        <span className="text-lg font-bold">{formatPrice(order.total)}</span>
+        <a
+          href={`/api/pedido/${order.token}/comprobante`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="focus-ring rounded text-sm font-medium text-accent-light hover:underline"
+        >
+          Ver comprobante (PDF)
+        </a>
+      </div>
+    </article>
+  );
+}
