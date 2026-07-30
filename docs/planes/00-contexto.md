@@ -78,6 +78,9 @@ Si alguna de estas aparece en una conversación, anotala y seguí con la fase ac
 - API de WhatsApp Business (por `wa.me` **no se puede adjuntar un archivo**; solo se manda el
   link al comprobante)
 - Control de stock real (`inStock` sigue siendo un booleano manual en `products.ts`)
+- **Checkout autoservicio** (Fase 9). El comprador ya no crea su propio pedido: el carrito
+  termina en un mensaje de WhatsApp y nada más. El comprobante en PDF lo genera el dueño desde
+  el panel, pegando ese mismo mensaje — ver §5.
 
 ---
 
@@ -93,8 +96,9 @@ Si alguna de estas aparece en una conversación, anotala y seguí con la fase ac
   `cartTotal()` son helpers puros exportados desde ahí.
 - **Precios**: `src/data/products.ts`, array estático. `price` en Bs como número entero.
   `price: 0` significa "Precio a consultar" (esos productos **no pueden entrar al checkout**).
-- **Pedido actual**: `src/lib/whatsapp.ts` arma un texto y abre `wa.me`. Esto **sigue existiendo**
-  después de la Fase 5 — no lo borres, es el fallback y el canal de confirmación.
+- **Pedido actual**: `src/lib/whatsapp.ts` arma un texto y abre `wa.me`. Desde la Fase 9 dejó de
+  ser el fallback: es **el** canal de pedido — no hay checkout autoservicio. El dueño genera el
+  comprobante desde `/admin/recibos/nuevo` pegando ese mismo mensaje.
 - **Formato de dinero**: `formatPrice()` en `src/lib/format.ts`, usa `Intl.NumberFormat("es-BO")`
   y el prefijo `Bs` de `siteConfig.currency`.
 - **Config**: `src/config/site.ts` (WhatsApp, contacto, URL, marca). Usa el comentario
@@ -109,30 +113,38 @@ Si alguna de estas aparece en una conversación, anotala y seguí con la fase ac
 
 ## 5. Arquitectura elegida
 
+Desde la Fase 9 no hay checkout autoservicio: el carrito termina en un mensaje de WhatsApp, y el
+comprobante lo genera el dueño desde el panel pegando ese mismo mensaje. `orders`/`order_items`
+quedan como **historial de solo lectura** de los pedidos de las Fases 5–7 — no entran filas
+nuevas.
+
 ```
-Navegador                      Vercel (Next Route Handlers)          Supabase
-─────────                      ────────────────────────────          ────────
+Navegador                                        Vercel (Next Route Handlers)          Supabase
+─────────                                        ────────────────────────────          ────────
 carrito (zustand)
    │
-   ├── POST /api/descuentos/validar ──► valida código ──────────────► discount_codes
+   ├── POST /api/descuentos/validar ──► valida código (informativo) ───────────────────► discount_codes
    │   ◄── { valid, discount, label }
    │
-   └── POST /api/pedidos ────────────► Zod + recalcula TODO ────────► orders
-       ◄── { token, orderNumber }      desde products.ts             order_items
-                                                                     discount_redemptions
-   ▼
-/pedido/[token]  ──── GET /api/pedido/[token]/comprobante ─────────► lee orden → PDF
-   │                                                                  (@react-pdf/renderer)
-   └── botón WhatsApp con nº de pedido + link al comprobante
+   └── botón "Finalizar pedido por WhatsApp" ──► wa.me con ítems, total y código
+       (el comprador completa nombre/ciudad/dirección a mano antes de enviar)
 
-Panel del dueño (Fase 5.6, autenticado)
+Panel del dueño (autenticado)
    │
-   ├── POST /admin/login ────────────► verifica contraseña ─────────► (sin DB: env var)
+   ├── POST /admin/login ────────────► verifica contraseña ─────────────────────────────► (sin DB: env var)
    │   ◄── cookie de sesión firmada
    │
-   ├── /admin ───────────────────────► lista paginada ──────────────► orders + order_items
+   ├── /admin ───────────────────────► lista paginada (solo historial) ─────────────────► orders + order_items
+   ├── POST /api/admin/pedidos/[id]/estado ──► pending|paid|shipped|cancelled ──────────► orders.status (solo historial)
    │
-   └── POST /api/admin/pedidos/[id]/estado ──► pending|paid|cancelled ──► orders.status
+   └── /admin/recibos/nuevo: pega el mensaje, corrige lo que el parser no reconoció
+       └── POST /api/admin/recibos ──► Zod + recalcula TODO desde products.ts
+           │                            (nunca inserta una fila en orders)
+           ├── si hay código: reclama el uso (claim_discount_code_use) ────────────────► discount_redemptions
+           └── ◄── PDF del comprobante, se descarga directo (no hay token ni /pedido/[nuevo])
+
+/pedido/[token]  ──── GET /api/pedido/[token]/comprobante ─────────────────────────────► lee orden histórica → PDF
+   (solo responde a tokens de pedidos ya existentes; no se genera ninguno nuevo)
 ```
 
 **Stack añadido**: Supabase (Postgres), `@react-pdf/renderer`, `zod`.
@@ -229,6 +241,10 @@ El umbral de envío gratis se evalúa **después** del descuento (más conservad
 ---
 
 ## 8. Estados de una orden
+
+> Desde la Fase 9 esto aplica solo a los pedidos históricos de `orders` (Fases 5–7). Los
+> comprobantes que genera el dueño desde `/admin/recibos/nuevo` no crean una orden ni tienen
+> estado en la base — el check "ya está pagado" del formulario solo decide qué dice el PDF.
 
 ```
 pending    ── se crea acá y se queda acá hasta que el dueño intervenga

@@ -13,7 +13,7 @@
 
 | Campo | Qué poner |
 |---|---|
-| Código | En MAYÚSCULAS, sin espacios. Ej: `MAFE10`. Es lo que la persona escribe al pagar. |
+| Código | En MAYÚSCULAS, sin espacios. Ej: `MAFE10`. Es lo que la persona escribe en el carrito — queda incluido en el mensaje de WhatsApp que te manda, y es lo que vos pegás al generar el comprobante. |
 | Tipo | **Porcentaje** (ej. 10%) o **Monto fijo** (ej. Bs 150). |
 | Valor | El número: `10` para 10%, o `150` para Bs 150. Los porcentajes no pueden pasar de 50%. |
 | De quién es | Para vos, nunca lo ve el comprador. Ej: `María Fernanda — IG @mafe`. |
@@ -33,22 +33,32 @@ reactivarlo cuando quieras de la misma forma.
 
 ## Compartir un link con el código ya cargado
 
-En vez de decirle a alguien "poné MAFE10 al pagar", pasale este link y el descuento se aplica
-solo apenas entra:
+En vez de decirle a alguien "poné MAFE10 en el carrito", pasale este link y el descuento se
+aplica solo apenas entra:
 
 ```
 tusitio.com/catalogo?codigo=MAFE10
 ```
 
+## El comprador ya no paga en el sitio
+
+Desde que el pedido se coordina por WhatsApp, el código que aplica el comprador en el carrito es
+**informativo**: viaja en el mensaje que te manda, pero el que vale es el que vos pegás al
+generar el comprobante en **+ Nuevo comprobante**. Ahí es donde el sistema revalida el código de
+nuevo y descuenta un uso de verdad.
+
 ## Leer los números de cada código
 
-Cada código en la lista muestra cuatro números:
+Cada código en la lista, y en el **Reporte** (`/admin/codigos/reporte`), muestra cuatro números.
+Desde que el comprobante lo generás vos en vez de que el pedido se cree solo, "generado" y
+"pagado" suman tanto pedidos históricos como comprobantes nuevos:
 
-- **Pedidos generados** / **Descuento (generado)**: todo pedido que se creó con ese código,
-  aunque nunca se haya cobrado. Este número **sobreestima** — nadie marca solo el sistema
-  cuándo entra la plata, eso lo hacés vos a mano viendo tu banco.
-- **Pedidos pagados** / **Facturado (pagado)**: solo los pedidos que vos marcaste como
-  **Pagado** en la pantalla de **Pedidos**. Este es el número real.
+- **Pedidos generados** / **Descuento (generado)**: todo pedido o comprobante que se creó con
+  ese código, aunque nunca se haya cobrado. Este número **sobreestima** — nadie marca solo el
+  sistema cuándo entra la plata, eso lo hacés vos a mano viendo tu banco.
+- **Pedidos pagados** / **Facturado (pagado)**: solo lo que marcaste como **Pagado** — en la
+  pantalla de **Pedidos** para pedidos históricos, o con el check **"ya está pagado"** al generar
+  el comprobante. Este es el número real.
 
 **Si le vas a pagar una comisión a alguien por los pedidos que trajo, usá siempre "Pagados",
 nunca "Generados".**
