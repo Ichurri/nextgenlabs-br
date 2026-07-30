@@ -8,6 +8,10 @@ import type { OrderStatus } from "@/lib/orders-data";
 
 /**
  * Arma el texto del pedido para WhatsApp a partir de los ítems del carrito.
+ * El formato es para humanos y el comprador puede editar el texto entero
+ * antes de enviarlo — el admin lo pega en el panel y `parseOrderMessage()`
+ * solo reconoce las líneas "• nombre dosis xN", la del código y las de
+ * datos; los precios y el total son informativos, el parser los ignora.
  * Ejemplo de salida:
  *
  *   Hola Nextgen Labs, quiero hacer un pedido:
@@ -17,11 +21,14 @@ import type { OrderStatus } from "@/lib/orders-data";
  *
  *   Total: Bs 1150
  *
+ *   Código de descuento: MAFE10
+ *
  *   Mis datos:
  *   Nombre:
  *   Ciudad:
+ *   Dirección:
  */
-export function buildOrderMessage(items: CartItem[]): string {
+export function buildOrderMessage(items: CartItem[], discountCode?: string | null): string {
   const lines = items.map((i) => {
     const lineTotal = formatPrice(i.price * i.quantity);
     return `• ${i.name} ${i.dose} x${i.quantity} — ${lineTotal}`;
@@ -36,15 +43,17 @@ export function buildOrderMessage(items: CartItem[]): string {
     "",
     `Total: ${total}`,
     "",
+    ...(discountCode ? [`Código de descuento: ${discountCode}`, ""] : []),
     "Mis datos:",
     "Nombre:",
     "Ciudad:",
+    "Dirección:",
     "",
   ].join("\n");
 }
 
-export function buildOrderWhatsAppUrl(items: CartItem[]): string {
-  return buildWhatsAppUrl(buildOrderMessage(items));
+export function buildOrderWhatsAppUrl(items: CartItem[], discountCode?: string | null): string {
+  return buildWhatsAppUrl(buildOrderMessage(items, discountCode));
 }
 
 // ─── Negocio → comprador ────────────────────────────────────────────────

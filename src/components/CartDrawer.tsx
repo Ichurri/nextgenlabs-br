@@ -7,6 +7,7 @@ import { useCart, cartTotal, cartCount, resolveCartItems } from "@/lib/cart";
 import { formatPrice } from "@/lib/format";
 import { buildOrderWhatsAppUrl } from "@/lib/whatsapp";
 import { WhatsAppCtaButton } from "@/components/WhatsAppCtaButton";
+import { useDiscountField } from "@/lib/use-discount-field";
 
 export function CartDrawer() {
   const { items, isDrawerOpen, closeDrawer, setQuantity, removeItem } = useCart();
@@ -22,6 +23,19 @@ export function CartDrawer() {
   const resolvedItems = resolveCartItems(items);
   const total = cartTotal(resolvedItems);
   const count = cartCount(resolvedItems);
+
+  // CartDrawer está siempre montado (root layout): es el único consumidor
+  // del auto-apply de `?codigo=` para todo el sitio, ver use-discount-field.ts.
+  const {
+    discountInput,
+    setDiscountInput,
+    discountState,
+    discountMessage,
+    discountAnnounceKey,
+    appliedDiscount,
+    applyDiscountCode,
+    removeDiscount,
+  } = useDiscountField(resolvedItems, { autoApply: true });
 
   return (
     <>
@@ -120,25 +134,72 @@ export function CartDrawer() {
             </div>
 
             <div className="border-t border-border px-5 py-4">
+              {appliedDiscount ? (
+                <div className="mb-3 flex items-center justify-between gap-2 rounded-lg border border-accent/30 bg-accent/5 px-3 py-2 text-xs">
+                  <span className="font-medium text-accent-light">
+                    {appliedDiscount.code} · −{formatPrice(appliedDiscount.amount)}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={removeDiscount}
+                    aria-label="Quitar código de descuento"
+                    className="focus-ring rounded text-muted transition hover:text-foreground"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ) : (
+                <div className="mb-1.5 flex gap-2">
+                  <input
+                    value={discountInput}
+                    onChange={(e) => setDiscountInput(e.target.value.toUpperCase())}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        void applyDiscountCode(discountInput);
+                      }
+                    }}
+                    placeholder="Código de descuento"
+                    className={`focus-ring w-full rounded-lg border bg-surface-2 px-3 py-2 text-xs outline-none transition ${
+                      discountState === "error" ? "border-danger" : "border-border"
+                    }`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => applyDiscountCode(discountInput)}
+                    disabled={discountState === "validating" || discountInput.trim().length === 0}
+                    className="focus-ring shrink-0 rounded-lg border border-border px-3 py-2 text-xs font-medium transition hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {discountState === "validating" ? "…" : "Aplicar"}
+                  </button>
+                </div>
+              )}
+              <p
+                role="status"
+                aria-live="polite"
+                key={discountAnnounceKey}
+                className="mb-2 min-h-4 text-xs"
+              >
+                {discountState === "error" && discountMessage && (
+                  <span className="text-danger">{discountMessage}</span>
+                )}
+                {appliedDiscount && (
+                  <span className="text-muted">
+                    Monto informativo: el admin lo confirma al generar el comprobante.
+                  </span>
+                )}
+              </p>
+
               <div className="mb-3 flex items-center justify-between text-base font-semibold">
                 <span>Total</span>
                 <span>{formatPrice(total)}</span>
               </div>
-              <Link
-                href="/checkout"
-                onClick={closeDrawer}
-                className="focus-ring flex w-full items-center justify-center rounded-lg bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-accent-light"
-              >
-                Continuar al pedido
-              </Link>
-              <div className="mt-2.5 flex justify-center">
-                <WhatsAppCtaButton
-                  href={buildOrderWhatsAppUrl(resolvedItems)}
-                  label="Finalizar pedido por WhatsApp"
-                  variant="compact"
-                  analyticsEvent="whatsapp_click_checkout"
-                />
-              </div>
+              <WhatsAppCtaButton
+                href={buildOrderWhatsAppUrl(resolvedItems, appliedDiscount?.code)}
+                label="Finalizar pedido por WhatsApp"
+                variant="solid"
+                analyticsEvent="whatsapp_click_checkout"
+              />
               <Link
                 href="/carrito"
                 onClick={closeDrawer}

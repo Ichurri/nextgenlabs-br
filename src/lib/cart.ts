@@ -11,6 +11,12 @@ export type CartItem = {
   quantity: number;
 };
 
+// Código de descuento ya validado contra /api/descuentos/validar (Fase 9). El
+// monto es informativo para el comprador: el que vale es el que el admin
+// revalida al generar el comprobante, así que no pasa nada si queda
+// desactualizado tras cambiar el carrito.
+export type AppliedDiscount = { code: string; amount: number; label: string };
+
 type CartState = {
   items: CartItem[];
   isDrawerOpen: boolean;
@@ -21,8 +27,9 @@ type CartState = {
   addNonce: number;
   // Código de descuento que llegó por `?codigo=` (Fase 6). Vive solo en
   // memoria, no en localStorage: es un puente de una sola pasada entre el
-  // catálogo y el checkout, no algo que deba sobrevivir a cerrar la pestaña.
+  // catálogo y el carrito, no algo que deba sobrevivir a cerrar la pestaña.
   pendingCode: string | null;
+  appliedCode: AppliedDiscount | null;
   addItem: (product: Product, quantity?: number) => void;
   removeItem: (slug: string) => void;
   setQuantity: (slug: string, quantity: number) => void;
@@ -31,6 +38,8 @@ type CartState = {
   closeDrawer: () => void;
   setPendingCode: (code: string) => void;
   clearPendingCode: () => void;
+  setAppliedCode: (discount: AppliedDiscount) => void;
+  clearAppliedCode: () => void;
 };
 
 export const useCart = create<CartState>()(
@@ -41,6 +50,7 @@ export const useCart = create<CartState>()(
       lastAddedName: null,
       addNonce: 0,
       pendingCode: null,
+      appliedCode: null,
 
       // Añadir NO abre el carrito: solo acumula el ítem y dispara un aviso breve.
       // El carrito se abre únicamente cuando el usuario pulsa el ícono del carrito.
@@ -85,16 +95,19 @@ export const useCart = create<CartState>()(
             .filter((i) => i.quantity > 0),
         })),
 
-      clear: () => set({ items: [] }),
+      clear: () => set({ items: [], appliedCode: null }),
       openDrawer: () => set({ isDrawerOpen: true }),
       closeDrawer: () => set({ isDrawerOpen: false }),
       setPendingCode: (code) => set({ pendingCode: code }),
       clearPendingCode: () => set({ pendingCode: null }),
+      setAppliedCode: (discount) => set({ appliedCode: discount }),
+      clearAppliedCode: () => set({ appliedCode: null }),
     }),
     {
       name: "nextgen-cart",
-      // Solo persistimos los ítems, no el estado del drawer.
-      partialize: (state) => ({ items: state.items }),
+      // Persistimos los ítems y el código aplicado, no el estado del drawer
+      // ni el pendingCode (puente de una sola pasada, ver arriba).
+      partialize: (state) => ({ items: state.items, appliedCode: state.appliedCode }),
     }
   )
 );

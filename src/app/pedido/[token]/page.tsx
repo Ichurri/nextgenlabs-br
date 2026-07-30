@@ -6,7 +6,6 @@ import { formatPrice } from "@/lib/format";
 import { buildWhatsAppUrl, siteConfig } from "@/config/site";
 import { PaymentInstructions } from "@/components/PaymentInstructions";
 import { ClearCartOnMount } from "@/components/ClearCartOnMount";
-import { SaveRecentOrderOnMount } from "@/components/SaveRecentOrderOnMount";
 import { WhatsAppCtaButton } from "@/components/WhatsAppCtaButton";
 
 export const metadata: Metadata = {
@@ -43,11 +42,6 @@ export default async function OrderPage({
   return (
     <div className="mx-auto max-w-3xl px-4 py-14 sm:px-6">
       <ClearCartOnMount />
-      <SaveRecentOrderOnMount
-        token={order.token}
-        orderNumber={order.orderNumber}
-        createdAt={order.createdAt}
-      />
 
       <p className="eyebrow mb-2">Pedido registrado</p>
       <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">

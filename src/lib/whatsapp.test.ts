@@ -28,7 +28,7 @@ const items: CartItem[] = [
 ];
 
 describe("buildOrderMessage", () => {
-  it("arma el mensaje con el formato exacto esperado", () => {
+  it("arma el mensaje con el formato exacto esperado, sin código de descuento", () => {
     const expected = [
       `Hola ${siteConfig.name}, quiero hacer un pedido:`,
       "",
@@ -40,10 +40,37 @@ describe("buildOrderMessage", () => {
       "Mis datos:",
       "Nombre:",
       "Ciudad:",
+      "Dirección:",
       "",
     ].join("\n");
 
     expect(buildOrderMessage(items)).toBe(expected);
+  });
+
+  it("arma el mensaje con el formato exacto esperado, con código de descuento", () => {
+    const expected = [
+      `Hola ${siteConfig.name}, quiero hacer un pedido:`,
+      "",
+      "• Tesamorelin 10 MG x1 — Bs 1.700",
+      "• NAD+ 500 MG x1 — Bs 1.900",
+      "",
+      "Total: Bs 3.600",
+      "",
+      "Código de descuento: MAFE10",
+      "",
+      "Mis datos:",
+      "Nombre:",
+      "Ciudad:",
+      "Dirección:",
+      "",
+    ].join("\n");
+
+    expect(buildOrderMessage(items, "MAFE10")).toBe(expected);
+  });
+
+  it("no incluye la línea del código cuando no hay uno aplicado", () => {
+    expect(buildOrderMessage(items, null)).not.toContain("Código de descuento");
+    expect(buildOrderMessage(items)).not.toContain("Código de descuento");
   });
 
   it("multiplica precio x cantidad en cada línea", () => {
@@ -74,6 +101,14 @@ describe("buildOrderWhatsAppUrl", () => {
     const encodedMessage = url.split("?text=")[1];
 
     expect(decodeURIComponent(encodedMessage)).toBe(buildOrderMessage(items));
+  });
+
+  it("propaga el código de descuento al mensaje codificado", () => {
+    const url = buildOrderWhatsAppUrl(items, "MAFE10");
+    const encodedMessage = url.split("?text=")[1];
+
+    expect(decodeURIComponent(encodedMessage)).toBe(buildOrderMessage(items, "MAFE10"));
+    expect(decodeURIComponent(encodedMessage)).toContain("Código de descuento: MAFE10");
   });
 });
 

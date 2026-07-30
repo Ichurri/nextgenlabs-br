@@ -44,7 +44,14 @@ function makeProduct(overrides: Partial<Product> = {}): Product {
 
 beforeEach(() => {
   // Merge (no `replace`) para no perder los métodos de acción del store.
-  useCart.setState({ items: [], isDrawerOpen: false, lastAddedName: null, addNonce: 0 });
+  useCart.setState({
+    items: [],
+    isDrawerOpen: false,
+    lastAddedName: null,
+    addNonce: 0,
+    pendingCode: null,
+    appliedCode: null,
+  });
 });
 
 describe("useCart", () => {
@@ -108,11 +115,13 @@ describe("useCart", () => {
     expect(useCart.getState().items[0].quantity).toBe(1);
   });
 
-  it("clear vacía el carrito", () => {
+  it("clear vacía el carrito y el código de descuento aplicado", () => {
     useCart.getState().addItem(makeProduct());
+    useCart.getState().setAppliedCode({ code: "MAFE10", amount: 10, label: "10% de descuento" });
     useCart.getState().clear();
 
     expect(useCart.getState().items).toHaveLength(0);
+    expect(useCart.getState().appliedCode).toBeNull();
   });
 
   it("openDrawer y closeDrawer alternan isDrawerOpen", () => {
@@ -121,6 +130,21 @@ describe("useCart", () => {
 
     useCart.getState().closeDrawer();
     expect(useCart.getState().isDrawerOpen).toBe(false);
+  });
+
+  it("setAppliedCode guarda el código de descuento aplicado", () => {
+    useCart.getState().setAppliedCode({ code: "MAFE10", amount: 10, label: "10% de descuento" });
+    expect(useCart.getState().appliedCode).toEqual({
+      code: "MAFE10",
+      amount: 10,
+      label: "10% de descuento",
+    });
+  });
+
+  it("clearAppliedCode borra el código de descuento aplicado", () => {
+    useCart.getState().setAppliedCode({ code: "MAFE10", amount: 10, label: "10% de descuento" });
+    useCart.getState().clearAppliedCode();
+    expect(useCart.getState().appliedCode).toBeNull();
   });
 });
 
