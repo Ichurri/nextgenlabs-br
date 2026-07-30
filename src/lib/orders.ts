@@ -1,5 +1,5 @@
 import { randomBytes, randomInt } from "node:crypto";
-import { getProductBySlug } from "@/data/products";
+import { getProductBySlug, isInStock } from "@/data/products";
 import { round2 } from "@/lib/money";
 import { SHIPPING } from "@/config/shipping";
 
@@ -45,6 +45,11 @@ export function calculateOrderTotals(
     if (product.price === 0) {
       throw new OrderValidationError(
         `${product.name} es "precio a consultar" y no se puede pedir desde el checkout. Consultalo por WhatsApp.`
+      );
+    }
+    if (!isInStock(product)) {
+      throw new OrderValidationError(
+        `${product.name} está agotado y no se puede pedir en este momento.`
       );
     }
     return {

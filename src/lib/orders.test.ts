@@ -41,9 +41,22 @@ vi.mock("@/data/products", () => {
       image: "/c.webp",
       highlights: [],
     },
+    {
+      slug: "agotado",
+      name: "Producto Agotado",
+      dose: "20 MG",
+      price: 200,
+      purity: "≥99% HPLC",
+      form: "Liofilizado",
+      category: "Otros",
+      image: "/d.webp",
+      highlights: [],
+      inStock: false,
+    },
   ];
   return {
     getProductBySlug: (slug: string) => products.find((p) => p.slug === slug),
+    isInStock: (product: { inStock?: boolean }) => product.inStock !== false,
   };
 });
 
@@ -78,6 +91,12 @@ describe("calculateOrderTotals", () => {
 
   it("rechaza un producto con price === 0", () => {
     expect(() => calculateOrderTotals([{ slug: "consulta", quantity: 1 }])).toThrow(
+      OrderValidationError
+    );
+  });
+
+  it("rechaza un producto agotado (inStock: false)", () => {
+    expect(() => calculateOrderTotals([{ slug: "agotado", quantity: 1 }])).toThrow(
       OrderValidationError
     );
   });

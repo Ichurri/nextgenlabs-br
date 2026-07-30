@@ -1,6 +1,31 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import { useCart, cartCount, cartTotal, type CartItem } from "@/lib/cart";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { useCart, cartCount, cartTotal, resolveCartItems, type CartItem } from "@/lib/cart";
 import type { Product } from "@/data/products";
+
+vi.mock("@/data/products", () => {
+  const products = [
+    {
+      slug: "vigente",
+      name: "Nombre actual",
+      dose: "20 MG",
+      price: 999,
+      image: "/vigente.webp",
+      inStock: true,
+    },
+    {
+      slug: "agotado",
+      name: "Producto agotado",
+      dose: "10 MG",
+      price: 500,
+      image: "/agotado.webp",
+      inStock: false,
+    },
+  ];
+  return {
+    getProductBySlug: (slug: string) => products.find((p) => p.slug === slug),
+    isInStock: (product: { inStock?: boolean }) => product.inStock !== false,
+  };
+});
 
 function makeProduct(overrides: Partial<Product> = {}): Product {
   return {
@@ -110,6 +135,46 @@ describe("cartCount", () => {
 
   it("devuelve 0 para un carrito vacío", () => {
     expect(cartCount([])).toBe(0);
+  });
+});
+
+describe("resolveCartItems", () => {
+  it("devuelve el precio, nombre y dosis actuales, no el snapshot guardado", () => {
+    const stale: CartItem[] = [
+      { slug: "vigente", name: "Nombre viejo", dose: "10 MG", price: 100, image: "", quantity: 2 },
+    ];
+    const resolved = resolveCartItems(stale);
+    expect(resolved).toHaveLength(1);
+    expect(resolved[0]).toMatchObject({
+      slug: "vigente",
+      name: "Nombre actual",
+      dose: "20 MG",
+      price: 999,
+      quantity: 2,
+      inStock: true,
+    });
+  });
+
+  it("descarta un slug que ya no existe en el catálogo", () => {
+    const stale: CartItem[] = [
+      { slug: "vigente", name: "X", dose: "1 MG", price: 1, image: "", quantity: 1 },
+      { slug: "discontinuado", name: "Y", dose: "1 MG", price: 1, image: "", quantity: 1 },
+    ];
+    const resolved = resolveCartItems(stale);
+    expect(resolved).toHaveLength(1);
+    expect(resolved[0].slug).toBe("vigente");
+  });
+
+  it("expone inStock: false para un producto agotado", () => {
+    const stale: CartItem[] = [
+      { slug: "agotado", name: "Y", dose: "1 MG", price: 1, image: "", quantity: 1 },
+    ];
+    const resolved = resolveCartItems(stale);
+    expect(resolved[0].inStock).toBe(false);
+  });
+
+  it("devuelve un array vacío para un carrito vacío", () => {
+    expect(resolveCartItems([])).toEqual([]);
   });
 });
 
