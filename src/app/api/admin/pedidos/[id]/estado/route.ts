@@ -7,7 +7,7 @@ import { supabaseAdmin } from "@/lib/supabase-admin";
 export const runtime = "nodejs";
 
 const estadoSchema = z.object({
-  status: z.enum(["pending", "paid", "cancelled"]),
+  status: z.enum(["pending", "paid", "shipped", "cancelled"]),
 });
 
 export async function POST(
@@ -31,12 +31,18 @@ export async function POST(
     return NextResponse.json({ error: "Estado inválido." }, { status: 400 });
   }
 
-  // Las tres transiciones son libres y reversibles: no hay máquina de
+  // Las cuatro transiciones son libres y reversibles: no hay máquina de
   // estados, el CHECK constraint de Postgres es la última red.
-  const { error } = await supabaseAdmin
-    .from("orders")
-    .update({ status: parsed.data.status })
-    .eq("id", id);
+  //
+  // paid_at registra cuándo se confirmó el pago (Fase 7 B3): se fija al
+  // pasar a "paid" y se limpia solo al volver a "pending". "shipped" y
+  // "cancelled" no la tocan — un pedido despachado o cancelado sigue
+  // habiendo sido pagado en ese momento, si lo estuvo.
+  const update: { status: string; paid_at?: string | null } = { status: parsed.data.status };
+  if (parsed.data.status === "paid") update.paid_at = new Date().toISOString();
+  if (parsed.data.status === "pending") update.paid_at = null;
+
+  const { error } = await supabaseAdmin.from("orders").update(update).eq("id", id);
 
   if (error) {
     console.error("update_order_status_failed", error.code);

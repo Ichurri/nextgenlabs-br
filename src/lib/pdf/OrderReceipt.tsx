@@ -116,6 +116,7 @@ const styles = StyleSheet.create({
 const STATUS_LABEL: Record<OrderRecord["status"], string> = {
   pending: "Pendiente de pago",
   paid: "Pagado",
+  shipped: "Despachado",
   cancelled: "Cancelado",
 };
 

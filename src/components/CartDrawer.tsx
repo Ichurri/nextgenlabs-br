@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect } from "react";
-import { useCart, cartTotal, cartCount } from "@/lib/cart";
+import { useCart, cartTotal, cartCount, resolveCartItems } from "@/lib/cart";
 import { formatPrice } from "@/lib/format";
 import { buildOrderWhatsAppUrl } from "@/lib/whatsapp";
 import { WhatsAppCtaButton } from "@/components/WhatsAppCtaButton";
@@ -19,8 +19,9 @@ export function CartDrawer() {
     return () => window.removeEventListener("keydown", onKey);
   }, [isDrawerOpen, closeDrawer]);
 
-  const total = cartTotal(items);
-  const count = cartCount(items);
+  const resolvedItems = resolveCartItems(items);
+  const total = cartTotal(resolvedItems);
+  const count = cartCount(resolvedItems);
 
   return (
     <>
@@ -57,7 +58,7 @@ export function CartDrawer() {
           </button>
         </div>
 
-        {items.length === 0 ? (
+        {resolvedItems.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
             <p className="text-muted">Tu carrito está vacío.</p>
             <Link
@@ -72,7 +73,7 @@ export function CartDrawer() {
           <>
             <div className="flex-1 overflow-y-auto px-5 py-4">
               <ul className="space-y-4">
-                {items.map((item) => (
+                {resolvedItems.map((item) => (
                   <li key={item.slug} className="flex gap-3">
                     <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-border bg-surface-2">
                       <Image
@@ -88,6 +89,9 @@ export function CartDrawer() {
                         <div>
                           <p className="text-sm font-semibold leading-tight">{item.name}</p>
                           <p className="text-xs text-muted">{item.dose}</p>
+                          {!item.inStock && (
+                            <p className="text-xs font-medium text-danger">Agotado</p>
+                          )}
                         </div>
                         <button
                           onClick={() => removeItem(item.slug)}
@@ -129,7 +133,7 @@ export function CartDrawer() {
               </Link>
               <div className="mt-2.5 flex justify-center">
                 <WhatsAppCtaButton
-                  href={buildOrderWhatsAppUrl(items)}
+                  href={buildOrderWhatsAppUrl(resolvedItems)}
                   label="Finalizar pedido por WhatsApp"
                   variant="compact"
                   analyticsEvent="whatsapp_click_checkout"

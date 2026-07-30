@@ -15,6 +15,7 @@ const PAGE_SIZE = 25;
 const STATUS_FILTERS = [
   { value: "pending", label: "Pendientes" },
   { value: "paid", label: "Pagados" },
+  { value: "shipped", label: "Despachados" },
   { value: "cancelled", label: "Cancelados" },
   { value: "all", label: "Todos" },
 ] as const;

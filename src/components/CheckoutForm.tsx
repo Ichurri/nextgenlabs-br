@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useCart, cartTotal } from "@/lib/cart";
+import { useCart, cartTotal, resolveCartItems } from "@/lib/cart";
 import { formatPrice } from "@/lib/format";
 import { round2 } from "@/lib/money";
 import { checkoutSchema } from "@/lib/orders.schema";
@@ -27,6 +27,7 @@ type DiscountFieldState = "idle" | "validating" | "applied" | "error";
 export function CheckoutForm() {
   const router = useRouter();
   const items = useCart((s) => s.items);
+  const removeItem = useCart((s) => s.removeItem);
   const pendingCode = useCart((s) => s.pendingCode);
   const clearPendingCode = useCart((s) => s.clearPendingCode);
   const [hydrated, setHydrated] = useState(false);
@@ -57,7 +58,8 @@ export function CheckoutForm() {
     if (hydrated && items.length === 0) router.replace("/catalogo");
   }, [hydrated, items.length, router]);
 
-  const sellableItems = items.filter((i) => i.price > 0);
+  const resolvedItems = resolveCartItems(items);
+  const sellableItems = resolvedItems.filter((i) => i.price > 0 && i.inStock);
 
   // Link con código pre-aplicado (?codigo=MAFE10 en /catalogo): se valida
   // una sola vez al montar, silenciosamente si falla — no es el comprador
@@ -75,7 +77,8 @@ export function CheckoutForm() {
 
   if (!hydrated || items.length === 0) return null;
 
-  const consultaItems = items.filter((i) => i.price === 0);
+  const consultaItems = resolvedItems.filter((i) => i.price === 0);
+  const outOfStockItems = resolvedItems.filter((i) => i.price > 0 && !i.inStock);
 
   const subtotal = cartTotal(sellableItems);
   const discountAmount = appliedDiscount?.amount ?? 0;
@@ -209,6 +212,30 @@ export function CheckoutForm() {
   return (
     <div className="grid gap-8 lg:grid-cols-3">
       <form onSubmit={handleSubmit} noValidate className="space-y-5 lg:col-span-2">
+        {outOfStockItems.length > 0 && (
+          <div className="space-y-2 rounded-lg border border-danger/30 bg-danger/5 px-4 py-3 text-sm text-muted">
+            <p className="leading-relaxed">
+              {outOfStockItems.length === 1
+                ? "Este producto se agotó y no entra en el pedido:"
+                : "Estos productos se agotaron y no entran en el pedido:"}
+            </p>
+            <ul className="space-y-1.5">
+              {outOfStockItems.map((i) => (
+                <li key={i.slug} className="flex items-center justify-between gap-3">
+                  <span className="text-foreground">{i.name}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeItem(i.slug)}
+                    className="focus-ring shrink-0 rounded font-semibold text-danger hover:underline"
+                  >
+                    Quitar del carrito
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         {consultaItems.length > 0 && (
           <div className="rounded-lg border border-accent/30 bg-accent/5 px-4 py-3 text-sm leading-relaxed text-muted">
             {consultaItems.map((i) => i.name).join(", ")} — precio a consultar, no{" "}
@@ -231,8 +258,10 @@ export function CheckoutForm() {
 
         {sellableItems.length === 0 ? (
           <div className="rounded-xl border border-border bg-surface p-6 text-sm text-muted">
-            Todos los productos de tu carrito son &ldquo;precio a consultar&rdquo;. Coordiná por
-            WhatsApp para continuar.
+            {resolvedItems.length === 0
+              ? "Los productos de tu carrito ya no están disponibles."
+              : 'Todos los productos de tu carrito son "precio a consultar" o están agotados.'}{" "}
+            Coordiná por WhatsApp para continuar.
           </div>
         ) : (
           <>

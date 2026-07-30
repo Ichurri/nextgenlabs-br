@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useCart, cartTotal } from "@/lib/cart";
+import { useCart, cartTotal, resolveCartItems } from "@/lib/cart";
 import { formatPrice } from "@/lib/format";
 import { buildOrderWhatsAppUrl } from "@/lib/whatsapp";
 import { QtyStepper } from "@/components/CartDrawer";
@@ -10,7 +10,8 @@ import { WhatsAppCtaButton } from "@/components/WhatsAppCtaButton";
 
 export default function CarritoPage() {
   const { items, setQuantity, removeItem, clear } = useCart();
-  const total = cartTotal(items);
+  const resolvedItems = resolveCartItems(items);
+  const total = cartTotal(resolvedItems);
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-14 sm:px-6">
@@ -18,7 +19,7 @@ export default function CarritoPage() {
         Tu carrito
       </h1>
 
-      {items.length === 0 ? (
+      {resolvedItems.length === 0 ? (
         <div className="rounded-xl border border-border bg-surface p-12 text-center">
           <p className="text-muted">Tu carrito está vacío.</p>
           <Link
@@ -33,7 +34,7 @@ export default function CarritoPage() {
           {/* Ítems */}
           <div className="lg:col-span-2">
             <ul className="divide-y divide-border rounded-xl border border-border bg-surface">
-              {items.map((item) => (
+              {resolvedItems.map((item) => (
                 <li key={item.slug} className="flex gap-4 p-4">
                   <Link
                     href={`/producto/${item.slug}`}
@@ -57,6 +58,9 @@ export default function CarritoPage() {
                           {item.name}
                         </Link>
                         <p className="text-sm text-muted">{item.dose}</p>
+                        {!item.inStock && (
+                          <p className="text-sm font-medium text-danger">Agotado</p>
+                        )}
                       </div>
                       <span className="font-semibold">
                         {formatPrice(item.price * item.quantity)}
@@ -112,7 +116,7 @@ export default function CarritoPage() {
               </Link>
               <div className="mt-3 flex justify-center">
                 <WhatsAppCtaButton
-                  href={buildOrderWhatsAppUrl(items)}
+                  href={buildOrderWhatsAppUrl(resolvedItems)}
                   label="Finalizar pedido por WhatsApp"
                   variant="compact"
                   analyticsEvent="whatsapp_click_checkout"

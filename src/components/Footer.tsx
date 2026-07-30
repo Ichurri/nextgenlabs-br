@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { siteConfig } from "@/config/site";
+import { RecentOrdersList } from "@/components/RecentOrdersList";
 
 export function Footer() {
   const year = new Date().getFullYear();
@@ -41,6 +42,9 @@ export function Footer() {
               <li><Link href="/contacto" className="focus-ring rounded hover:text-foreground">Contacto</Link></li>
               <li><Link href="/preguntas-frecuentes" className="focus-ring rounded hover:text-foreground">Preguntas frecuentes</Link></li>
             </ul>
+            <div className="mt-4">
+              <RecentOrdersList />
+            </div>
           </div>
 
           <div>

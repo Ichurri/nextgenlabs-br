@@ -179,6 +179,7 @@ export type Database = {
           discount_code_label: string | null
           id: string
           order_number: string
+          paid_at: string | null
           shipping: number
           status: string
           subtotal: number
@@ -197,6 +198,7 @@ export type Database = {
           discount_code_label?: string | null
           id?: string
           order_number: string
+          paid_at?: string | null
           shipping?: number
           status?: string
           subtotal: number
@@ -215,6 +217,7 @@ export type Database = {
           discount_code_label?: string | null
           id?: string
           order_number?: string
+          paid_at?: string | null
           shipping?: number
           status?: string
           subtotal?: number

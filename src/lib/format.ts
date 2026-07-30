@@ -11,3 +11,16 @@ export function formatPrice(amount: number): string {
   }).format(amount);
   return `${siteConfig.currency} ${formatted}`;
 }
+
+/** Días completos transcurridos desde una fecha ISO hasta `now`. */
+export function daysSince(iso: string, now: Date = new Date()): number {
+  return Math.floor((now.getTime() - new Date(iso).getTime()) / (1000 * 60 * 60 * 24));
+}
+
+/** "hoy", "ayer" o "hace N días" a partir de una fecha ISO. */
+export function formatRelativeDays(iso: string, now: Date = new Date()): string {
+  const diffDays = daysSince(iso, now);
+  if (diffDays <= 0) return "hoy";
+  if (diffDays === 1) return "ayer";
+  return `hace ${diffDays} días`;
+}
