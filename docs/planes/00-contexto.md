@@ -70,17 +70,14 @@ Si alguna de estas aparece en una conversación, anotala y seguí con la fase ac
 - Pasarela de pago / QR dinámico / webhook de confirmación
 - Pagos con tarjeta
 - Facturación electrónica SIN
+- Envío de correos (Resend o similar)
+- Cuentas de usuario / login **del comprador** (el panel del dueño sí tiene login desde la
+  Fase 5.6, pero es una sola credencial compartida, no un sistema de usuarios)
 - Roles y permisos: el panel tiene un único nivel de acceso. Si algún día entra personal con
   permisos distintos, eso es migrar a Supabase Auth y es otra fase
 - API de WhatsApp Business (por `wa.me` **no se puede adjuntar un archivo**; solo se manda el
   link al comprobante)
 - Control de stock real (`inStock` sigue siendo un booleano manual en `products.ts`)
-
-> **Revocado por la Fase 8 (2026-07-30).** Esta lista excluía originalmente "cuentas de
-> usuario / login del comprador" y "envío de correos". Esa exclusión se levantó: la Fase 8
-> agrega cuentas de comprador con Supabase Auth (correo + contraseña, SMTP propio solo para
-> recuperación) sin tocar la invariante de RLS de §5. Detalle completo en
-> `docs/planes/fase-8-cuentas-de-comprador.md`.
 
 ---
 

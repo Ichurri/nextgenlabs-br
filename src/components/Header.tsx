@@ -12,13 +12,11 @@ const navLinks = [
   { href: "/contacto", label: "Contacto" },
 ];
 
-export function Header({ customerEmail }: { customerEmail?: string | null }) {
+export function Header() {
   const items = useCart((s) => s.items);
   const openDrawer = useCart((s) => s.openDrawer);
   const [mobileOpen, setMobileOpen] = useState(false);
   const count = cartCount(items);
-  const accountHref = customerEmail ? "/cuenta/pedidos" : "/cuenta/ingresar";
-  const accountLabel = customerEmail ? "Mi cuenta" : "Ingresar";
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/80 bg-background/80 backdrop-blur-md">
@@ -47,15 +45,6 @@ export function Header({ customerEmail }: { customerEmail?: string | null }) {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Link
-            href={accountHref}
-            aria-label={accountLabel}
-            className="focus-ring hidden items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground transition hover:bg-surface-2 sm:flex"
-          >
-            <AccountIcon />
-            {accountLabel}
-          </Link>
-
           <button
             onClick={openDrawer}
             aria-label="Abrir carrito"
@@ -93,13 +82,6 @@ export function Header({ customerEmail }: { customerEmail?: string | null }) {
                 {link.label}
               </Link>
             ))}
-            <Link
-              href={accountHref}
-              onClick={() => setMobileOpen(false)}
-              className="focus-ring rounded border-b border-border/50 py-3 text-sm font-medium text-muted transition hover:text-foreground"
-            >
-              {accountLabel}
-            </Link>
           </div>
         </nav>
       )}
@@ -113,15 +95,6 @@ function CartIcon() {
       <circle cx="9" cy="21" r="1" />
       <circle cx="20" cy="21" r="1" />
       <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-    </svg>
-  );
-}
-
-function AccountIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-      <circle cx="12" cy="7" r="4" />
     </svg>
   );
 }

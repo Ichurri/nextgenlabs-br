@@ -41,7 +41,6 @@ export function Footer() {
               <li><Link href="/envios" className="focus-ring rounded hover:text-foreground">Envíos</Link></li>
               <li><Link href="/contacto" className="focus-ring rounded hover:text-foreground">Contacto</Link></li>
               <li><Link href="/preguntas-frecuentes" className="focus-ring rounded hover:text-foreground">Preguntas frecuentes</Link></li>
-              <li><Link href="/cuenta/pedidos" className="focus-ring rounded hover:text-foreground">Mis pedidos</Link></li>
             </ul>
             <div className="mt-4">
               <RecentOrdersList />

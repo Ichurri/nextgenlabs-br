@@ -14,36 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      customer_profiles: {
-        Row: {
-          address: string | null
-          city: string | null
-          created_at: string
-          full_name: string
-          phone: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          address?: string | null
-          city?: string | null
-          created_at?: string
-          full_name: string
-          phone: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          address?: string | null
-          city?: string | null
-          created_at?: string
-          full_name?: string
-          phone?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       discount_codes: {
         Row: {
           code: string

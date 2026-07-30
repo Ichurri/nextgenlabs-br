@@ -1,5 +1,10 @@
 # Fase 8 — Cuentas de comprador
 
+> **DESCARTADA el 2026-07-30, sin llegar a producción.** El dueño decidió que el comprador no
+> tenga cuenta: el único usuario del sistema es el administrador. El Bloque A alcanzó a
+> commitearse (`63ecaa4`) y fue revertido; el Bloque B nunca se commiteó. Reemplazada por
+> `fase-9-recibos-desde-whatsapp.md`. Este documento queda como registro de la decisión.
+
 > **Requisito**: leé `00-contexto.md` completo antes de empezar. Este plan no repite lo que
 > está ahí (decisiones del cliente, reglas del dinero, convenciones, cómo se habla con Supabase).
 
