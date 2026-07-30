@@ -13,7 +13,7 @@ import {
 import { formatPrice } from "@/lib/format";
 import { siteConfig } from "@/config/site";
 import { PAYMENT } from "@/config/payment";
-import type { OrderRecord } from "@/lib/orders-data";
+import type { ReceiptData } from "@/lib/orders-data";
 
 // Si alguna vez agregás un test que llame a renderOrderReceiptPdf(), no lo
 // corras bajo el `environment: "jsdom"` de vitest.config.ts: el stream
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
   footerText: { fontSize: 8, color: MUTED, lineHeight: 1.5 },
 });
 
-const STATUS_LABEL: Record<OrderRecord["status"], string> = {
+const STATUS_LABEL: Record<ReceiptData["status"], string> = {
   pending: "Pendiente de pago",
   paid: "Pagado",
   shipped: "Despachado",
@@ -141,7 +141,7 @@ function OrderReceiptDocument({
   logoData,
   qrData,
 }: {
-  order: OrderRecord;
+  order: ReceiptData;
   logoData: Buffer;
   qrData: Buffer;
 }) {
@@ -271,7 +271,7 @@ function OrderReceiptDocument({
  * `renderBrandOgImage()` en brand-og-image.tsx — sin esto los acentos y la
  * ñ salen rotos.
  */
-export async function renderOrderReceiptPdf(order: OrderRecord): Promise<Buffer> {
+export async function renderOrderReceiptPdf(order: ReceiptData): Promise<Buffer> {
   const { logo, qr } = await readImageBuffers();
 
   // Font.register acepta un path local (fontkit.open) además de URL/data-uri;

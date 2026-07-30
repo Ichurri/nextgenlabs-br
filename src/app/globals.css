@@ -17,6 +17,7 @@
   --success-hover: #20bd5a;
   --danger: #f87171;
   --danger-hover: #ef4444;
+  --warning: #eab308;
 }
 
 @theme inline {
@@ -32,6 +33,7 @@
   --color-success-hover: var(--success-hover);
   --color-danger: var(--danger);
   --color-danger-hover: var(--danger-hover);
+  --color-warning: var(--warning);
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 

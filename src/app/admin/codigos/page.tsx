@@ -42,12 +42,20 @@ export default async function AdminCodigosPage() {
           </Link>
           <h1 className="mt-1 text-xl font-semibold">Códigos de descuento</h1>
         </div>
-        <Link
-          href="/admin/codigos/nuevo"
-          className="focus-ring rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent-light"
-        >
-          + Nuevo código
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/admin/codigos/reporte"
+            className="focus-ring rounded-lg border border-border px-4 py-2 text-sm transition hover:bg-surface-2"
+          >
+            Reporte
+          </Link>
+          <Link
+            href="/admin/codigos/nuevo"
+            className="focus-ring rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent-light"
+          >
+            + Nuevo código
+          </Link>
+        </div>
       </div>
 
       <p className="mt-3 max-w-2xl text-xs text-muted">

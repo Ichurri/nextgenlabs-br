@@ -67,25 +67,37 @@ export type Database = {
           code: string
           code_id: string
           created_at: string
+          customer_name: string | null
           discount_amount: number
           id: string
-          order_id: string
+          is_paid: boolean
+          order_id: string | null
+          receipt_number: string | null
+          receipt_total: number | null
         }
         Insert: {
           code: string
           code_id: string
           created_at?: string
+          customer_name?: string | null
           discount_amount: number
           id?: string
-          order_id: string
+          is_paid?: boolean
+          order_id?: string | null
+          receipt_number?: string | null
+          receipt_total?: number | null
         }
         Update: {
           code?: string
           code_id?: string
           created_at?: string
+          customer_name?: string | null
           discount_amount?: number
           id?: string
-          order_id?: string
+          is_paid?: boolean
+          order_id?: string | null
+          receipt_number?: string | null
+          receipt_total?: number | null
         }
         Relationships: [
           {
@@ -270,6 +282,7 @@ export type Database = {
       }
     }
     Functions: {
+      claim_discount_code_use: { Args: { p_code_id: string }; Returns: number }
       create_order: {
         Args: { payload: Json }
         Returns: {

@@ -44,6 +44,29 @@ export type OrderRecord = {
 };
 
 /**
+ * Lo que necesita el PDF del comprobante (ver OrderReceipt.tsx). `OrderRecord`
+ * la satisface tal cual, así que /api/pedido/[token]/comprobante sigue
+ * funcionando sin cambios (Fase 9 §C3) — pero el comprobante que arma el
+ * admin desde /api/admin/recibos nunca tuvo `id` ni `token`: no persiste.
+ */
+export type ReceiptData = Pick<
+  OrderRecord,
+  | "orderNumber"
+  | "createdAt"
+  | "status"
+  | "customerName"
+  | "customerPhone"
+  | "customerCity"
+  | "customerAddress"
+  | "subtotal"
+  | "discount"
+  | "discountCodeLabel"
+  | "shipping"
+  | "total"
+  | "items"
+>;
+
+/**
  * Lee una orden completa por su token. Usado tanto por `/pedido/[token]`
  * (Server Component) como por la Route Handler del comprobante PDF, para no
  * duplicar la consulta a Supabase.
