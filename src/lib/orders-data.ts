@@ -1,6 +1,6 @@
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
-const ORDER_STATUSES = ["pending", "paid", "cancelled"] as const;
+const ORDER_STATUSES = ["pending", "paid", "shipped", "cancelled"] as const;
 export type OrderStatus = (typeof ORDER_STATUSES)[number];
 
 // El CHECK constraint de Postgres garantiza estos tres valores, pero
@@ -37,8 +37,9 @@ export type OrderRecord = {
   total: number;
   discountCode: string | null;
   discountCodeLabel: string | null;
-  status: "pending" | "paid" | "cancelled";
+  status: OrderStatus;
   createdAt: string;
+  paidAt: string | null;
   items: OrderItemRecord[];
 };
 
@@ -81,6 +82,7 @@ export async function getOrderByToken(token: string): Promise<OrderRecord | null
     discountCodeLabel: order.discount_code_label,
     status: parseOrderStatus(order.status),
     createdAt: order.created_at,
+    paidAt: order.paid_at,
     items: (items ?? []).map((item) => ({
       slug: item.slug,
       name: item.name,
