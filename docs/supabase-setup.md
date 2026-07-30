@@ -214,6 +214,43 @@ permita leer tablas (nunca owner).
 
 ---
 
+## Paso 9 — SMTP propio para cuentas de comprador (Fase 8)
+
+> Esto es tuyo, no del agente: son clicks en el dashboard de Supabase y en el
+> de Resend, con tu cuenta y tu dominio. El agente no tiene acceso a
+> ninguno de los dos.
+
+Desde la Fase 8 el sitio tiene cuentas de comprador (correo + contraseña). El
+correo se usa **solo** para recuperar la contraseña — no hay confirmación de
+cuenta por correo (ver más abajo por qué).
+
+1. **Cuenta de Resend**: [resend.com](https://resend.com), tier gratis (3000
+   correos/mes, de sobra para esto).
+2. **Verificá tu dominio de envío** en Resend (agregando los registros SPF y
+   DKIM que te da a tu DNS). Sin esto, los correos de recuperación caen en
+   spam o no salen. Si no tenés acceso al DNS del dominio, **frená y avisale
+   al agente antes de seguir** — no hay forma de mandar correos confiables
+   sin esto.
+3. En el dashboard de Supabase del proyecto **prod** (y de **dev** si querés
+   probar el flujo antes) → **Authentication → SMTP Settings**: cargá el
+   host/usuario/contraseña SMTP que te da Resend.
+4. En la misma sección de Authentication, **traducí al español las
+   plantillas de recuperación de contraseña** ("Reset Password"). El
+   remitente y el asunto tienen que sonar a Nextgen Labs, no a Supabase.
+5. **Authentication → Providers → Email → "Confirm email": desactivalo.**
+   Con la confirmación activa, `signUp()` no devuelve sesión hasta que el
+   comprador abra su correo — y un correo perdido en spam en pleno checkout
+   es una venta perdida. El correo sirve acá solo para recuperar contraseña,
+   no para validar que la persona es quien dice ser (eso lo hace el WhatsApp,
+   que ya se pide en el registro).
+
+No hay nada de código que dependa de que hagas esto ya: el agente sigue con
+el resto de la fase sin esperar. Lo que sí queda roto hasta que lo hagas es
+**la recuperación de contraseña de punta a punta** — probalo mandándote un
+correo a vos mismo antes de darlo por terminado.
+
+---
+
 ## Lo que NO tenés que hacer
 
 - **No corras SQL a mano en el editor web.** Todo el esquema vive en

@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { siteConfig } from "@/config/site";
+import { getCustomer } from "@/lib/customer-dal";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { AgeGate } from "@/components/AgeGate";
@@ -61,11 +62,16 @@ const organizationJsonLd = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Anónimo: getCustomer() no llega a golpear la red (no hay cookie de
+  // sesión que validar). Solo cuesta un round-trip extra a Supabase Auth
+  // cuando hay una cuenta logueada.
+  const customer = await getCustomer();
+
   return (
     <html lang="es" className={`${inter.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-background text-foreground">
@@ -77,7 +83,7 @@ export default function RootLayout({
           Saltar al contenido
         </a>
         <AgeGate />
-        <Header />
+        <Header customerEmail={customer?.email ?? null} />
         <main id="main-content" className="flex-1">
           {children}
         </main>
