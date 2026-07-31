@@ -128,22 +128,32 @@ function formatOrderDate(iso: string): string {
   });
 }
 
+// Formato real del QR: el archivo en PAYMENT.qrImage puede cambiar de
+// extensión (png/jpg) cuando el negocio actualiza sus datos de pago, y
+// react-pdf necesita que `format` coincida con los bytes reales o el PDF
+// sale corrupto — nunca hardcodear "png" acá.
+function qrImageFormat(qrImage: string): "png" | "jpg" {
+  return qrImage.toLowerCase().endsWith(".png") ? "png" : "jpg";
+}
+
 async function readImageBuffers() {
   const [logo, qr] = await Promise.all([
     readFile(join(process.cwd(), "public/logo-pdf.png")),
-    readFile(join(process.cwd(), "public/pago/qr.png")),
+    readFile(join(process.cwd(), "public", PAYMENT.qrImage)),
   ]);
-  return { logo, qr };
+  return { logo, qr, qrFormat: qrImageFormat(PAYMENT.qrImage) };
 }
 
 function OrderReceiptDocument({
   order,
   logoData,
   qrData,
+  qrFormat,
 }: {
   order: ReceiptData;
   logoData: Buffer;
   qrData: Buffer;
+  qrFormat: "png" | "jpg";
 }) {
   return (
     <Document title={`Pedido ${order.orderNumber}`}>
@@ -243,7 +253,7 @@ function OrderReceiptDocument({
             <Text style={styles.value}>Cuenta: {PAYMENT.accountNumber}</Text>
             <View style={{ flexDirection: "row", alignItems: "center", marginTop: 10 }}>
               {/* eslint-disable-next-line jsx-a11y/alt-text -- Image de @react-pdf/renderer, no <img>: no tiene prop alt */}
-              <Image src={{ data: qrData, format: "png" }} style={{ width: 72, height: 72 }} />
+              <Image src={{ data: qrData, format: qrFormat }} style={{ width: 72, height: 72 }} />
               <Text style={[styles.value, { marginLeft: 12, flex: 1 }]}>
                 Enviá la captura de tu pago por WhatsApp al {siteConfig.contact.whatsappDisplay}{" "}
                 junto con tu número de pedido ({order.orderNumber}).
@@ -272,7 +282,7 @@ function OrderReceiptDocument({
  * ñ salen rotos.
  */
 export async function renderOrderReceiptPdf(order: ReceiptData): Promise<Buffer> {
-  const { logo, qr } = await readImageBuffers();
+  const { logo, qr, qrFormat } = await readImageBuffers();
 
   // Font.register acepta un path local (fontkit.open) además de URL/data-uri;
   // a diferencia de next/og (satori), acá no hace falta leer el buffer.
@@ -285,6 +295,6 @@ export async function renderOrderReceiptPdf(order: ReceiptData): Promise<Buffer>
   });
 
   return renderToBuffer(
-    <OrderReceiptDocument order={order} logoData={logo} qrData={qr} />
+    <OrderReceiptDocument order={order} logoData={logo} qrData={qr} qrFormat={qrFormat} />
   );
 }
