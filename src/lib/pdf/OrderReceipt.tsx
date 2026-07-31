@@ -79,22 +79,43 @@ const styles = StyleSheet.create({
   colUnit: { flex: 1.4, textAlign: "right" },
   colTotal: { flex: 1.4, textAlign: "right" },
   tableHeaderText: { color: MUTED, fontSize: 8, fontFamily: "Inter", fontWeight: 700 },
-  totalsBlock: { marginTop: 14, alignSelf: "flex-end", width: 220 },
-  totalsRow: { flexDirection: "row", justifyContent: "space-between", marginTop: 4 },
+  totalsBlock: {
+    marginTop: 20,
+    alignSelf: "flex-end",
+    width: 260,
+    backgroundColor: "#f9fafb",
+    borderWidth: 1,
+    borderColor: BORDER,
+    borderRadius: 6,
+    padding: 14,
+  },
+  totalsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginTop: 6,
+  },
+  // Detalle del código de descuento ("MAFE10 · 10% de descuento"): va como
+  // subtítulo bajo "Descuento", nunca al lado del monto — un código largo
+  // pegado a "−Bsxx" en la misma línea quedaba encimado (ver git blame).
+  totalsRowDetail: { fontSize: 8, color: MUTED, marginTop: 1 },
   grandTotalRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 8,
-    paddingTop: 8,
+    marginTop: 10,
+    paddingTop: 10,
     borderTopWidth: 1,
     borderTopColor: BORDER,
   },
   grandTotalLabel: { fontSize: 12, fontFamily: "Inter", fontWeight: 700 },
   grandTotalValue: { fontSize: 16, fontFamily: "Inter", fontWeight: 700, color: ACCENT },
   footer: {
-    marginTop: 20,
+    marginTop: 24,
     paddingHorizontal: 32,
+    paddingTop: 14,
     paddingBottom: 24,
+    borderTopWidth: 1,
+    borderTopColor: BORDER,
   },
   footerText: { fontSize: 8, color: MUTED, lineHeight: 1.5 },
 });
@@ -195,15 +216,18 @@ function OrderReceiptDocument({
           </View>
 
           <View style={styles.totalsBlock}>
-            <View style={styles.totalsRow}>
+            <View style={[styles.totalsRow, { marginTop: 0 }]}>
               <Text style={styles.label}>Subtotal</Text>
               <Text style={styles.value}>{formatPrice(order.subtotal)}</Text>
             </View>
             {order.discount > 0 && (
               <View style={styles.totalsRow}>
-                <Text style={styles.label}>
-                  Descuento{discountDetail ? ` (${discountDetail})` : ""}
-                </Text>
+                <View>
+                  <Text style={styles.label}>Descuento</Text>
+                  {discountDetail && (
+                    <Text style={styles.totalsRowDetail}>{discountDetail}</Text>
+                  )}
+                </View>
                 <Text style={styles.value}>−{formatPrice(order.discount)}</Text>
               </View>
             )}
