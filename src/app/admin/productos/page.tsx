@@ -4,6 +4,7 @@ import { requireSession } from "@/lib/dal";
 import { getAdminCatalog, type AdminProduct } from "@/lib/products-data";
 import { formatPrice } from "@/lib/format";
 import { ProductArchiveToggle } from "@/components/admin/ProductArchiveToggle";
+import { SortControls } from "@/components/admin/SortControls";
 
 export const metadata: Metadata = {
   title: "Productos | Panel",
@@ -14,7 +15,7 @@ export default async function AdminProductosPage() {
   await requireSession();
   const { products } = await getAdminCatalog();
 
-  const active = products.filter((p) => p.isActive);
+  const active = products.filter((p) => p.isActive).sort((a, b) => a.sortOrder - b.sortOrder);
   const archived = products.filter((p) => !p.isActive);
 
   return (
@@ -46,8 +47,13 @@ export default async function AdminProductosPage() {
         <p className="mt-8 text-sm text-muted">Todavía no creaste ningún producto.</p>
       ) : (
         <ul className="mt-6 divide-y divide-border rounded-xl border border-border bg-surface">
-          {active.map((p) => (
-            <ProductRow key={p.id} product={p} />
+          {active.map((p, i) => (
+            <ProductRow
+              key={p.id}
+              product={p}
+              isFirst={i === 0}
+              isLast={i === active.length - 1}
+            />
           ))}
         </ul>
       )}
@@ -59,7 +65,9 @@ export default async function AdminProductosPage() {
           </summary>
           <ul className="mt-3 divide-y divide-border rounded-xl border border-border bg-surface">
             {archived.map((p) => (
-              <ProductRow key={p.id} product={p} />
+              // isFirst/isLast no importan acá: SortControls no se muestra
+              // para productos archivados.
+              <ProductRow key={p.id} product={p} isFirst isLast />
             ))}
           </ul>
         </details>
@@ -68,7 +76,15 @@ export default async function AdminProductosPage() {
   );
 }
 
-function ProductRow({ product }: { product: AdminProduct }) {
+function ProductRow({
+  product,
+  isFirst,
+  isLast,
+}: {
+  product: AdminProduct;
+  isFirst: boolean;
+  isLast: boolean;
+}) {
   return (
     <li className="flex flex-wrap items-center gap-4 px-4 py-3">
       <div className="min-w-0 flex-1">
@@ -78,6 +94,16 @@ function ProductRow({ product }: { product: AdminProduct }) {
           {product.price > 0 ? formatPrice(product.price) : "A consultar"}
         </p>
       </div>
+      {product.isActive && (
+        <SortControls
+          moveUpUrl={
+            isFirst ? null : `/api/admin/productos/${product.id}?accion=mover&direction=up`
+          }
+          moveDownUrl={
+            isLast ? null : `/api/admin/productos/${product.id}?accion=mover&direction=down`
+          }
+        />
+      )}
       <Link
         href={`/admin/productos/${product.id}/editar`}
         className="focus-ring shrink-0 rounded text-sm text-accent-light hover:underline"

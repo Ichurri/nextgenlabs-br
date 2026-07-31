@@ -7,9 +7,10 @@ import { productFieldsSchema, archiveProductSchema } from "@/lib/product.schema"
 export const runtime = "nodejs";
 
 // ?accion=archivar: solo cambia is_active (archivar o reactivar), sin tocar
-// el resto del producto. Sin ese query param: edición completa del
-// formulario. El slug nunca se escribe acá aunque venga en el body — es
-// inmutable, ver product.schema.ts.
+// el resto del producto. ?accion=mover: intercambia sort_order con el
+// vecino activo (Bloque D, orden global del catálogo — no por categoría).
+// Sin query param: edición completa del formulario. El slug nunca se
+// escribe acá aunque venga en el body — es inmutable, ver product.schema.ts.
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -18,7 +19,49 @@ export async function PATCH(
   if (unauthorized) return unauthorized;
 
   const { id } = await params;
-  const accion = new URL(request.url).searchParams.get("accion");
+  const url = new URL(request.url);
+  const accion = url.searchParams.get("accion");
+
+  if (accion === "mover") {
+    const direction = url.searchParams.get("direction");
+    if (direction !== "up" && direction !== "down") {
+      return NextResponse.json({ error: "Dirección inválida." }, { status: 400 });
+    }
+
+    const { data: products, error: listError } = await supabaseAdmin
+      .from("products")
+      .select("id, sort_order")
+      .eq("is_active", true)
+      .order("sort_order");
+
+    if (listError || !products) {
+      console.error("move_product_list_failed", listError?.code);
+      return NextResponse.json({ error: "No pudimos reordenar." }, { status: 500 });
+    }
+
+    const index = products.findIndex((p) => p.id === id);
+    const neighborIndex = direction === "up" ? index - 1 : index + 1;
+    if (index === -1 || neighborIndex < 0 || neighborIndex >= products.length) {
+      return NextResponse.json({ error: "No se puede mover más." }, { status: 400 });
+    }
+
+    const current = products[index];
+    const neighbor = products[neighborIndex];
+
+    const [{ error: err1 }, { error: err2 }] = await Promise.all([
+      supabaseAdmin.from("products").update({ sort_order: neighbor.sort_order }).eq("id", current.id),
+      supabaseAdmin.from("products").update({ sort_order: current.sort_order }).eq("id", neighbor.id),
+    ]);
+
+    if (err1 || err2) {
+      console.error("move_product_swap_failed", err1?.code, err2?.code);
+      return NextResponse.json({ error: "No pudimos reordenar." }, { status: 500 });
+    }
+
+    revalidateTag("catalog", { expire: 0 });
+    revalidatePath("/admin/productos");
+    return NextResponse.json({ ok: true });
+  }
 
   let body: unknown;
   try {

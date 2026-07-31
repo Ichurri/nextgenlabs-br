@@ -4,9 +4,10 @@ import { useMemo, useState } from "react";
 import { ProductCard } from "@/components/ProductCard";
 import type { Product } from "@/lib/products.types";
 
-type SortKey = "nombre" | "precio-asc" | "precio-desc";
+type SortKey = "catalogo" | "nombre" | "precio-asc" | "precio-desc";
 
 const sortOptions: { value: SortKey; label: string }[] = [
+  { value: "catalogo", label: "Orden del catálogo" },
   { value: "nombre", label: "Nombre (A–Z)" },
   { value: "precio-asc", label: "Precio (menor a mayor)" },
   { value: "precio-desc", label: "Precio (mayor a menor)" },
@@ -21,7 +22,7 @@ export function CatalogClient({
 }) {
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<string>("Todos");
-  const [sort, setSort] = useState<SortKey>("nombre");
+  const [sort, setSort] = useState<SortKey>("catalogo");
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -36,16 +37,20 @@ export function CatalogClient({
       return matchesCategory && matchesQuery;
     });
 
-    result.sort((a, b) => {
-      if (sort === "precio-asc") {
+    // "catalogo": no reordena — `products` ya viene ordenado por sort_order
+    // desde getCatalog() (Fase 10, orden manual del dueño).
+    if (sort === "precio-asc") {
+      result.sort((a, b) => {
         // Precio 0 = "a consultar": va al final, no es el más barato.
         const priceA = a.price === 0 ? Infinity : a.price;
         const priceB = b.price === 0 ? Infinity : b.price;
         return priceA - priceB;
-      }
-      if (sort === "precio-desc") return b.price - a.price;
-      return a.name.localeCompare(b.name, "es");
-    });
+      });
+    } else if (sort === "precio-desc") {
+      result.sort((a, b) => b.price - a.price);
+    } else if (sort === "nombre") {
+      result.sort((a, b) => a.name.localeCompare(b.name, "es"));
+    }
 
     return result;
   }, [products, query, activeCategory, sort]);
