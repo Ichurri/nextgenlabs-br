@@ -7,6 +7,7 @@ import {
   ReceiptCustomerFields,
   type ReceiptCustomerForm,
 } from "@/components/admin/ReceiptCustomerFields";
+import type { Product } from "@/lib/products.types";
 
 const emptyForm: ReceiptCustomerForm = { name: "", phone: "", city: "", address: "", note: "" };
 
@@ -16,7 +17,7 @@ function filenameFromContentDisposition(header: string | null): string {
   return match?.[1] ?? "Comprobante.pdf";
 }
 
-export function ReceiptBuilderForm() {
+export function ReceiptBuilderForm({ products }: { products: Product[] }) {
   const [rawMessage, setRawMessage] = useState("");
   const [parsed, setParsed] = useState(false);
   const [items, setItems] = useState<ReceiptItem[]>([]);
@@ -32,7 +33,7 @@ export function ReceiptBuilderForm() {
   }
 
   function handleParse() {
-    const result = parseOrderMessage(rawMessage);
+    const result = parseOrderMessage(rawMessage, products);
     setItems(result.items);
     setUnmatched(result.unmatched);
     setForm({
@@ -149,6 +150,7 @@ export function ReceiptBuilderForm() {
       </button>
 
       <ReceiptItemsEditor
+        products={products}
         items={items}
         unmatched={unmatched}
         onQuantityChange={updateQuantity}

@@ -1,4 +1,4 @@
-import { products, type Product } from "@/data/products";
+import type { Product } from "@/lib/products.types";
 import { normalizeCode } from "@/lib/discounts";
 
 export type ParsedOrderMessage = {
@@ -27,7 +27,7 @@ export function normalizeText(text: string): string {
     .replace(/\s+/g, " ");
 }
 
-function buildProductIndex() {
+function buildProductIndex(products: Product[]) {
   const byFull = new Map<string, Product>();
   const byName = new Map<string, Product>();
   for (const product of products) {
@@ -62,13 +62,13 @@ function extractField(lines: string[], label: string): string | null {
 
 /**
  * Parser puro del mensaje de WhatsApp pegado por el admin. Nunca adivina un
- * producto: lo que no matchea contra `name + dose` de products.ts va a
+ * producto: lo que no matchea contra `name + dose` del catálogo va a
  * `unmatched` para que el admin lo resuelva a mano. Los montos del mensaje
  * (precios, total) se ignoran del todo — el servidor los recalcula siempre
- * desde products.ts (ver calculateOrderTotals en C3).
+ * desde el catálogo (ver calculateOrderTotals en C3).
  */
-export function parseOrderMessage(text: string): ParsedOrderMessage {
-  const { byFull, byName } = buildProductIndex();
+export function parseOrderMessage(text: string, products: Product[]): ParsedOrderMessage {
+  const { byFull, byName } = buildProductIndex(products);
   const lines = text.split("\n");
 
   const itemsBySlug = new Map<string, number>();

@@ -9,6 +9,7 @@ import { buildOrderWhatsAppUrl } from "@/lib/whatsapp";
 import { WhatsAppCtaButton } from "@/components/WhatsAppCtaButton";
 import { CustomerFields, LOCAL_DELIVERY_CITY } from "@/components/CustomerFields";
 import { useDiscountField } from "@/lib/use-discount-field";
+import { useCatalog } from "@/components/CatalogProvider";
 
 export function CartDrawer() {
   const {
@@ -35,7 +36,8 @@ export function CartDrawer() {
     return () => window.removeEventListener("keydown", onKey);
   }, [isDrawerOpen, closeDrawer]);
 
-  const resolvedItems = resolveCartItems(items);
+  const catalog = useCatalog();
+  const resolvedItems = resolveCartItems(items, catalog);
   const total = cartTotal(resolvedItems);
   const count = cartCount(resolvedItems);
   // La línea "Dirección" del mensaje solo existe para Cochabamba con envío a

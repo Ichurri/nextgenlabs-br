@@ -1,5 +1,5 @@
 import { randomBytes, randomInt } from "node:crypto";
-import { getProductBySlug, isInStock } from "@/data/products";
+import { isInStock, type Catalog } from "@/lib/products.types";
 import { round2 } from "@/lib/money";
 import { SHIPPING } from "@/config/shipping";
 
@@ -25,12 +25,14 @@ export class OrderValidationError extends Error {}
 
 /**
  * Calcula subtotal, descuento, envío y total a partir de `[{ slug, quantity }]`.
- * Pura y sin acceso a red ni a Supabase: lee únicamente `products.ts`. El
- * servidor nunca confía en montos que manda el cliente, así que esta función
- * es la única fuente de verdad para el dinero de un pedido (Fase 5 y 6).
+ * Pura y sin acceso a red ni a Supabase: recibe el catálogo ya resuelto por
+ * el caller (getCatalog(), Fase 10) en vez de leerlo él mismo. El servidor
+ * nunca confía en montos que manda el cliente, así que esta función es la
+ * única fuente de verdad para el dinero de un pedido (Fase 5 y 6).
  */
 export function calculateOrderTotals(
   items: { slug: string; quantity: number }[],
+  catalog: Catalog,
   discount = 0 // la Fase 6 pasa un valor acá; la Fase 5 siempre 0
 ): OrderTotals {
   if (items.length === 0) {
@@ -38,7 +40,7 @@ export function calculateOrderTotals(
   }
 
   const lines: OrderLine[] = items.map((item) => {
-    const product = getProductBySlug(item.slug);
+    const product = catalog.products.find((p) => p.slug === item.slug);
     if (!product) {
       throw new OrderValidationError(`No encontramos el producto "${item.slug}".`);
     }

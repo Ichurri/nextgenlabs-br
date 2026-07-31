@@ -2,22 +2,23 @@ import { describe, expect, it } from "vitest";
 import { parseOrderMessage } from "@/lib/whatsapp-parse";
 import { buildOrderMessage } from "@/lib/whatsapp";
 import type { CartItem } from "@/lib/cart";
+import { fixtureProducts } from "@/lib/__fixtures__/catalog";
 
 const items: CartItem[] = [
   {
-    slug: "tesamorelin",
-    name: "Tesamorelin",
+    slug: "normal",
+    name: "Producto Normal",
     dose: "10 MG",
-    price: 1700,
-    image: "/products/tesamorelin.webp",
+    price: 100,
+    image: "/products/normal.webp",
     quantity: 2,
   },
   {
-    slug: "nad-plus",
-    name: "NAD+",
-    dose: "500 MG",
-    price: 1900,
-    image: "/products/nadplus.webp",
+    slug: "agotado",
+    name: "Producto Agotado",
+    dose: "20 MG",
+    price: 200,
+    image: "/products/agotado.webp",
     quantity: 1,
   },
 ];
@@ -25,11 +26,11 @@ const items: CartItem[] = [
 describe("parseOrderMessage", () => {
   it("mensaje intacto: reconoce los ítems y no encuentra datos del comprador", () => {
     const message = buildOrderMessage(items);
-    const parsed = parseOrderMessage(message);
+    const parsed = parseOrderMessage(message, fixtureProducts);
 
     expect(parsed.items).toEqual([
-      { slug: "tesamorelin", quantity: 2 },
-      { slug: "nad-plus", quantity: 1 },
+      { slug: "normal", quantity: 2 },
+      { slug: "agotado", quantity: 1 },
     ]);
     expect(parsed.unmatched).toEqual([]);
     expect(parsed.code).toBeNull();
@@ -46,11 +47,11 @@ describe("parseOrderMessage", () => {
       address: "Av. Siempre Viva 123",
     });
 
-    const parsed = parseOrderMessage(message);
+    const parsed = parseOrderMessage(message, fixtureProducts);
 
     expect(parsed.items).toEqual([
-      { slug: "tesamorelin", quantity: 2 },
-      { slug: "nad-plus", quantity: 1 },
+      { slug: "normal", quantity: 2 },
+      { slug: "agotado", quantity: 1 },
     ]);
     expect(parsed.code).toBe("MAFE10");
     expect(parsed.name).toBe("Carla Comprador");
@@ -59,39 +60,42 @@ describe("parseOrderMessage", () => {
   });
 
   it("sin código: code queda null", () => {
-    const parsed = parseOrderMessage(buildOrderMessage(items));
+    const parsed = parseOrderMessage(buildOrderMessage(items), fixtureProducts);
     expect(parsed.code).toBeNull();
   });
 
   it("producto reescrito a mano (otra capitalización y espacios): igual matchea", () => {
-    const parsed = parseOrderMessage("•   tesamorelin   10  mg  x1 — Bs 1700");
-    expect(parsed.items).toEqual([{ slug: "tesamorelin", quantity: 1 }]);
+    const parsed = parseOrderMessage(
+      "•   producto normal   10  mg  x1 — Bs 100",
+      fixtureProducts
+    );
+    expect(parsed.items).toEqual([{ slug: "normal", quantity: 1 }]);
     expect(parsed.unmatched).toEqual([]);
   });
 
   it("x2 pegado sin espacio: igual reconoce la cantidad", () => {
-    const parsed = parseOrderMessage("• Tesamorelin 10 MGx2 — Bs 3400");
-    expect(parsed.items).toEqual([{ slug: "tesamorelin", quantity: 2 }]);
+    const parsed = parseOrderMessage("• Producto Normal 10 MGx2 — Bs 200", fixtureProducts);
+    expect(parsed.items).toEqual([{ slug: "normal", quantity: 2 }]);
   });
 
   it("dosis omitida: matchea por nombre solo", () => {
-    const parsed = parseOrderMessage("• Tesamorelin x1 — Bs 1700");
-    expect(parsed.items).toEqual([{ slug: "tesamorelin", quantity: 1 }]);
+    const parsed = parseOrderMessage("• Producto Normal x1 — Bs 100", fixtureProducts);
+    expect(parsed.items).toEqual([{ slug: "normal", quantity: 1 }]);
   });
 
   it("bullet cambiado de • a -: lo sigue reconociendo como ítem", () => {
-    const parsed = parseOrderMessage("- Tesamorelin 10 MG x1 — Bs 1700");
-    expect(parsed.items).toEqual([{ slug: "tesamorelin", quantity: 1 }]);
+    const parsed = parseOrderMessage("- Producto Normal 10 MG x1 — Bs 100", fixtureProducts);
+    expect(parsed.items).toEqual([{ slug: "normal", quantity: 1 }]);
   });
 
   it("un producto que no existe en el catálogo va a unmatched, no se adivina", () => {
-    const parsed = parseOrderMessage("• Colágeno en polvo x1 — Bs 200");
+    const parsed = parseOrderMessage("• Colágeno en polvo x1 — Bs 200", fixtureProducts);
     expect(parsed.items).toEqual([]);
     expect(parsed.unmatched).toEqual(["• Colágeno en polvo x1 — Bs 200"]);
   });
 
   it("texto que no es un pedido: todo queda vacío, sin tirar error", () => {
-    const parsed = parseOrderMessage("Hola, ¿tienen envíos a Sucre?");
+    const parsed = parseOrderMessage("Hola, ¿tienen envíos a Sucre?", fixtureProducts);
     expect(parsed).toEqual({
       items: [],
       unmatched: [],
@@ -104,8 +108,9 @@ describe("parseOrderMessage", () => {
 
   it("suma cantidades cuando el mismo producto aparece en dos líneas", () => {
     const parsed = parseOrderMessage(
-      "• Tesamorelin 10 MG x1 — Bs 1700\n• Tesamorelin 10 MG x2 — Bs 3400"
+      "• Producto Normal 10 MG x1 — Bs 100\n• Producto Normal 10 MG x2 — Bs 200",
+      fixtureProducts
     );
-    expect(parsed.items).toEqual([{ slug: "tesamorelin", quantity: 3 }]);
+    expect(parsed.items).toEqual([{ slug: "normal", quantity: 3 }]);
   });
 });

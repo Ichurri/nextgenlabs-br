@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { getProductBySlug, getRelatedProducts, isInStock, products } from "@/data/products";
+import { getCatalog, getProductBySlug, getRelatedProducts } from "@/lib/products-data";
+import { isInStock } from "@/lib/products.types";
 import { formatPrice } from "@/lib/format";
 import { AddToCartControls } from "@/components/AddToCartControls";
 import { ProductCard } from "@/components/ProductCard";
@@ -10,7 +11,8 @@ import { ProductCoaViewer } from "@/components/ProductCoaViewer";
 import { WhatsAppCtaButton } from "@/components/WhatsAppCtaButton";
 import { buildWhatsAppUrl, siteConfig } from "@/config/site";
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const { products } = await getCatalog();
   return products.map((p) => ({ slug: p.slug }));
 }
 
@@ -20,7 +22,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const product = await getProductBySlug(slug);
   if (!product) return { title: "Producto no encontrado" };
   return {
     title: `${product.name} ${product.dose}`,
@@ -35,11 +37,11 @@ export default async function ProductPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const product = await getProductBySlug(slug);
   if (!product) notFound();
 
   const inStock = isInStock(product);
-  const relatedProducts = getRelatedProducts(product);
+  const relatedProducts = await getRelatedProducts(product);
 
   const productJsonLd = {
     "@context": "https://schema.org",

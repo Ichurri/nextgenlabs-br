@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { ProductCard } from "@/components/ProductCard";
-import { categories, type Product } from "@/data/products";
+import type { Product } from "@/lib/products.types";
 
 type SortKey = "nombre" | "precio-asc" | "precio-desc";
 
@@ -12,7 +12,13 @@ const sortOptions: { value: SortKey; label: string }[] = [
   { value: "precio-desc", label: "Precio (mayor a menor)" },
 ];
 
-export function CatalogClient({ products }: { products: Product[] }) {
+export function CatalogClient({
+  products,
+  categories,
+}: {
+  products: Product[];
+  categories: string[];
+}) {
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<string>("Todos");
   const [sort, setSort] = useState<SortKey>("nombre");

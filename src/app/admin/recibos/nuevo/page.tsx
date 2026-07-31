@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { requireSession } from "@/lib/dal";
 import { ReceiptBuilderForm } from "@/components/admin/ReceiptBuilderForm";
+import { getAdminCatalog } from "@/lib/products-data";
 
 export const metadata: Metadata = {
   title: "Nuevo comprobante | Panel",
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
 
 export default async function NuevoReciboPage() {
   await requireSession();
+  const { products } = await getAdminCatalog();
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10">
@@ -22,7 +24,7 @@ export default async function NuevoReciboPage() {
         entendimos y generá el PDF. No se guarda ningún pedido en el sistema.
       </p>
       <div className="mt-6">
-        <ReceiptBuilderForm />
+        <ReceiptBuilderForm products={products} />
       </div>
     </div>
   );

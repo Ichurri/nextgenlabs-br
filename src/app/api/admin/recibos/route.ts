@@ -7,6 +7,7 @@ import { normalizeCode, evaluateDiscount, mapDiscountCodeRow, type DiscountCode 
 import { renderOrderReceiptPdf } from "@/lib/pdf/OrderReceipt";
 import type { ReceiptData } from "@/lib/orders-data";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { getCatalog } from "@/lib/products-data";
 
 // @react-pdf/renderer no corre en Edge.
 export const runtime = "nodejs";
@@ -47,11 +48,12 @@ export async function POST(request: Request) {
   const { items, customer, discountCode: rawDiscountCode, isPaid } = parsed.data;
 
   // El servidor jamás confía en montos que vengan del body: acá se
-  // recalcula todo desde products.ts. Primera pasada sin descuento: hace
+  // recalcula todo desde el catálogo. Primera pasada sin descuento: hace
   // falta el subtotal crudo para evaluar el código contra min_order_total.
+  const catalog = await getCatalog();
   let baseTotals;
   try {
-    baseTotals = calculateOrderTotals(items);
+    baseTotals = calculateOrderTotals(items, catalog);
   } catch (error) {
     if (error instanceof OrderValidationError) {
       return NextResponse.json({ error: error.message }, { status: 400 });
@@ -90,7 +92,7 @@ export async function POST(request: Request) {
 
   // Segunda pasada: con el descuento evaluado, para que el umbral de envío
   // gratis se calcule sobre subtotal-después-de-descuento.
-  const totals = calculateOrderTotals(items, discountAmount);
+  const totals = calculateOrderTotals(items, catalog, discountAmount);
   const orderNumber = generateOrderNumber();
 
   // Reclama el uso ANTES de renderizar: si el código se agotó entre la

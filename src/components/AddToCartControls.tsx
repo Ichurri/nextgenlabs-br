@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useCart } from "@/lib/cart";
-import type { Product } from "@/data/products";
+import type { Product } from "@/lib/products.types";
 import { QtyStepper } from "@/components/CartDrawer";
 
 export function AddToCartControls({ product }: { product: Product }) {

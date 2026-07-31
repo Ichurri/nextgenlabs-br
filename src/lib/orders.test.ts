@@ -5,110 +5,65 @@ import {
   generateToken,
   OrderValidationError,
 } from "@/lib/orders";
-
-vi.mock("@/data/products", () => {
-  const products = [
-    {
-      slug: "a",
-      name: "Producto A",
-      dose: "10 MG",
-      price: 100,
-      purity: "≥99% HPLC",
-      form: "Liofilizado",
-      category: "Péptidos",
-      image: "/a.webp",
-      highlights: [],
-    },
-    {
-      slug: "b",
-      name: "Producto B",
-      dose: "5 MG",
-      price: 50,
-      purity: "≥99% HPLC",
-      form: "Liofilizado",
-      category: "Péptidos",
-      image: "/b.webp",
-      highlights: [],
-    },
-    {
-      slug: "consulta",
-      name: "Producto a consultar",
-      dose: "1 MG",
-      price: 0,
-      purity: "≥99% HPLC",
-      form: "Liofilizado",
-      category: "Otros",
-      image: "/c.webp",
-      highlights: [],
-    },
-    {
-      slug: "agotado",
-      name: "Producto Agotado",
-      dose: "20 MG",
-      price: 200,
-      purity: "≥99% HPLC",
-      form: "Liofilizado",
-      category: "Otros",
-      image: "/d.webp",
-      highlights: [],
-      inStock: false,
-    },
-  ];
-  return {
-    getProductBySlug: (slug: string) => products.find((p) => p.slug === slug),
-    isInStock: (product: { inStock?: boolean }) => product.inStock !== false,
-  };
-});
+import { fixtureCatalog } from "@/lib/__fixtures__/catalog";
 
 describe("calculateOrderTotals", () => {
   it("calcula un ítem con cantidad 1", () => {
-    const totals = calculateOrderTotals([{ slug: "a", quantity: 1 }]);
+    const totals = calculateOrderTotals([{ slug: "normal", quantity: 1 }], fixtureCatalog);
     expect(totals.subtotal).toBe(100);
     expect(totals.lines).toHaveLength(1);
-    expect(totals.lines[0]).toMatchObject({ slug: "a", unitPrice: 100, quantity: 1, lineTotal: 100 });
+    expect(totals.lines[0]).toMatchObject({
+      slug: "normal",
+      unitPrice: 100,
+      quantity: 1,
+      lineTotal: 100,
+    });
   });
 
-  it("suma varios ítems distintos", () => {
-    const totals = calculateOrderTotals([
-      { slug: "a", quantity: 1 },
-      { slug: "b", quantity: 1 },
-    ]);
-    expect(totals.subtotal).toBe(150);
+  it("suma varias líneas del carrito", () => {
+    const totals = calculateOrderTotals(
+      [
+        { slug: "normal", quantity: 1 },
+        { slug: "normal", quantity: 1 },
+      ],
+      fixtureCatalog
+    );
+    expect(totals.subtotal).toBe(200);
     expect(totals.lines).toHaveLength(2);
   });
 
   it("multiplica precio x cantidad cuando la cantidad es mayor a 1", () => {
-    const totals = calculateOrderTotals([{ slug: "a", quantity: 3 }]);
+    const totals = calculateOrderTotals([{ slug: "normal", quantity: 3 }], fixtureCatalog);
     expect(totals.lines[0].lineTotal).toBe(300);
     expect(totals.subtotal).toBe(300);
   });
 
   it("rechaza un slug inexistente", () => {
-    expect(() => calculateOrderTotals([{ slug: "no-existe", quantity: 1 }])).toThrow(
-      OrderValidationError
-    );
+    expect(() =>
+      calculateOrderTotals([{ slug: "no-existe", quantity: 1 }], fixtureCatalog)
+    ).toThrow(OrderValidationError);
   });
 
   it("rechaza un producto con price === 0", () => {
-    expect(() => calculateOrderTotals([{ slug: "consulta", quantity: 1 }])).toThrow(
-      OrderValidationError
-    );
+    expect(() =>
+      calculateOrderTotals([{ slug: "consulta", quantity: 1 }], fixtureCatalog)
+    ).toThrow(OrderValidationError);
   });
 
-  it("rechaza un producto agotado (inStock: false)", () => {
-    expect(() => calculateOrderTotals([{ slug: "agotado", quantity: 1 }])).toThrow(
-      OrderValidationError
-    );
+  it("rechaza un producto agotado (stockQty <= 0)", () => {
+    expect(() =>
+      calculateOrderTotals([{ slug: "agotado", quantity: 1 }], fixtureCatalog)
+    ).toThrow(OrderValidationError);
   });
 
   it("suma el envío al total", () => {
-    const totals = calculateOrderTotals([{ slug: "a", quantity: 1 }]);
+    const totals = calculateOrderTotals([{ slug: "normal", quantity: 1 }], fixtureCatalog);
     expect(totals.total).toBe(round2(totals.subtotal - totals.discount + totals.shipping));
     expect(totals.shipping).toBeGreaterThan(0);
   });
 
   it("el descuento nunca supera el subtotal y el total nunca baja del costo de envío", () => {
-    const totals = calculateOrderTotals([{ slug: "b", quantity: 1 }], 999999);
+    const totals = calculateOrderTotals([{ slug: "normal", quantity: 1 }], fixtureCatalog, 999999);
     expect(totals.discount).toBe(totals.subtotal);
     expect(totals.total).toBe(totals.shipping);
   });
@@ -124,7 +79,7 @@ describe("calculateOrderTotals — umbral de envío gratis", () => {
       SHIPPING: { nationalCost: 30, freeOver: 100, label: "Envío nacional" },
     }));
     const { calculateOrderTotals: calc } = await import("@/lib/orders");
-    const totals = calc([{ slug: "a", quantity: 1 }]); // subtotal 100 === freeOver
+    const totals = calc([{ slug: "normal", quantity: 1 }], fixtureCatalog); // subtotal 100 === freeOver
     expect(totals.shipping).toBe(0);
   });
 
@@ -133,7 +88,7 @@ describe("calculateOrderTotals — umbral de envío gratis", () => {
       SHIPPING: { nationalCost: 30, freeOver: 500, label: "Envío nacional" },
     }));
     const { calculateOrderTotals: calc } = await import("@/lib/orders");
-    const totals = calc([{ slug: "a", quantity: 1 }]); // subtotal 100 < freeOver
+    const totals = calc([{ slug: "normal", quantity: 1 }], fixtureCatalog); // subtotal 100 < freeOver
     expect(totals.shipping).toBe(30);
   });
 
@@ -142,9 +97,9 @@ describe("calculateOrderTotals — umbral de envío gratis", () => {
       SHIPPING: { nationalCost: 30, freeOver: 100, label: "Envío nacional" },
     }));
     const { calculateOrderTotals: calc } = await import("@/lib/orders");
-    // subtotal crudo 150 ≥ freeOver, pero 150 - 60 = 90 < freeOver: se cobra envío.
-    const totals = calc([{ slug: "a", quantity: 1 }, { slug: "b", quantity: 1 }], 60);
-    expect(totals.subtotal).toBe(150);
+    // subtotal crudo 200 ≥ freeOver, pero 200 - 150 = 50 < freeOver: se cobra envío.
+    const totals = calc([{ slug: "normal", quantity: 2 }], fixtureCatalog, 150);
+    expect(totals.subtotal).toBe(200);
     expect(totals.shipping).toBe(30);
   });
 });

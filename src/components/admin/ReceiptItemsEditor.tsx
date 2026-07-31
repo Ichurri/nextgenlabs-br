@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { getProductBySlug, products } from "@/data/products";
+import type { Product } from "@/lib/products.types";
 import { formatPrice } from "@/lib/format";
 import { normalizeText } from "@/lib/whatsapp-parse";
 import { QtyStepper } from "@/components/CartDrawer";
@@ -9,6 +9,7 @@ import { QtyStepper } from "@/components/CartDrawer";
 export type ReceiptItem = { slug: string; quantity: number };
 
 type Props = {
+  products: Product[];
   items: ReceiptItem[];
   unmatched: string[];
   onQuantityChange: (slug: string, quantity: number) => void;
@@ -17,7 +18,14 @@ type Props = {
 };
 
 /** Ítems reconocidos del mensaje + buscador para agregar los que faltaron. */
-export function ReceiptItemsEditor({ items, unmatched, onQuantityChange, onRemove, onAdd }: Props) {
+export function ReceiptItemsEditor({
+  products,
+  items,
+  unmatched,
+  onQuantityChange,
+  onRemove,
+  onAdd,
+}: Props) {
   const [search, setSearch] = useState("");
 
   const matches =
@@ -38,7 +46,7 @@ export function ReceiptItemsEditor({ items, unmatched, onQuantityChange, onRemov
         ) : (
           <ul className="divide-y divide-border rounded-lg border border-border">
             {items.map((item) => {
-              const product = getProductBySlug(item.slug);
+              const product = products.find((p) => p.slug === item.slug);
               return (
                 <li key={item.slug} className="flex items-center justify-between gap-3 px-4 py-3">
                   <div className="min-w-0">

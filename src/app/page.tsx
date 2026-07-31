@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Hero } from "@/components/Hero";
 import { ProductCard } from "@/components/ProductCard";
-import { getFeaturedProducts } from "@/data/products";
+import { getFeaturedProducts } from "@/lib/products-data";
 import { siteConfig } from "@/config/site";
 
 const trustCards = [
@@ -22,8 +22,8 @@ const trustCards = [
   },
 ];
 
-export default function HomePage() {
-  const featured = getFeaturedProducts();
+export default async function HomePage() {
+  const featured = await getFeaturedProducts();
 
   return (
     <>

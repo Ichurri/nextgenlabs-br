@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { isInStock, type Product } from "@/data/products";
+import { isInStock, type Product } from "@/lib/products.types";
 import { useCart } from "@/lib/cart";
 import { formatPrice } from "@/lib/format";
 import { buildWhatsAppUrl } from "@/config/site";

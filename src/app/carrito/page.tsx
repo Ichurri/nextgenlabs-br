@@ -9,6 +9,7 @@ import { QtyStepper } from "@/components/CartDrawer";
 import { WhatsAppCtaButton } from "@/components/WhatsAppCtaButton";
 import { CustomerFields, LOCAL_DELIVERY_CITY } from "@/components/CustomerFields";
 import { useDiscountField } from "@/lib/use-discount-field";
+import { useCatalog } from "@/components/CatalogProvider";
 
 export default function CarritoPage() {
   const {
@@ -25,7 +26,8 @@ export default function CarritoPage() {
     customerAddress,
     setCustomerAddress,
   } = useCart();
-  const resolvedItems = resolveCartItems(items);
+  const catalog = useCatalog();
+  const resolvedItems = resolveCartItems(items, catalog);
   const total = cartTotal(resolvedItems);
   // La línea "Dirección" del mensaje solo existe para Cochabamba con envío a
   // domicilio elegido — ver el comentario en OrderMessageDetails (whatsapp.ts).

@@ -9,6 +9,8 @@ import { AgeGate } from "@/components/AgeGate";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { CartDrawer } from "@/components/CartDrawer";
 import { CartToast } from "@/components/CartToast";
+import { CatalogProvider } from "@/components/CatalogProvider";
+import { getCatalog } from "@/lib/products-data";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -61,11 +63,13 @@ const organizationJsonLd = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const catalog = await getCatalog();
+
   return (
     <html lang="es" className={`${inter.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-background text-foreground">
@@ -73,18 +77,20 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
         />
-        <a href="#main-content" className="skip-link">
-          Saltar al contenido
-        </a>
-        <AgeGate />
-        <Header />
-        <main id="main-content" className="flex-1">
-          {children}
-        </main>
-        <Footer />
-        <WhatsAppButton />
-        <CartDrawer />
-        <CartToast />
+        <CatalogProvider catalog={catalog}>
+          <a href="#main-content" className="skip-link">
+            Saltar al contenido
+          </a>
+          <AgeGate />
+          <Header />
+          <main id="main-content" className="flex-1">
+            {children}
+          </main>
+          <Footer />
+          <WhatsAppButton />
+          <CartDrawer />
+          <CartToast />
+        </CatalogProvider>
         <Analytics />
       </body>
     </html>

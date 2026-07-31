@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { CatalogClient } from "@/components/CatalogClient";
 import { ApplyCodeFromUrl } from "@/components/ApplyCodeFromUrl";
-import { products } from "@/data/products";
+import { getCatalog } from "@/lib/products-data";
 
 export const metadata: Metadata = {
   title: "Catálogo",
@@ -15,6 +15,7 @@ export default async function CatalogoPage({
   searchParams: Promise<{ codigo?: string }>;
 }) {
   const { codigo } = await searchParams;
+  const { products, categories } = await getCatalog();
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
@@ -33,7 +34,7 @@ export default async function CatalogoPage({
         </p>
       </header>
 
-      <CatalogClient products={products} />
+      <CatalogClient products={products} categories={categories} />
     </div>
   );
 }

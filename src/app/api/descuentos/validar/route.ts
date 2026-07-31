@@ -4,6 +4,7 @@ import { orderItemInputSchema } from "@/lib/orders.schema";
 import { calculateOrderTotals, OrderValidationError } from "@/lib/orders";
 import { normalizeCode, evaluateDiscount, mapDiscountCodeRow } from "@/lib/discounts";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { getCatalog } from "@/lib/products-data";
 
 export const runtime = "nodejs";
 
@@ -34,7 +35,8 @@ export async function POST(request: Request) {
   // incluso acá donde "solo es para mostrar".
   let subtotal: number;
   try {
-    subtotal = calculateOrderTotals(parsed.data.items).subtotal;
+    const catalog = await getCatalog();
+    subtotal = calculateOrderTotals(parsed.data.items, catalog).subtotal;
   } catch (error) {
     if (error instanceof OrderValidationError) {
       return NextResponse.json({ error: error.message }, { status: 400 });

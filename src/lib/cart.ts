@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { getProductBySlug, isInStock, type Product } from "@/data/products";
+import { isInStock, type Catalog, type Product } from "@/lib/products.types";
 
 export type CartItem = {
   slug: string;
@@ -157,16 +157,18 @@ export function cartTotal(items: CartItem[]): number {
 export type ResolvedCartItem = CartItem & { inStock: boolean };
 
 /**
- * Resuelve los ítems del carrito contra `products.ts`: el `price` (y nombre,
+ * Resuelve los ítems del carrito contra el catálogo: el `price` (y nombre,
  * dosis, imagen) que devuelve es siempre el actual, no el snapshot que
  * zustand guardó en localStorage cuando se agregó el producto. Descarta los
  * slugs que ya no existen en el catálogo (productos discontinuados). Se usa
  * en todo lugar donde se muestra el carrito — CartDrawer, /carrito,
- * CheckoutForm — para que el total nunca quede desactualizado.
+ * CheckoutForm — para que el total nunca quede desactualizado. El catálogo
+ * se lee del CatalogProvider (useCatalog()), nunca se importa acá: este
+ * archivo corre en el navegador y no puede tocar supabaseAdmin.
  */
-export function resolveCartItems(items: CartItem[]): ResolvedCartItem[] {
+export function resolveCartItems(items: CartItem[], catalog: Catalog): ResolvedCartItem[] {
   return items.reduce<ResolvedCartItem[]>((resolved, item) => {
-    const product = getProductBySlug(item.slug);
+    const product = catalog.products.find((p) => p.slug === item.slug);
     if (!product) return resolved;
     resolved.push({
       slug: product.slug,
