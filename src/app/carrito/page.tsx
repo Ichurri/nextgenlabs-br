@@ -7,7 +7,7 @@ import { formatPrice } from "@/lib/format";
 import { buildOrderWhatsAppUrl } from "@/lib/whatsapp";
 import { QtyStepper } from "@/components/CartDrawer";
 import { WhatsAppCtaButton } from "@/components/WhatsAppCtaButton";
-import { CustomerFields } from "@/components/CustomerFields";
+import { CustomerFields, LOCAL_DELIVERY_CITY } from "@/components/CustomerFields";
 import { useDiscountField } from "@/lib/use-discount-field";
 
 export default function CarritoPage() {
@@ -20,9 +20,17 @@ export default function CarritoPage() {
     setCustomerName,
     customerCity,
     setCustomerCity,
+    customerWantsDelivery,
+    setCustomerWantsDelivery,
+    customerAddress,
+    setCustomerAddress,
   } = useCart();
   const resolvedItems = resolveCartItems(items);
   const total = cartTotal(resolvedItems);
+  // La línea "Dirección" del mensaje solo existe para Cochabamba con envío a
+  // domicilio elegido — ver el comentario en OrderMessageDetails (whatsapp.ts).
+  const messageAddress =
+    customerCity === LOCAL_DELIVERY_CITY && customerWantsDelivery ? customerAddress : undefined;
 
   // El auto-apply de `?codigo=` lo hace CartDrawer (siempre montado en el
   // layout, ver use-discount-field.ts): acá solo se lee/edita el estado
@@ -128,6 +136,10 @@ export default function CarritoPage() {
                   onNameChange={setCustomerName}
                   city={customerCity}
                   onCityChange={setCustomerCity}
+                  wantsDelivery={customerWantsDelivery}
+                  onWantsDeliveryChange={setCustomerWantsDelivery}
+                  address={customerAddress}
+                  onAddressChange={setCustomerAddress}
                 />
               </div>
 
@@ -207,6 +219,7 @@ export default function CarritoPage() {
                     discountCode: appliedDiscount?.code,
                     name: customerName,
                     city: customerCity,
+                    address: messageAddress,
                   })}
                   label="Finalizar pedido por WhatsApp"
                   variant="solid"

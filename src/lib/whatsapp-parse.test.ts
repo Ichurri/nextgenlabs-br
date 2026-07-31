@@ -43,7 +43,8 @@ describe("parseOrderMessage", () => {
       discountCode: "MAFE10",
       name: "Carla Comprador",
       city: "Santa Cruz",
-    }).replace("Dirección:", "Dirección: Av. Siempre Viva 123");
+      address: "Av. Siempre Viva 123",
+    });
 
     const parsed = parseOrderMessage(message);
 

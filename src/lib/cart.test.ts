@@ -53,6 +53,8 @@ beforeEach(() => {
     appliedCode: null,
     customerName: "",
     customerCity: "",
+    customerWantsDelivery: false,
+    customerAddress: "",
   });
 });
 
@@ -167,6 +169,25 @@ describe("useCart", () => {
     expect(useCart.getState().items).toHaveLength(0);
     expect(useCart.getState().customerName).toBe("Juan Pérez");
     expect(useCart.getState().customerCity).toBe("La Paz");
+  });
+
+  it("setCustomerWantsDelivery y setCustomerAddress guardan la elección de envío", () => {
+    useCart.getState().setCustomerWantsDelivery(true);
+    useCart.getState().setCustomerAddress("Av. América #123");
+
+    const { customerWantsDelivery, customerAddress } = useCart.getState();
+    expect(customerWantsDelivery).toBe(true);
+    expect(customerAddress).toBe("Av. América #123");
+  });
+
+  it("clear NO borra la elección de envío ni la dirección", () => {
+    useCart.getState().addItem(makeProduct());
+    useCart.getState().setCustomerWantsDelivery(true);
+    useCart.getState().setCustomerAddress("Av. América #123");
+    useCart.getState().clear();
+
+    expect(useCart.getState().customerWantsDelivery).toBe(true);
+    expect(useCart.getState().customerAddress).toBe("Av. América #123");
   });
 });
 

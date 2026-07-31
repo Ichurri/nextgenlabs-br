@@ -11,6 +11,15 @@ export type OrderMessageDetails = {
   /** Del formulario de "Tus datos" en el carrito (Fase 9.1). Vacío u omitido → etiqueta en blanco, como antes. */
   name?: string | null;
   city?: string | null;
+  /**
+   * Solo Cochabamba ofrece elegir entre envío a domicilio y recojo (ver
+   * CustomerFields.tsx); en el resto de las ciudades no existe el concepto
+   * de dirección local. Por eso la línea "Dirección:" no es como
+   * Nombre/Ciudad (blanco vs. completo): se omite del todo salvo que el
+   * caller pase explícitamente un valor — `undefined`/`null` la saca por
+   * completo, `""` la deja en blanco para completar a mano.
+   */
+  address?: string | null;
 };
 
 /**
@@ -19,7 +28,7 @@ export type OrderMessageDetails = {
  * antes de enviarlo — el admin lo pega en el panel y `parseOrderMessage()`
  * solo reconoce las líneas "• nombre dosis xN", la del código y las de
  * datos; los precios y el total son informativos, el parser los ignora.
- * Ejemplo de salida (con nombre y ciudad ya completados en el carrito):
+ * Ejemplo de salida (con nombre, ciudad y envío a domicilio en Cochabamba):
  *
  *   Hola Nextgen Labs, quiero hacer un pedido:
  *
@@ -32,8 +41,8 @@ export type OrderMessageDetails = {
  *
  *   Mis datos:
  *   Nombre: Juan Pérez
- *   Ciudad: La Paz
- *   Dirección:
+ *   Ciudad: Cochabamba
+ *   Dirección: Av. América #123
  */
 export function buildOrderMessage(items: CartItem[], details: OrderMessageDetails = {}): string {
   const lines = items.map((i) => {
@@ -44,6 +53,8 @@ export function buildOrderMessage(items: CartItem[], details: OrderMessageDetail
   const total = formatPrice(cartTotal(items));
   const name = details.name?.trim();
   const city = details.city?.trim();
+  const showAddress = details.address !== undefined && details.address !== null;
+  const address = details.address?.trim();
 
   return [
     `Hola ${siteConfig.name}, quiero hacer un pedido:`,
@@ -56,7 +67,7 @@ export function buildOrderMessage(items: CartItem[], details: OrderMessageDetail
     "Mis datos:",
     name ? `Nombre: ${name}` : "Nombre:",
     city ? `Ciudad: ${city}` : "Ciudad:",
-    "Dirección:",
+    ...(showAddress ? [address ? `Dirección: ${address}` : "Dirección:"] : []),
     "",
   ].join("\n");
 }

@@ -36,6 +36,12 @@ type CartState = {
   // siempre, para completar a mano dentro de WhatsApp.
   customerName: string;
   customerCity: string;
+  // Solo tiene sentido cuando customerCity === "Cochabamba" (ver
+  // CustomerFields.tsx): en el resto de las ciudades no se ofrece elegir
+  // entre envío a domicilio y recojo, así que estos dos campos quedan sin
+  // usar — buildOrderMessage() los ignora salvo en ese caso puntual.
+  customerWantsDelivery: boolean;
+  customerAddress: string;
   addItem: (product: Product, quantity?: number) => void;
   removeItem: (slug: string) => void;
   setQuantity: (slug: string, quantity: number) => void;
@@ -48,6 +54,8 @@ type CartState = {
   clearAppliedCode: () => void;
   setCustomerName: (name: string) => void;
   setCustomerCity: (city: string) => void;
+  setCustomerWantsDelivery: (wantsDelivery: boolean) => void;
+  setCustomerAddress: (address: string) => void;
 };
 
 export const useCart = create<CartState>()(
@@ -61,6 +69,8 @@ export const useCart = create<CartState>()(
       appliedCode: null,
       customerName: "",
       customerCity: "",
+      customerWantsDelivery: false,
+      customerAddress: "",
 
       // Añadir NO abre el carrito: solo acumula el ítem y dispara un aviso breve.
       // El carrito se abre únicamente cuando el usuario pulsa el ícono del carrito.
@@ -114,18 +124,22 @@ export const useCart = create<CartState>()(
       clearAppliedCode: () => set({ appliedCode: null }),
       setCustomerName: (name) => set({ customerName: name }),
       setCustomerCity: (city) => set({ customerCity: city }),
+      setCustomerWantsDelivery: (wantsDelivery) => set({ customerWantsDelivery: wantsDelivery }),
+      setCustomerAddress: (address) => set({ customerAddress: address }),
     }),
     {
       name: "nextgen-cart",
       // Persistimos ítems, código aplicado y datos del comprador — no el
       // estado del drawer ni el pendingCode (puente de una sola pasada, ver
-      // arriba). Nombre/ciudad sobreviven a "Vaciar carrito": identifican a
-      // la persona, no al pedido puntual.
+      // arriba). Nombre/ciudad/envío/dirección sobreviven a "Vaciar
+      // carrito": identifican a la persona, no al pedido puntual.
       partialize: (state) => ({
         items: state.items,
         appliedCode: state.appliedCode,
         customerName: state.customerName,
         customerCity: state.customerCity,
+        customerWantsDelivery: state.customerWantsDelivery,
+        customerAddress: state.customerAddress,
       }),
     }
   )

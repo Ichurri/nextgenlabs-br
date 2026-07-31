@@ -7,7 +7,7 @@ import { useCart, cartTotal, cartCount, resolveCartItems } from "@/lib/cart";
 import { formatPrice } from "@/lib/format";
 import { buildOrderWhatsAppUrl } from "@/lib/whatsapp";
 import { WhatsAppCtaButton } from "@/components/WhatsAppCtaButton";
-import { CustomerFields } from "@/components/CustomerFields";
+import { CustomerFields, LOCAL_DELIVERY_CITY } from "@/components/CustomerFields";
 import { useDiscountField } from "@/lib/use-discount-field";
 
 export function CartDrawer() {
@@ -21,6 +21,10 @@ export function CartDrawer() {
     setCustomerName,
     customerCity,
     setCustomerCity,
+    customerWantsDelivery,
+    setCustomerWantsDelivery,
+    customerAddress,
+    setCustomerAddress,
   } = useCart();
 
   useEffect(() => {
@@ -34,6 +38,10 @@ export function CartDrawer() {
   const resolvedItems = resolveCartItems(items);
   const total = cartTotal(resolvedItems);
   const count = cartCount(resolvedItems);
+  // La línea "Dirección" del mensaje solo existe para Cochabamba con envío a
+  // domicilio elegido — ver el comentario en OrderMessageDetails (whatsapp.ts).
+  const messageAddress =
+    customerCity === LOCAL_DELIVERY_CITY && customerWantsDelivery ? customerAddress : undefined;
 
   // CartDrawer está siempre montado (root layout): es el único consumidor
   // del auto-apply de `?codigo=` para todo el sitio, ver use-discount-field.ts.
@@ -152,6 +160,10 @@ export function CartDrawer() {
                   onNameChange={setCustomerName}
                   city={customerCity}
                   onCityChange={setCustomerCity}
+                  wantsDelivery={customerWantsDelivery}
+                  onWantsDeliveryChange={setCustomerWantsDelivery}
+                  address={customerAddress}
+                  onAddressChange={setCustomerAddress}
                   compact
                 />
               </div>
@@ -220,6 +232,7 @@ export function CartDrawer() {
                   discountCode: appliedDiscount?.code,
                   name: customerName,
                   city: customerCity,
+                  address: messageAddress,
                 })}
                 label="Finalizar pedido por WhatsApp"
                 variant="solid"

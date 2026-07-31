@@ -40,7 +40,6 @@ describe("buildOrderMessage", () => {
       "Mis datos:",
       "Nombre:",
       "Ciudad:",
-      "Dirección:",
       "",
     ].join("\n");
 
@@ -61,7 +60,6 @@ describe("buildOrderMessage", () => {
       "Mis datos:",
       "Nombre:",
       "Ciudad:",
-      "Dirección:",
       "",
     ].join("\n");
 
@@ -85,7 +83,6 @@ describe("buildOrderMessage", () => {
       "Mis datos:",
       "Nombre: Juan Pérez",
       "Ciudad: La Paz",
-      "Dirección:",
       "",
     ].join("\n");
 
@@ -96,6 +93,25 @@ describe("buildOrderMessage", () => {
     const message = buildOrderMessage(items, { name: "  ", city: "" });
     expect(message).toContain("Nombre:\n");
     expect(message).toContain("Ciudad:\n");
+  });
+
+  it("omite la línea de dirección cuando no se pasa (otras ciudades, o Cochabamba sin envío)", () => {
+    expect(buildOrderMessage(items)).not.toContain("Dirección");
+    expect(buildOrderMessage(items, { city: "Santa Cruz" })).not.toContain("Dirección");
+    expect(buildOrderMessage(items, { address: undefined })).not.toContain("Dirección");
+    expect(buildOrderMessage(items, { address: null })).not.toContain("Dirección");
+  });
+
+  it("incluye la dirección completa cuando se pasa un valor (Cochabamba con envío)", () => {
+    const message = buildOrderMessage(items, { city: "Cochabamba", address: "Av. América #123" });
+    expect(message).toContain("Ciudad: Cochabamba");
+    expect(message).toContain("Dirección: Av. América #123");
+  });
+
+  it("deja la línea de dirección en blanco cuando se pasa un string vacío", () => {
+    const message = buildOrderMessage(items, { city: "Cochabamba", address: "" });
+    expect(message).toContain("Dirección:\n");
+    expect(message).not.toContain("Dirección: ");
   });
 
   it("multiplica precio x cantidad en cada línea", () => {
