@@ -324,9 +324,9 @@ export const SHIPPING = {
 // PLACEHOLDER: todos estos datos los da el cliente antes de publicar.
 export const PAYMENT = {
   qrImage: "/pago/qr.png",
-  bank: "Banco XXX",
-  accountHolder: "Nombre del titular",
-  accountNumber: "0000000000",
+  bank: "Banco Economico",
+  accountHolder: "Castro Farrapo Ana Leticia",
+  accountNumber: "3101659906",
   accountType: "Caja de ahorro",
   currency: "BOB",
 } as const;

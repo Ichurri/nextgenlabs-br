@@ -4,10 +4,10 @@
  * públicos por naturaleza (es la cuenta que recibe el dinero).
  */
 export const PAYMENT = {
-  qrImage: "/pago/qr.png",
-  bank: "Banco XXX",
-  accountHolder: "Nombre del titular",
-  accountNumber: "0000000000",
+  qrImage: "/pago/qr.jpeg",
+  bank: "Banco Economico",
+  accountHolder: "Castro Farrapo Ana Leticia",
+  accountNumber: "3101659906",
   accountType: "Caja de ahorro",
   currency: "BOB",
 } as const;
