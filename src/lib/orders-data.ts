@@ -60,6 +60,7 @@ export type ReceiptData = Pick<
   | "customerAddress"
   | "subtotal"
   | "discount"
+  | "discountCode"
   | "discountCodeLabel"
   | "shipping"
   | "total"

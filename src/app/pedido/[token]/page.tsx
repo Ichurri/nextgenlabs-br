@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getOrderByToken } from "@/lib/orders-data";
 import { formatPrice } from "@/lib/format";
+import { formatDiscountDetail } from "@/lib/discounts";
 import { buildWhatsAppUrl, siteConfig } from "@/config/site";
 import { PaymentInstructions } from "@/components/PaymentInstructions";
 import { ClearCartOnMount } from "@/components/ClearCartOnMount";
@@ -29,6 +30,8 @@ export default async function OrderPage({
   const { token } = await params;
   const order = await getOrderByToken(token);
   if (!order) notFound();
+
+  const discountDetail = formatDiscountDetail(order.discountCode, order.discountCodeLabel);
 
   const receiptUrl = `${siteConfig.url}/pedido/${order.token}`;
   const whatsappMessage = [
@@ -100,7 +103,7 @@ export default async function OrderPage({
           {order.discount > 0 && (
             <div className="flex justify-between">
               <span className="text-muted">
-                Descuento{order.discountCodeLabel ? ` (${order.discountCodeLabel})` : ""}
+                Descuento{discountDetail ? ` (${discountDetail})` : ""}
               </span>
               <span className="text-accent-light">−{formatPrice(order.discount)}</span>
             </div>

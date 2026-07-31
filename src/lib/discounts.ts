@@ -84,6 +84,18 @@ export function mapDiscountCodeRow(row: DiscountCodeRow): DiscountCode {
   };
 }
 
+/**
+ * "MAFE10 · 10% de descuento" para mostrar en recibos/comprobantes — el
+ * código real usado, no solo la tasa. Cualquiera de los dos puede faltar
+ * (código viejo sin discountCode persistido): se muestra lo que haya.
+ */
+export function formatDiscountDetail(
+  code: string | null,
+  label: string | null
+): string {
+  return [code, label].filter((value): value is string => Boolean(value)).join(" · ");
+}
+
 function formatBoliviaDate(iso: string): string {
   return new Intl.DateTimeFormat("es-BO", {
     day: "2-digit",

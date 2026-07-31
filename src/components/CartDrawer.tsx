@@ -38,7 +38,6 @@ export function CartDrawer() {
 
   const catalog = useCatalog();
   const resolvedItems = resolveCartItems(items, catalog);
-  const total = cartTotal(resolvedItems);
   const count = cartCount(resolvedItems);
   // La línea "Dirección" del mensaje solo existe para Cochabamba con envío a
   // domicilio elegido — ver el comentario en OrderMessageDetails (whatsapp.ts).
@@ -57,6 +56,9 @@ export function CartDrawer() {
     applyDiscountCode,
     removeDiscount,
   } = useDiscountField(resolvedItems, { autoApply: true });
+
+  const subtotal = cartTotal(resolvedItems);
+  const total = Math.max(0, subtotal - (appliedDiscount?.amount ?? 0));
 
   return (
     <>
@@ -225,6 +227,12 @@ export function CartDrawer() {
                 )}
               </p>
 
+              {appliedDiscount && (
+                <div className="mb-1 flex items-center justify-between text-xs text-muted">
+                  <span>Subtotal</span>
+                  <span>{formatPrice(subtotal)}</span>
+                </div>
+              )}
               <div className="mb-3 flex items-center justify-between text-base font-semibold">
                 <span>Total</span>
                 <span>{formatPrice(total)}</span>

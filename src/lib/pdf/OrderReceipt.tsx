@@ -12,6 +12,7 @@ import {
 } from "@react-pdf/renderer";
 import { formatPrice } from "@/lib/format";
 import { siteConfig } from "@/config/site";
+import { formatDiscountDetail } from "@/lib/discounts";
 import type { ReceiptData } from "@/lib/orders-data";
 
 // Si alguna vez agregás un test que llame a renderOrderReceiptPdf(), no lo
@@ -125,6 +126,8 @@ function OrderReceiptDocument({
   order: ReceiptData;
   logoData: Buffer;
 }) {
+  const discountDetail = formatDiscountDetail(order.discountCode, order.discountCodeLabel);
+
   return (
     <Document title={`Pedido ${order.orderNumber}`}>
       <Page size="A4" style={styles.page}>
@@ -199,7 +202,7 @@ function OrderReceiptDocument({
             {order.discount > 0 && (
               <View style={styles.totalsRow}>
                 <Text style={styles.label}>
-                  Descuento{order.discountCodeLabel ? ` (${order.discountCodeLabel})` : ""}
+                  Descuento{discountDetail ? ` (${discountDetail})` : ""}
                 </Text>
                 <Text style={styles.value}>−{formatPrice(order.discount)}</Text>
               </View>

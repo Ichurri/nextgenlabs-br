@@ -28,7 +28,6 @@ export default function CarritoPage() {
   } = useCart();
   const catalog = useCatalog();
   const resolvedItems = resolveCartItems(items, catalog);
-  const total = cartTotal(resolvedItems);
   // La línea "Dirección" del mensaje solo existe para Cochabamba con envío a
   // domicilio elegido — ver el comentario en OrderMessageDetails (whatsapp.ts).
   const messageAddress =
@@ -47,6 +46,9 @@ export default function CarritoPage() {
     applyDiscountCode,
     removeDiscount,
   } = useDiscountField(resolvedItems);
+
+  const subtotal = cartTotal(resolvedItems);
+  const total = Math.max(0, subtotal - (appliedDiscount?.amount ?? 0));
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-14 sm:px-6">
@@ -203,7 +205,17 @@ export default function CarritoPage() {
                 </p>
               </div>
 
-              <div className="mt-4 flex items-center justify-between border-t border-border pt-4 text-lg font-bold">
+              {appliedDiscount && (
+                <div className="mt-4 flex items-center justify-between border-t border-border pt-4 text-sm text-muted">
+                  <span>Subtotal</span>
+                  <span>{formatPrice(subtotal)}</span>
+                </div>
+              )}
+              <div
+                className={`flex items-center justify-between text-lg font-bold ${
+                  appliedDiscount ? "mt-1" : "mt-4 border-t border-border pt-4"
+                }`}
+              >
                 <span>Total</span>
                 <span>{formatPrice(total)}</span>
               </div>

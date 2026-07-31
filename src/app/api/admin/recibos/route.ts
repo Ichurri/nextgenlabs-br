@@ -143,6 +143,7 @@ export async function POST(request: Request) {
     customerAddress: customer.address ?? null,
     subtotal: totals.subtotal,
     discount: totals.discount,
+    discountCode: discountCodeRow?.code ?? null,
     discountCodeLabel: discountLabel,
     shipping: totals.shipping,
     total: totals.total,

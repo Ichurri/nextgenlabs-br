@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { normalizeCode, evaluateDiscount, type DiscountCode } from "@/lib/discounts";
+import {
+  normalizeCode,
+  evaluateDiscount,
+  formatDiscountDetail,
+  type DiscountCode,
+} from "@/lib/discounts";
 
 const NOW = new Date("2026-07-29T12:00:00Z");
 
@@ -123,5 +128,25 @@ describe("evaluateDiscount", () => {
     // puede devolver más que el subtotal.
     const result = evaluateDiscount(makeCode({ type: "percent", value: 100 }), 3600, NOW);
     expect(result).toMatchObject({ valid: true, amount: 3600 });
+  });
+});
+
+describe("formatDiscountDetail", () => {
+  it("código y label → los junta con un separador", () => {
+    expect(formatDiscountDetail("MAFE10", "10% de descuento")).toBe(
+      "MAFE10 · 10% de descuento"
+    );
+  });
+
+  it("solo código (sin label) → devuelve solo el código", () => {
+    expect(formatDiscountDetail("MAFE10", null)).toBe("MAFE10");
+  });
+
+  it("solo label (sin código) → devuelve solo el label", () => {
+    expect(formatDiscountDetail(null, "10% de descuento")).toBe("10% de descuento");
+  });
+
+  it("ninguno de los dos → string vacío", () => {
+    expect(formatDiscountDetail(null, null)).toBe("");
   });
 });
