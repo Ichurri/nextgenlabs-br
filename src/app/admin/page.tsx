@@ -65,6 +65,12 @@ export default async function AdminPage({
             + Nuevo comprobante
           </Link>
           <Link
+            href="/admin/productos"
+            className="focus-ring rounded-lg border border-border px-4 py-2 text-sm transition hover:bg-surface-2"
+          >
+            Productos
+          </Link>
+          <Link
             href="/admin/codigos"
             className="focus-ring rounded-lg border border-border px-4 py-2 text-sm transition hover:bg-surface-2"
           >
