@@ -27,6 +27,9 @@ export function ReceiptBuilderForm({ products }: { products: Product[] }) {
   const [isPaid, setIsPaid] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [stockBatchId, setStockBatchId] = useState<string | null>(null);
+  const [stockWarning, setStockWarning] = useState(false);
+  const [undoState, setUndoState] = useState<"idle" | "pending" | "done" | "error">("idle");
 
   function updateField<K extends keyof ReceiptCustomerForm>(key: K, value: ReceiptCustomerForm[K]) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -68,9 +71,23 @@ export function ReceiptBuilderForm({ products }: { products: Product[] }) {
     });
   }
 
+  async function undoStockBatch() {
+    if (!stockBatchId) return;
+    setUndoState("pending");
+    try {
+      const res = await fetch(`/api/admin/stock/${stockBatchId}`, { method: "DELETE" });
+      setUndoState(res.ok ? "done" : "error");
+    } catch {
+      setUndoState("error");
+    }
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSubmitError(null);
+    setStockBatchId(null);
+    setStockWarning(false);
+    setUndoState("idle");
 
     const payload = {
       items: items.map(({ slug, quantity }) => ({ slug, quantity })),
@@ -97,6 +114,12 @@ export function ReceiptBuilderForm({ products }: { products: Product[] }) {
         const body = await res.json().catch(() => null);
         setSubmitError(body?.error ?? "No pudimos generar el comprobante.");
         return;
+      }
+
+      if (res.headers.get("X-Stock-Warning")) {
+        setStockWarning(true);
+      } else {
+        setStockBatchId(res.headers.get("X-Stock-Batch-Id"));
       }
 
       const blob = await res.blob();
@@ -180,6 +203,33 @@ export function ReceiptBuilderForm({ products }: { products: Product[] }) {
       >
         {isSubmitting ? "Generando…" : "Generar comprobante"}
       </button>
+
+      {stockWarning && (
+        <p className="rounded-lg border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-warning">
+          El comprobante se generó, pero no pudimos descontar el stock automáticamente. Ajustalo
+          a mano desde la ficha del producto.
+        </p>
+      )}
+
+      {stockBatchId && undoState !== "done" && (
+        <p className="text-xs text-muted">
+          ¿Generaste este comprobante dos veces?{" "}
+          <button
+            type="button"
+            onClick={undoStockBatch}
+            disabled={undoState === "pending"}
+            className="focus-ring rounded text-accent-light hover:underline disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {undoState === "pending" ? "Deshaciendo…" : "Deshacer el descuento de stock"}
+          </button>
+          {undoState === "error" && (
+            <span className="ml-1 text-danger">No pudimos deshacerlo, probá de nuevo.</span>
+          )}
+        </p>
+      )}
+      {undoState === "done" && (
+        <p className="text-xs text-success">Descuento de stock deshecho.</p>
+      )}
     </form>
   );
 }

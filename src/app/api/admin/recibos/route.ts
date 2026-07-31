@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { revalidateTag } from "next/cache";
 import { requireApiSession } from "@/lib/dal";
 import { orderItemInputSchema, customerSchema } from "@/lib/orders.schema";
 import { calculateOrderTotals, generateOrderNumber, OrderValidationError } from "@/lib/orders";
@@ -150,11 +151,36 @@ export async function POST(request: Request) {
 
   const pdfBuffer = await renderOrderReceiptPdf(receipt);
 
-  return new Response(new Uint8Array(pdfBuffer), {
-    headers: {
-      "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="Comprobante-${orderNumber}.pdf"`,
-      "Cache-Control": "private, no-store",
-    },
-  });
+  // El comprobante ya existe en este punto: si el descuento de stock falla,
+  // logueamos y devolvemos el PDF igual con un aviso — perder el descuento
+  // de stock es molesto, perder el comprobante de una venta real es peor
+  // (§5 Bloque E del plan).
+  const headers: Record<string, string> = {
+    "Content-Type": "application/pdf",
+    "Content-Disposition": `attachment; filename="Comprobante-${orderNumber}.pdf"`,
+    "Cache-Control": "private, no-store",
+  };
+
+  try {
+    const { data: batchId, error: stockError } = await supabaseAdmin.rpc("register_sale_stock", {
+      payload: {
+        receipt_number: orderNumber,
+        items: totals.lines.map((line) => ({ slug: line.slug, quantity: line.quantity })),
+      },
+    });
+
+    if (stockError) {
+      console.error("register_sale_stock_failed", stockError.code);
+      headers["X-Stock-Warning"] = "1";
+    } else if (batchId) {
+      headers["X-Stock-Batch-Id"] = batchId;
+    }
+  } catch (err) {
+    console.error("register_sale_stock_threw", err);
+    headers["X-Stock-Warning"] = "1";
+  }
+
+  revalidateTag("catalog", { expire: 0 });
+
+  return new Response(new Uint8Array(pdfBuffer), { headers });
 }

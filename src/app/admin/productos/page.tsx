@@ -94,6 +94,13 @@ function ProductRow({
           {product.price > 0 ? formatPrice(product.price) : "A consultar"}
         </p>
       </div>
+      <StockBadge product={product} />
+      <Link
+        href={`/admin/productos/${product.id}/stock`}
+        className="focus-ring shrink-0 rounded text-sm text-accent-light hover:underline"
+      >
+        Stock
+      </Link>
       {product.isActive && (
         <SortControls
           moveUpUrl={
@@ -112,5 +119,24 @@ function ProductRow({
       </Link>
       <ProductArchiveToggle id={product.id} isActive={product.isActive} />
     </li>
+  );
+}
+
+// Semáforo: rojo si agotado (o negativo — "revisá el inventario"), ámbar si
+// bajo el umbral, normal si no. "—" para productos que no controlan stock.
+function StockBadge({ product }: { product: AdminProduct }) {
+  if (!product.trackStock) {
+    return <span className="shrink-0 text-xs text-muted">—</span>;
+  }
+
+  const isOut = product.stockQty <= 0;
+  const isLow = product.stockQty <= product.lowStockThreshold;
+  const colorClass = isOut ? "text-danger" : isLow ? "text-warning" : "text-foreground";
+
+  return (
+    <span className={`shrink-0 text-xs font-semibold ${colorClass}`}>
+      {product.stockQty}
+      {product.stockQty < 0 && " · revisá el inventario"}
+    </span>
   );
 }
