@@ -7,10 +7,20 @@ import { formatPrice } from "@/lib/format";
 import { buildOrderWhatsAppUrl } from "@/lib/whatsapp";
 import { QtyStepper } from "@/components/CartDrawer";
 import { WhatsAppCtaButton } from "@/components/WhatsAppCtaButton";
+import { CustomerFields } from "@/components/CustomerFields";
 import { useDiscountField } from "@/lib/use-discount-field";
 
 export default function CarritoPage() {
-  const { items, setQuantity, removeItem, clear } = useCart();
+  const {
+    items,
+    setQuantity,
+    removeItem,
+    clear,
+    customerName,
+    setCustomerName,
+    customerCity,
+    setCustomerCity,
+  } = useCart();
   const resolvedItems = resolveCartItems(items);
   const total = cartTotal(resolvedItems);
 
@@ -112,6 +122,16 @@ export default function CarritoPage() {
               <h2 className="text-lg font-semibold">Resumen del pedido</h2>
 
               <div className="mt-4 border-t border-border pt-4">
+                <p className="eyebrow mb-2">Tus datos</p>
+                <CustomerFields
+                  name={customerName}
+                  onNameChange={setCustomerName}
+                  city={customerCity}
+                  onCityChange={setCustomerCity}
+                />
+              </div>
+
+              <div className="mt-4 border-t border-border pt-4">
                 {appliedDiscount ? (
                   <div className="flex items-center justify-between gap-2 rounded-lg border border-accent/30 bg-accent/5 px-3 py-2 text-sm">
                     <span className="font-medium text-accent-light">
@@ -183,7 +203,11 @@ export default function CarritoPage() {
               </p>
               <div className="mt-5">
                 <WhatsAppCtaButton
-                  href={buildOrderWhatsAppUrl(resolvedItems, appliedDiscount?.code)}
+                  href={buildOrderWhatsAppUrl(resolvedItems, {
+                    discountCode: appliedDiscount?.code,
+                    name: customerName,
+                    city: customerCity,
+                  })}
                   label="Finalizar pedido por WhatsApp"
                   variant="solid"
                   analyticsEvent="whatsapp_click_checkout"

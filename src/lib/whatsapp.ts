@@ -6,13 +6,20 @@ import type { OrderStatus } from "@/lib/orders-data";
 // ─── Comprador → negocio ───────────────────────────────────────────────
 // wa.me apunta al número DEL NEGOCIO (WHATSAPP_NUMBER en config/site.ts).
 
+export type OrderMessageDetails = {
+  discountCode?: string | null;
+  /** Del formulario de "Tus datos" en el carrito (Fase 9.1). Vacío u omitido → etiqueta en blanco, como antes. */
+  name?: string | null;
+  city?: string | null;
+};
+
 /**
  * Arma el texto del pedido para WhatsApp a partir de los ítems del carrito.
  * El formato es para humanos y el comprador puede editar el texto entero
  * antes de enviarlo — el admin lo pega en el panel y `parseOrderMessage()`
  * solo reconoce las líneas "• nombre dosis xN", la del código y las de
  * datos; los precios y el total son informativos, el parser los ignora.
- * Ejemplo de salida:
+ * Ejemplo de salida (con nombre y ciudad ya completados en el carrito):
  *
  *   Hola Nextgen Labs, quiero hacer un pedido:
  *
@@ -24,17 +31,19 @@ import type { OrderStatus } from "@/lib/orders-data";
  *   Código de descuento: MAFE10
  *
  *   Mis datos:
- *   Nombre:
- *   Ciudad:
+ *   Nombre: Juan Pérez
+ *   Ciudad: La Paz
  *   Dirección:
  */
-export function buildOrderMessage(items: CartItem[], discountCode?: string | null): string {
+export function buildOrderMessage(items: CartItem[], details: OrderMessageDetails = {}): string {
   const lines = items.map((i) => {
     const lineTotal = formatPrice(i.price * i.quantity);
     return `• ${i.name} ${i.dose} x${i.quantity} — ${lineTotal}`;
   });
 
   const total = formatPrice(cartTotal(items));
+  const name = details.name?.trim();
+  const city = details.city?.trim();
 
   return [
     `Hola ${siteConfig.name}, quiero hacer un pedido:`,
@@ -43,17 +52,17 @@ export function buildOrderMessage(items: CartItem[], discountCode?: string | nul
     "",
     `Total: ${total}`,
     "",
-    ...(discountCode ? [`Código de descuento: ${discountCode}`, ""] : []),
+    ...(details.discountCode ? [`Código de descuento: ${details.discountCode}`, ""] : []),
     "Mis datos:",
-    "Nombre:",
-    "Ciudad:",
+    name ? `Nombre: ${name}` : "Nombre:",
+    city ? `Ciudad: ${city}` : "Ciudad:",
     "Dirección:",
     "",
   ].join("\n");
 }
 
-export function buildOrderWhatsAppUrl(items: CartItem[], discountCode?: string | null): string {
-  return buildWhatsAppUrl(buildOrderMessage(items, discountCode));
+export function buildOrderWhatsAppUrl(items: CartItem[], details: OrderMessageDetails = {}): string {
+  return buildWhatsAppUrl(buildOrderMessage(items, details));
 }
 
 // ─── Negocio → comprador ────────────────────────────────────────────────

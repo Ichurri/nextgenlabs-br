@@ -65,12 +65,37 @@ describe("buildOrderMessage", () => {
       "",
     ].join("\n");
 
-    expect(buildOrderMessage(items, "MAFE10")).toBe(expected);
+    expect(buildOrderMessage(items, { discountCode: "MAFE10" })).toBe(expected);
   });
 
   it("no incluye la línea del código cuando no hay uno aplicado", () => {
-    expect(buildOrderMessage(items, null)).not.toContain("Código de descuento");
+    expect(buildOrderMessage(items, { discountCode: null })).not.toContain("Código de descuento");
     expect(buildOrderMessage(items)).not.toContain("Código de descuento");
+  });
+
+  it("completa nombre y ciudad cuando vienen del formulario del carrito", () => {
+    const expected = [
+      `Hola ${siteConfig.name}, quiero hacer un pedido:`,
+      "",
+      "• Tesamorelin 10 MG x1 — Bs 1.700",
+      "• NAD+ 500 MG x1 — Bs 1.900",
+      "",
+      "Total: Bs 3.600",
+      "",
+      "Mis datos:",
+      "Nombre: Juan Pérez",
+      "Ciudad: La Paz",
+      "Dirección:",
+      "",
+    ].join("\n");
+
+    expect(buildOrderMessage(items, { name: "Juan Pérez", city: "La Paz" })).toBe(expected);
+  });
+
+  it("deja la etiqueta en blanco cuando el nombre o la ciudad vienen vacíos", () => {
+    const message = buildOrderMessage(items, { name: "  ", city: "" });
+    expect(message).toContain("Nombre:\n");
+    expect(message).toContain("Ciudad:\n");
   });
 
   it("multiplica precio x cantidad en cada línea", () => {
@@ -104,11 +129,21 @@ describe("buildOrderWhatsAppUrl", () => {
   });
 
   it("propaga el código de descuento al mensaje codificado", () => {
-    const url = buildOrderWhatsAppUrl(items, "MAFE10");
+    const url = buildOrderWhatsAppUrl(items, { discountCode: "MAFE10" });
     const encodedMessage = url.split("?text=")[1];
 
-    expect(decodeURIComponent(encodedMessage)).toBe(buildOrderMessage(items, "MAFE10"));
+    expect(decodeURIComponent(encodedMessage)).toBe(
+      buildOrderMessage(items, { discountCode: "MAFE10" })
+    );
     expect(decodeURIComponent(encodedMessage)).toContain("Código de descuento: MAFE10");
+  });
+
+  it("propaga nombre y ciudad al mensaje codificado", () => {
+    const url = buildOrderWhatsAppUrl(items, { name: "Juan Pérez", city: "La Paz" });
+    const encodedMessage = url.split("?text=")[1];
+
+    expect(decodeURIComponent(encodedMessage)).toContain("Nombre: Juan Pérez");
+    expect(decodeURIComponent(encodedMessage)).toContain("Ciudad: La Paz");
   });
 });
 

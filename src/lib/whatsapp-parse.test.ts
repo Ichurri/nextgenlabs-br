@@ -39,10 +39,11 @@ describe("parseOrderMessage", () => {
   });
 
   it("mensaje con los datos completados y código: los reconoce todos", () => {
-    const message = buildOrderMessage(items, "MAFE10")
-      .replace("Nombre:", "Nombre: Carla Comprador")
-      .replace("Ciudad:", "Ciudad: Santa Cruz")
-      .replace("Dirección:", "Dirección: Av. Siempre Viva 123");
+    const message = buildOrderMessage(items, {
+      discountCode: "MAFE10",
+      name: "Carla Comprador",
+      city: "Santa Cruz",
+    }).replace("Dirección:", "Dirección: Av. Siempre Viva 123");
 
     const parsed = parseOrderMessage(message);
 

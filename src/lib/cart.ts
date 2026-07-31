@@ -30,6 +30,12 @@ type CartState = {
   // catálogo y el carrito, no algo que deba sobrevivir a cerrar la pestaña.
   pendingCode: string | null;
   appliedCode: AppliedDiscount | null;
+  // Datos del comprador para prellenar el mensaje de WhatsApp (Nombre/Ciudad
+  // de "Mis datos"). Nunca se validan ni se mandan a ningún endpoint: si
+  // quedan vacíos, buildOrderMessage() cae en las etiquetas en blanco de
+  // siempre, para completar a mano dentro de WhatsApp.
+  customerName: string;
+  customerCity: string;
   addItem: (product: Product, quantity?: number) => void;
   removeItem: (slug: string) => void;
   setQuantity: (slug: string, quantity: number) => void;
@@ -40,6 +46,8 @@ type CartState = {
   clearPendingCode: () => void;
   setAppliedCode: (discount: AppliedDiscount) => void;
   clearAppliedCode: () => void;
+  setCustomerName: (name: string) => void;
+  setCustomerCity: (city: string) => void;
 };
 
 export const useCart = create<CartState>()(
@@ -51,6 +59,8 @@ export const useCart = create<CartState>()(
       addNonce: 0,
       pendingCode: null,
       appliedCode: null,
+      customerName: "",
+      customerCity: "",
 
       // Añadir NO abre el carrito: solo acumula el ítem y dispara un aviso breve.
       // El carrito se abre únicamente cuando el usuario pulsa el ícono del carrito.
@@ -102,12 +112,21 @@ export const useCart = create<CartState>()(
       clearPendingCode: () => set({ pendingCode: null }),
       setAppliedCode: (discount) => set({ appliedCode: discount }),
       clearAppliedCode: () => set({ appliedCode: null }),
+      setCustomerName: (name) => set({ customerName: name }),
+      setCustomerCity: (city) => set({ customerCity: city }),
     }),
     {
       name: "nextgen-cart",
-      // Persistimos los ítems y el código aplicado, no el estado del drawer
-      // ni el pendingCode (puente de una sola pasada, ver arriba).
-      partialize: (state) => ({ items: state.items, appliedCode: state.appliedCode }),
+      // Persistimos ítems, código aplicado y datos del comprador — no el
+      // estado del drawer ni el pendingCode (puente de una sola pasada, ver
+      // arriba). Nombre/ciudad sobreviven a "Vaciar carrito": identifican a
+      // la persona, no al pedido puntual.
+      partialize: (state) => ({
+        items: state.items,
+        appliedCode: state.appliedCode,
+        customerName: state.customerName,
+        customerCity: state.customerCity,
+      }),
     }
   )
 );

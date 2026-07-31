@@ -7,10 +7,21 @@ import { useCart, cartTotal, cartCount, resolveCartItems } from "@/lib/cart";
 import { formatPrice } from "@/lib/format";
 import { buildOrderWhatsAppUrl } from "@/lib/whatsapp";
 import { WhatsAppCtaButton } from "@/components/WhatsAppCtaButton";
+import { CustomerFields } from "@/components/CustomerFields";
 import { useDiscountField } from "@/lib/use-discount-field";
 
 export function CartDrawer() {
-  const { items, isDrawerOpen, closeDrawer, setQuantity, removeItem } = useCart();
+  const {
+    items,
+    isDrawerOpen,
+    closeDrawer,
+    setQuantity,
+    removeItem,
+    customerName,
+    setCustomerName,
+    customerCity,
+    setCustomerCity,
+  } = useCart();
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -134,6 +145,16 @@ export function CartDrawer() {
             </div>
 
             <div className="border-t border-border px-5 py-4">
+              <div className="mb-3">
+                <p className="eyebrow mb-1.5 text-[0.65rem]">Tus datos</p>
+                <CustomerFields
+                  name={customerName}
+                  onNameChange={setCustomerName}
+                  city={customerCity}
+                  onCityChange={setCustomerCity}
+                  compact
+                />
+              </div>
               {appliedDiscount ? (
                 <div className="mb-3 flex items-center justify-between gap-2 rounded-lg border border-accent/30 bg-accent/5 px-3 py-2 text-xs">
                   <span className="font-medium text-accent-light">
@@ -195,7 +216,11 @@ export function CartDrawer() {
                 <span>{formatPrice(total)}</span>
               </div>
               <WhatsAppCtaButton
-                href={buildOrderWhatsAppUrl(resolvedItems, appliedDiscount?.code)}
+                href={buildOrderWhatsAppUrl(resolvedItems, {
+                  discountCode: appliedDiscount?.code,
+                  name: customerName,
+                  city: customerCity,
+                })}
                 label="Finalizar pedido por WhatsApp"
                 variant="solid"
                 analyticsEvent="whatsapp_click_checkout"

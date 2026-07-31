@@ -51,6 +51,8 @@ beforeEach(() => {
     addNonce: 0,
     pendingCode: null,
     appliedCode: null,
+    customerName: "",
+    customerCity: "",
   });
 });
 
@@ -145,6 +147,26 @@ describe("useCart", () => {
     useCart.getState().setAppliedCode({ code: "MAFE10", amount: 10, label: "10% de descuento" });
     useCart.getState().clearAppliedCode();
     expect(useCart.getState().appliedCode).toBeNull();
+  });
+
+  it("setCustomerName y setCustomerCity guardan los datos del comprador", () => {
+    useCart.getState().setCustomerName("Juan Pérez");
+    useCart.getState().setCustomerCity("La Paz");
+
+    const { customerName, customerCity } = useCart.getState();
+    expect(customerName).toBe("Juan Pérez");
+    expect(customerCity).toBe("La Paz");
+  });
+
+  it("clear NO borra nombre y ciudad: identifican a la persona, no al pedido", () => {
+    useCart.getState().addItem(makeProduct());
+    useCart.getState().setCustomerName("Juan Pérez");
+    useCart.getState().setCustomerCity("La Paz");
+    useCart.getState().clear();
+
+    expect(useCart.getState().items).toHaveLength(0);
+    expect(useCart.getState().customerName).toBe("Juan Pérez");
+    expect(useCart.getState().customerCity).toBe("La Paz");
   });
 });
 
