@@ -68,6 +68,21 @@ export function Footer() {
           <p>
             Distribuidor oficial de {siteConfig.partner.name}.
           </p>
+          <a
+            href="https://www.instagram.com/loop.digital.corp/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="focus-ring flex items-center gap-2 rounded hover:text-foreground"
+          >
+            <span>Supported by</span>
+            <Image
+              src="/loop.png"
+              alt="Loop"
+              width={20}
+              height={20}
+              className="h-5 w-5 object-contain"
+            />
+          </a>
         </div>
       </div>
     </footer>
