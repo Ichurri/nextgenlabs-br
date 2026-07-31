@@ -214,6 +214,28 @@ permita leer tablas (nunca owner).
 
 ---
 
+## Paso 9 — Bucket de Storage para el catálogo (Fase 10)
+
+Desde la Fase 10 el panel sube imágenes y COA de productos a Supabase Storage. El bucket
+se llama **`catalogo`** y tiene que existir en **cada** proyecto (dev y prod) antes de
+que el panel pueda subir un archivo ahí.
+
+En `nextgenlabs-dev` ya lo creó el agente (con la service key, vía el mismo camino
+programático que usa el panel — no hace falta tocar el dashboard). En **prod** todavía
+no existe: cuando estés por salir a producción, creálo vos desde el dashboard:
+
+1. Entrá al proyecto `nextgenlabs-prod`, sección Storage, y creá un bucket nuevo.
+2. Nombre: `catalogo`.
+3. **Public bucket: activado.** Las imágenes tienen que ser fetcheables por el
+   navegador sin autenticación — es lo mismo que hoy pasa con `/public/products/*.webp`.
+4. No hace falta crear los prefijos `productos/` y `coa/` a mano: el primer archivo que
+   suba el panel los crea solo.
+
+No hay política de RLS que configurar acá: la escritura pasa siempre por la service key
+desde los route handlers del panel, nunca desde el navegador.
+
+---
+
 ## Lo que NO tenés que hacer
 
 - **No corras SQL a mano en el editor web.** Todo el esquema vive en

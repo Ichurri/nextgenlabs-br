@@ -238,6 +238,157 @@ export type Database = {
         }
         Relationships: []
       }
+      product_categories: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          category_id: string
+          coa_url: string | null
+          created_at: string
+          description: string | null
+          dose: string
+          featured: boolean
+          form: string
+          highlights: string[]
+          id: string
+          image: string
+          is_active: boolean
+          is_new: boolean
+          low_stock_threshold: number
+          name: string
+          price: number
+          purity: string
+          slug: string
+          sort_order: number
+          stock_qty: number
+          track_stock: boolean
+          updated_at: string
+        }
+        Insert: {
+          category_id: string
+          coa_url?: string | null
+          created_at?: string
+          description?: string | null
+          dose: string
+          featured?: boolean
+          form: string
+          highlights?: string[]
+          id?: string
+          image: string
+          is_active?: boolean
+          is_new?: boolean
+          low_stock_threshold?: number
+          name: string
+          price?: number
+          purity: string
+          slug: string
+          sort_order?: number
+          stock_qty?: number
+          track_stock?: boolean
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string
+          coa_url?: string | null
+          created_at?: string
+          description?: string | null
+          dose?: string
+          featured?: boolean
+          form?: string
+          highlights?: string[]
+          id?: string
+          image?: string
+          is_active?: boolean
+          is_new?: boolean
+          low_stock_threshold?: number
+          name?: string
+          price?: number
+          purity?: string
+          slug?: string
+          sort_order?: number
+          stock_qty?: number
+          track_stock?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "product_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stock_movements: {
+        Row: {
+          batch_id: string | null
+          created_at: string
+          id: string
+          product_id: string
+          qty: number
+          reason: string | null
+          receipt_number: string | null
+          reverted_at: string | null
+          stock_after: number
+          type: string
+        }
+        Insert: {
+          batch_id?: string | null
+          created_at?: string
+          id?: string
+          product_id: string
+          qty: number
+          reason?: string | null
+          receipt_number?: string | null
+          reverted_at?: string | null
+          stock_after: number
+          type: string
+        }
+        Update: {
+          batch_id?: string | null
+          created_at?: string
+          id?: string
+          product_id?: string
+          qty?: number
+          reason?: string | null
+          receipt_number?: string | null
+          reverted_at?: string | null
+          stock_after?: number
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_movements_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       discount_code_attribution: {
@@ -290,6 +441,8 @@ export type Database = {
           token: string
         }[]
       }
+      register_sale_stock: { Args: { payload: Json }; Returns: string }
+      revert_stock_batch: { Args: { p_batch_id: string }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never
