@@ -151,7 +151,8 @@ export default function CarritoPage() {
                 {appliedDiscount ? (
                   <div className="flex items-center justify-between gap-2 rounded-lg border border-accent/30 bg-accent/5 px-3 py-2 text-sm">
                     <span className="font-medium text-accent-light">
-                      {appliedDiscount.code} · −{formatPrice(appliedDiscount.amount)}
+                      {appliedDiscount.code} ({appliedDiscount.label}) · −
+                      {formatPrice(appliedDiscount.amount)}
                     </span>
                     <button
                       type="button"
