@@ -78,9 +78,9 @@ export function Footer() {
             <Image
               src="/loop.png"
               alt="Loop"
-              width={20}
-              height={20}
-              className="h-5 w-5 object-contain"
+              width={32}
+              height={32}
+              className="h-8 w-8 object-contain"
             />
           </a>
         </div>
