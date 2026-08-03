@@ -1,4 +1,5 @@
 import { BOLIVIA_CITIES } from "@/data/bolivia-cities";
+import { Select } from "@/components/Select";
 
 // Único caso con envío local / recojo en punto de atención. En cualquier
 // otra ciudad no existe el concepto de "dirección" en el sitio — se
@@ -60,14 +61,13 @@ export function CustomerFields({
         </label>
         <label className="block">
           <span className={labelClass}>Ciudad</span>
-          <select value={city} onChange={(e) => onCityChange(e.target.value)} className={inputClass}>
-            <option value="">Elegí tu ciudad</option>
-            {BOLIVIA_CITIES.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
+          <Select
+            value={city}
+            onChange={onCityChange}
+            options={BOLIVIA_CITIES}
+            placeholder="Elegí tu ciudad"
+            compact={compact}
+          />
         </label>
       </div>
 
