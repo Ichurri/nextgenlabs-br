@@ -108,7 +108,7 @@ export function Select({ value, onChange, options, placeholder, compact = false 
           tabIndex={-1}
           ref={listRef}
           onKeyDown={onListKeyDown}
-          className="absolute z-20 mt-1.5 max-h-64 w-full overflow-y-auto rounded-lg border border-border bg-surface-2 p-1 text-sm shadow-lg animate-fade-in"
+          className="absolute bottom-full z-20 mb-1.5 max-h-64 w-full overflow-y-auto rounded-lg border border-border bg-surface-2 p-1 text-sm shadow-lg animate-fade-in"
         >
           {options.map((option, index) => (
             <li
