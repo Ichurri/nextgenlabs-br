@@ -66,11 +66,6 @@ export function ReceiptCustomerFields({
           disabled={discountCodeLocked}
           className={`${inputClass} disabled:cursor-not-allowed disabled:opacity-60`}
         />
-        {discountCodeLocked && (
-          <span className="mt-1 block text-xs text-muted">
-            Viene del mensaje, no se puede editar acá.
-          </span>
-        )}
       </Field>
     </>
   );
