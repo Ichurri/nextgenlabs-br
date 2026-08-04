@@ -3,6 +3,8 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import type { DiscountCodeFields } from "@/lib/discount-code.schema";
+import { Select } from "@/components/Select";
+import { DatePicker } from "@/components/DatePicker";
 
 type Props = {
   mode: "create" | "edit";
@@ -75,25 +77,30 @@ export function DiscountCodeForm({ mode, codeId, initialValues }: Props) {
 
       <div className="grid grid-cols-2 gap-4">
         <Field label="Tipo">
-          <select
+          <Select
             value={values.type}
-            onChange={(e) => update("type", e.target.value as DiscountCodeFields["type"])}
-            className={inputClass}
-          >
-            <option value="percent">Porcentaje</option>
-            <option value="fixed">Monto fijo</option>
-          </select>
+            onChange={(v) => update("type", v as DiscountCodeFields["type"])}
+            options={[
+              { value: "percent", label: "Porcentaje" },
+              { value: "fixed", label: "Monto fijo" },
+            ]}
+            placeholder="Elegí un tipo"
+          />
         </Field>
         <Field label={values.type === "percent" ? "Valor (%)" : "Valor (Bs)"}>
           <input
             type="number"
-            value={values.value}
-            onChange={(e) => update("value", Number(e.target.value))}
+            // "|| ''" en vez de directo: si se deja en 0 (nunca es un valor
+            // válido, el mínimo real es 1% o Bs 0.01) el campo se muestra
+            // vacío en vez de "atascado" en 0 — así se puede borrar y
+            // escribir un número nuevo sin pelear con el input controlado.
+            value={values.value || ""}
+            onChange={(e) => update("value", e.target.value === "" ? 0 : Number(e.target.value))}
             min={values.type === "percent" ? 1 : 0.01}
             max={values.type === "percent" ? 50 : undefined}
             step="0.01"
             required
-            className={inputClass}
+            className={`${inputClass} no-spinner`}
           />
         </Field>
       </div>
@@ -129,15 +136,14 @@ export function DiscountCodeForm({ mode, codeId, initialValues }: Props) {
             onChange={(e) => update("maxUses", e.target.value === "" ? null : Number(e.target.value))}
             min={1}
             step="1"
-            className={inputClass}
+            className={`${inputClass} no-spinner`}
           />
         </Field>
         <Field label="Vence el (vacío = no vence)">
-          <input
-            type="date"
-            value={values.expiresAt ?? ""}
-            onChange={(e) => update("expiresAt", e.target.value === "" ? null : e.target.value)}
-            className={inputClass}
+          <DatePicker
+            value={values.expiresAt}
+            onChange={(v) => update("expiresAt", v)}
+            placeholder="Sin fecha"
           />
         </Field>
       </div>
@@ -152,7 +158,7 @@ export function DiscountCodeForm({ mode, codeId, initialValues }: Props) {
             }
             min={0}
             step="0.01"
-            className={inputClass}
+            className={`${inputClass} no-spinner`}
           />
         </Field>
         {values.type === "percent" && (
@@ -165,7 +171,7 @@ export function DiscountCodeForm({ mode, codeId, initialValues }: Props) {
               }
               min={0.01}
               step="0.01"
-              className={inputClass}
+              className={`${inputClass} no-spinner`}
             />
           </Field>
         )}

@@ -2,23 +2,41 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 
+export type SelectOption = string | { value: string; label: string };
+
+function normalizeOption(option: SelectOption): { value: string; label: string } {
+  return typeof option === "string" ? { value: option, label: option } : option;
+}
+
 type Props = {
   value: string;
   onChange: (value: string) => void;
-  options: readonly string[];
+  options: readonly SelectOption[];
   placeholder: string;
   /** Versión angosta para el drawer del carrito: texto y padding más chicos. */
   compact?: boolean;
 };
+
+// Debe coincidir con max-h-64 (16rem) de la lista de abajo, más el margen de
+// separación (mb-1.5/mt-1.5 = 0.375rem): así "auto" sabe cuánto espacio real
+// necesita antes de decidir para qué lado abrir.
+const MENU_SPACE_PX = 280;
 
 /**
  * Select propio: un `<select>` nativo no se puede restylear cross-browser
  * (el popup de opciones sale con el look por defecto del navegador/SO, ver
  * captura del reporte). Este reemplaza trigger + lista de opciones con los
  * mismos tokens que el resto del sitio.
+ *
+ * Se abre hacia abajo o hacia arriba según el espacio disponible en el
+ * viewport al momento de abrir (mide con getBoundingClientRect) — el mismo
+ * componente sirve tanto para un campo cerca del borde inferior (ciudad en
+ * el carrito) como uno cerca del borde superior (tipo de descuento).
  */
 export function Select({ value, onChange, options, placeholder, compact = false }: Props) {
+  const normalized = options.map(normalizeOption);
   const [isOpen, setIsOpen] = useState(false);
+  const [openDirection, setOpenDirection] = useState<"up" | "down">("down");
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const rootRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
@@ -35,13 +53,23 @@ export function Select({ value, onChange, options, placeholder, compact = false 
   }, [isOpen]);
 
   function openMenu() {
-    setHighlightedIndex(Math.max(options.indexOf(value), 0));
+    const currentIndex = normalized.findIndex((o) => o.value === value);
+    setHighlightedIndex(Math.max(currentIndex, 0));
+
+    const rect = rootRef.current?.getBoundingClientRect();
+    if (rect) {
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      setOpenDirection(
+        spaceBelow >= MENU_SPACE_PX || spaceBelow >= spaceAbove ? "down" : "up"
+      );
+    }
     setIsOpen(true);
   }
 
   function selectIndex(index: number) {
-    const next = options[index];
-    if (next !== undefined) onChange(next);
+    const next = normalized[index];
+    if (next !== undefined) onChange(next.value);
     setIsOpen(false);
   }
 
@@ -51,7 +79,7 @@ export function Select({ value, onChange, options, placeholder, compact = false 
       setIsOpen(false);
     } else if (e.key === "ArrowDown") {
       e.preventDefault();
-      setHighlightedIndex((i) => Math.min(i + 1, options.length - 1));
+      setHighlightedIndex((i) => Math.min(i + 1, normalized.length - 1));
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       setHighlightedIndex((i) => Math.max(i - 1, 0));
@@ -66,6 +94,8 @@ export function Select({ value, onChange, options, placeholder, compact = false 
   const triggerClass = compact
     ? "focus-ring flex w-full items-center justify-between gap-2 rounded-lg border border-border bg-surface-2 px-3 py-2 text-xs outline-none transition"
     : "focus-ring flex w-full items-center justify-between gap-2 rounded-lg border border-border bg-surface-2 px-4 py-3 text-sm outline-none transition";
+
+  const selectedLabel = normalized.find((o) => o.value === value)?.label;
 
   return (
     <div ref={rootRef} className="relative">
@@ -84,7 +114,7 @@ export function Select({ value, onChange, options, placeholder, compact = false 
         }}
         className={`${triggerClass} ${isOpen ? "border-accent-light" : ""}`}
       >
-        <span className={value ? "" : "text-muted"}>{value || placeholder}</span>
+        <span className={selectedLabel ? "" : "text-muted"}>{selectedLabel ?? placeholder}</span>
         <svg
           width="14"
           height="14"
@@ -108,20 +138,22 @@ export function Select({ value, onChange, options, placeholder, compact = false 
           tabIndex={-1}
           ref={listRef}
           onKeyDown={onListKeyDown}
-          className="absolute bottom-full z-20 mb-1.5 max-h-64 w-full overflow-y-auto rounded-lg border border-border bg-surface-2 p-1 text-sm shadow-lg animate-fade-in"
+          className={`absolute z-20 max-h-64 w-full overflow-y-auto rounded-lg border border-border bg-surface-2 p-1 text-sm shadow-lg animate-fade-in ${
+            openDirection === "down" ? "top-full mt-1.5" : "bottom-full mb-1.5"
+          }`}
         >
-          {options.map((option, index) => (
+          {normalized.map((option, index) => (
             <li
-              key={option}
+              key={option.value}
               role="option"
-              aria-selected={option === value}
+              aria-selected={option.value === value}
               onMouseEnter={() => setHighlightedIndex(index)}
               onClick={() => selectIndex(index)}
               className={`cursor-pointer rounded-md px-3 py-2 transition ${
                 index === highlightedIndex ? "bg-accent/15 text-accent-light" : "hover:bg-surface"
-              } ${option === value ? "font-medium" : ""}`}
+              } ${option.value === value ? "font-medium" : ""}`}
             >
-              {option}
+              {option.label}
             </li>
           ))}
         </ul>

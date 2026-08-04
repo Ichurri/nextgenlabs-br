@@ -108,3 +108,15 @@ body {
 .animate-fade-in {
   animation: fade-in 0.5s ease-out both;
 }
+
+/* Saca las flechas de +-1 de un <input type="number"> — se ven genéricas y
+   sobre montos en Bs o porcentajes no aportan nada. */
+.no-spinner::-webkit-outer-spin-button,
+.no-spinner::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.no-spinner {
+  -moz-appearance: textfield;
+}
