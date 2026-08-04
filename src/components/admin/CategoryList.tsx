@@ -170,10 +170,10 @@ function CategoryRow({
   }
 
   return (
-    <li className="flex flex-wrap items-center gap-3 px-4 py-3">
+    <li className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0 flex-1">
         {isEditing ? (
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -209,34 +209,36 @@ function CategoryRow({
         )}
       </div>
 
-      {!isEditing && category.isActive && (
-        <>
-          <SortControls
-            moveUpUrl={
-              isFirst ? null : `/api/admin/categorias/${category.id}?accion=mover&direction=up`
-            }
-            moveDownUrl={
-              isLast ? null : `/api/admin/categorias/${category.id}?accion=mover&direction=down`
-            }
-          />
-          <button
-            type="button"
-            onClick={() => setIsEditing(true)}
-            className="focus-ring rounded-lg border border-border px-3 py-1.5 text-xs font-medium transition hover:bg-surface-2"
-          >
-            Renombrar
-          </button>
-        </>
-      )}
+      <div className="flex flex-wrap items-center gap-3">
+        {!isEditing && category.isActive && (
+          <>
+            <SortControls
+              moveUpUrl={
+                isFirst ? null : `/api/admin/categorias/${category.id}?accion=mover&direction=up`
+              }
+              moveDownUrl={
+                isLast ? null : `/api/admin/categorias/${category.id}?accion=mover&direction=down`
+              }
+            />
+            <button
+              type="button"
+              onClick={() => setIsEditing(true)}
+              className="focus-ring rounded-lg border border-border px-3 py-1.5 text-xs font-medium transition hover:bg-surface-2"
+            >
+              Renombrar
+            </button>
+          </>
+        )}
 
-      <button
-        type="button"
-        onClick={toggleArchive}
-        disabled={pending}
-        className="focus-ring rounded-lg border border-border px-3 py-1.5 text-xs font-medium transition hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        {category.isActive ? "Archivar" : "Reactivar"}
-      </button>
+        <button
+          type="button"
+          onClick={toggleArchive}
+          disabled={pending}
+          className="focus-ring rounded-lg border border-border px-3 py-1.5 text-xs font-medium transition hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {category.isActive ? "Archivar" : "Reactivar"}
+        </button>
+      </div>
     </li>
   );
 }

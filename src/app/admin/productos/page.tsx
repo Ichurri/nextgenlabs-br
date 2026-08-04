@@ -27,7 +27,7 @@ export default async function AdminProductosPage() {
           </Link>
           <h1 className="mt-1 text-xl font-semibold">Productos</h1>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <Link
             href="/admin/categorias"
             className="focus-ring rounded-lg border border-border px-4 py-2 text-sm transition hover:bg-surface-2"
@@ -86,7 +86,7 @@ function ProductRow({
   isLast: boolean;
 }) {
   return (
-    <li className="flex flex-wrap items-center gap-4 px-4 py-3">
+    <li className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-semibold">{product.name}</p>
         <p className="text-xs text-muted">
@@ -94,30 +94,32 @@ function ProductRow({
           {product.price > 0 ? formatPrice(product.price) : "A consultar"}
         </p>
       </div>
-      <StockBadge product={product} />
-      <Link
-        href={`/admin/productos/${product.id}/stock`}
-        className="focus-ring shrink-0 rounded text-sm text-accent-light hover:underline"
-      >
-        Stock
-      </Link>
-      {product.isActive && (
-        <SortControls
-          moveUpUrl={
-            isFirst ? null : `/api/admin/productos/${product.id}?accion=mover&direction=up`
-          }
-          moveDownUrl={
-            isLast ? null : `/api/admin/productos/${product.id}?accion=mover&direction=down`
-          }
-        />
-      )}
-      <Link
-        href={`/admin/productos/${product.id}/editar`}
-        className="focus-ring shrink-0 rounded text-sm text-accent-light hover:underline"
-      >
-        Editar
-      </Link>
-      <ProductArchiveToggle id={product.id} isActive={product.isActive} />
+      <div className="flex flex-wrap items-center gap-3">
+        <StockBadge product={product} />
+        <Link
+          href={`/admin/productos/${product.id}/stock`}
+          className="focus-ring shrink-0 rounded text-sm text-accent-light hover:underline"
+        >
+          Stock
+        </Link>
+        {product.isActive && (
+          <SortControls
+            moveUpUrl={
+              isFirst ? null : `/api/admin/productos/${product.id}?accion=mover&direction=up`
+            }
+            moveDownUrl={
+              isLast ? null : `/api/admin/productos/${product.id}?accion=mover&direction=down`
+            }
+          />
+        )}
+        <Link
+          href={`/admin/productos/${product.id}/editar`}
+          className="focus-ring shrink-0 rounded text-sm text-accent-light hover:underline"
+        >
+          Editar
+        </Link>
+        <ProductArchiveToggle id={product.id} isActive={product.isActive} />
+      </div>
     </li>
   );
 }

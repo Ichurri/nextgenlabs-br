@@ -48,7 +48,7 @@ export function StockAdjustForm({ productId }: { productId: string }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-3 rounded-xl border border-border bg-surface p-4">
       <p className="text-sm font-semibold">Ajustar stock</p>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <label className="block">
           <span className="mb-1.5 block text-xs text-muted">
             Cantidad (positivo suma, negativo resta)

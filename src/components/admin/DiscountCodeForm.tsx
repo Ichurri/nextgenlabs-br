@@ -75,7 +75,7 @@ export function DiscountCodeForm({ mode, codeId, initialValues }: Props) {
         />
       </Field>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field label="Tipo">
           <Select
             value={values.type}
@@ -128,7 +128,7 @@ export function DiscountCodeForm({ mode, codeId, initialValues }: Props) {
         Activo
       </label>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field label="Usos máximos (vacío = ilimitado)">
           <input
             type="number"
@@ -148,7 +148,7 @@ export function DiscountCodeForm({ mode, codeId, initialValues }: Props) {
         </Field>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field label="Compra mínima en Bs (vacío = sin mínimo)">
           <input
             type="number"

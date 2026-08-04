@@ -42,7 +42,7 @@ export default async function AdminCodigosPage() {
           </Link>
           <h1 className="mt-1 text-xl font-semibold">Códigos de descuento</h1>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <Link
             href="/admin/codigos/reporte"
             className="focus-ring rounded-lg border border-border px-4 py-2 text-sm transition hover:bg-surface-2"

@@ -111,7 +111,7 @@ export function ProductForm({ mode, productId, categories, initialValues }: Prop
         )}
       </Field>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field label="Nombre">
           <input
             value={values.name}
@@ -131,7 +131,7 @@ export function ProductForm({ mode, productId, categories, initialValues }: Prop
         </Field>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field label="Precio (Bs. 0 = a consultar)">
           <input
             type="number"
@@ -159,7 +159,7 @@ export function ProductForm({ mode, productId, categories, initialValues }: Prop
         </Field>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field label="Pureza">
           <input
             value={values.purity}
