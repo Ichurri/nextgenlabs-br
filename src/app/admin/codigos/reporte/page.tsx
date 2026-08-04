@@ -30,9 +30,8 @@ export default async function ReporteCodigosPage() {
       </Link>
       <h1 className="mt-1 text-xl font-semibold">Reporte de códigos</h1>
       <p className="mt-2 max-w-2xl text-xs text-muted">
-        &ldquo;Generados&rdquo; cuenta pedidos históricos y comprobantes nuevos hechos con el
-        código, sin importar si se cobraron. &ldquo;Pagados&rdquo; es el número real: pedidos
-        marcados como pagados y comprobantes con &ldquo;ya está pagado&rdquo; tildado.
+        Cada pedido de la lista es una venta cobrada: &ldquo;Generados&rdquo; y
+        &ldquo;Pagados&rdquo; solo difieren por pedidos históricos que quedaron sin cobrar.
       </p>
 
       {error ? (
