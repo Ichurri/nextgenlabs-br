@@ -6,7 +6,8 @@
 // Número de WhatsApp en formato internacional
 // (código de país + número, solo dígitos, sin "+", espacios ni guiones).
 // Ejemplo Bolivia: 59171234567
-export const WHATSAPP_NUMBER = "59169437674";
+// export const WHATSAPP_NUMBER = "59169437674";
+export const WHATSAPP_NUMBER = "59178184211";
 
 export const siteConfig = {
   name: "Nextgen Labs",
@@ -18,8 +19,8 @@ export const siteConfig = {
   currency: "Bs",
 
   contact: {
-    email: "Quiquequiroga@icloud.com",
-    city: "Santa Cruz de la Sierra, Bolivia",
+    email: "quiquequiroga@icloud.com",
+    city: "Cochabamba, Bolivia",
     whatsappDisplay: "+591 69437674", // número visible
   },
 
