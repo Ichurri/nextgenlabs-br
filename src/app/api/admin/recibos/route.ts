@@ -3,15 +3,15 @@ import { z } from "zod";
 import { revalidateTag } from "next/cache";
 import { requireApiSession } from "@/lib/dal";
 import { orderItemInputSchema, customerSchema } from "@/lib/orders.schema";
-import { calculateOrderTotals, generateOrderNumber, OrderValidationError } from "@/lib/orders";
+import {
+  calculateOrderTotals,
+  generateOrderNumber,
+  generateToken,
+  OrderValidationError,
+} from "@/lib/orders";
 import { normalizeCode, evaluateDiscount, mapDiscountCodeRow, type DiscountCode } from "@/lib/discounts";
-import { renderOrderReceiptPdf } from "@/lib/pdf/OrderReceipt";
-import type { ReceiptData } from "@/lib/orders-data";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { getCatalog } from "@/lib/products-data";
-
-// @react-pdf/renderer no corre en Edge.
-export const runtime = "nodejs";
 
 const receiptSchema = z.object({
   items: z.array(orderItemInputSchema).min(1, "El comprobante no tiene ítems."),
@@ -20,11 +20,10 @@ const receiptSchema = z.object({
 });
 
 /**
- * Genera el PDF de un comprobante a partir de lo que el admin leyó de un
- * mensaje de WhatsApp y corrigió a mano. No persiste ningún pedido — ni
- * `orders`, ni token, ni estado en la base — es un PDF y se acabó (Fase 9
- * §1.3). El único registro que queda, si hay código de descuento, es la
- * redención: es lo único que sostiene el reporte por influencer.
+ * Crea un pedido a partir de lo que el admin leyó de un mensaje de WhatsApp
+ * y corrigió a mano. Persiste en `orders` + `order_items` vía create_order
+ * (Fase 11) y descuenta stock; el PDF se genera on-demand desde
+ * /api/pedido/[token]/comprobante.
  */
 export async function POST(request: Request) {
   const unauthorized = await requireApiSession();
@@ -94,95 +93,69 @@ export async function POST(request: Request) {
   // gratis se calcule sobre subtotal-después-de-descuento.
   const totals = calculateOrderTotals(items, catalog, discountAmount, customer.city);
   const orderNumber = generateOrderNumber();
+  const token = generateToken();
 
-  // Reclama el uso ANTES de renderizar: si el código se agotó entre la
-  // validación de arriba y este momento, no se genera ningún PDF.
-  if (discountCodeRow) {
-    const { error: claimError } = await supabaseAdmin.rpc("claim_discount_code_use", {
-      p_code_id: discountCodeRow.id,
-    });
-
-    if (claimError) {
-      if (claimError.code === "NGL01") {
-        return NextResponse.json(
-          { error: "Este código ya alcanzó su límite de usos." },
-          { status: 409 }
-        );
-      }
-      console.error("claim_discount_code_use_failed", claimError.code);
-      return NextResponse.json({ error: "No pudimos validar el código." }, { status: 500 });
-    }
-
-    const { error: insertError } = await supabaseAdmin.from("discount_redemptions").insert({
-      code_id: discountCodeRow.id,
-      code: discountCodeRow.code,
-      discount_amount: totals.discount,
-      receipt_number: orderNumber,
-      receipt_total: totals.total,
+  // El pedido, sus ítems, el claim del código y la redención entran en una
+  // sola transacción (create_order). Si el código se agotó entre la
+  // validación de arriba y este momento, no se crea nada.
+  const { error: orderError } = await supabaseAdmin.rpc("create_order", {
+    payload: {
+      order_number: orderNumber,
+      token,
       customer_name: customer.name,
-      is_paid: true,
-    });
+      customer_phone: customer.phone,
+      customer_city: customer.city,
+      customer_address: customer.address ?? null,
+      customer_note: customer.note ?? null,
+      subtotal: totals.subtotal,
+      discount: totals.discount,
+      shipping: totals.shipping,
+      total: totals.total,
+      discount_code: discountCodeRow?.code ?? null,
+      discount_code_label: discountLabel,
+      discount_code_id: discountCodeRow?.id ?? null,
+      items: totals.lines.map((line) => ({
+        slug: line.slug,
+        name: line.name,
+        dose: line.dose,
+        unit_price: line.unitPrice,
+        quantity: line.quantity,
+        line_total: line.lineTotal,
+      })),
+    },
+  });
 
-    if (insertError) {
-      console.error("insert_redemption_failed", insertError.code);
+  if (orderError) {
+    if (orderError.code === "NGL01") {
       return NextResponse.json(
-        { error: "No pudimos registrar el uso del código." },
-        { status: 500 }
+        { error: "Este código ya alcanzó su límite de usos." },
+        { status: 409 }
       );
     }
+    console.error("create_order_failed", orderError.code);
+    return NextResponse.json({ error: "No pudimos guardar el pedido." }, { status: 500 });
   }
 
-  const receipt: ReceiptData = {
-    orderNumber,
-    createdAt: new Date().toISOString(),
-    // Todo comprobante generado acá ya está pagado — no hay estado "pendiente"
-    // en este flujo (ver ORDER_STATUSES en orders-data.ts).
-    status: "paid",
-    customerName: customer.name,
-    customerPhone: customer.phone,
-    customerCity: customer.city,
-    customerAddress: customer.address ?? null,
-    subtotal: totals.subtotal,
-    discount: totals.discount,
-    discountCode: discountCodeRow?.code ?? null,
-    discountCodeLabel: discountLabel,
-    shipping: totals.shipping,
-    total: totals.total,
-    items: totals.lines,
-  };
-
-  const pdfBuffer = await renderOrderReceiptPdf(receipt);
-
-  // El comprobante ya existe en este punto: si el descuento de stock falla,
-  // logueamos y devolvemos el PDF igual con un aviso — perder el descuento
-  // de stock es molesto, perder el comprobante de una venta real es peor
-  // (§5 Bloque E del plan).
-  const headers: Record<string, string> = {
-    "Content-Type": "application/pdf",
-    "Content-Disposition": `attachment; filename="Comprobante-${orderNumber}.pdf"`,
-    "Cache-Control": "private, no-store",
-  };
-
+  // El pedido ya existe: si el descuento de stock falla, se avisa y se sigue —
+  // perder el descuento de stock es molesto, perder la venta es peor.
+  let stockWarning = false;
   try {
-    const { data: batchId, error: stockError } = await supabaseAdmin.rpc("register_sale_stock", {
+    const { error: stockError } = await supabaseAdmin.rpc("register_sale_stock", {
       payload: {
         receipt_number: orderNumber,
         items: totals.lines.map((line) => ({ slug: line.slug, quantity: line.quantity })),
       },
     });
-
     if (stockError) {
       console.error("register_sale_stock_failed", stockError.code);
-      headers["X-Stock-Warning"] = "1";
-    } else if (batchId) {
-      headers["X-Stock-Batch-Id"] = batchId;
+      stockWarning = true;
     }
   } catch (err) {
     console.error("register_sale_stock_threw", err);
-    headers["X-Stock-Warning"] = "1";
+    stockWarning = true;
   }
 
   revalidateTag("catalog", { expire: 0 });
 
-  return new Response(new Uint8Array(pdfBuffer), { headers });
+  return NextResponse.json({ orderNumber, token, stockWarning }, { status: 201 });
 }

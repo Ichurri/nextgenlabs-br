@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { parseOrderMessage } from "@/lib/whatsapp-parse";
 import { ReceiptItemsEditor, type ReceiptItem } from "@/components/admin/ReceiptItemsEditor";
 import {
@@ -11,13 +13,8 @@ import type { Product } from "@/lib/products.types";
 
 const emptyForm: ReceiptCustomerForm = { name: "", phone: "", city: "", address: "", note: "" };
 
-/** Extrae el filename de un header Content-Disposition: attachment; filename="X.pdf". */
-function filenameFromContentDisposition(header: string | null): string {
-  const match = header?.match(/filename="([^"]+)"/);
-  return match?.[1] ?? "Comprobante.pdf";
-}
-
 export function ReceiptBuilderForm({ products }: { products: Product[] }) {
+  const router = useRouter();
   const [rawMessage, setRawMessage] = useState("");
   const [parsed, setParsed] = useState(false);
   const [items, setItems] = useState<ReceiptItem[]>([]);
@@ -27,9 +24,8 @@ export function ReceiptBuilderForm({ products }: { products: Product[] }) {
   const [discountCodeLocked, setDiscountCodeLocked] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [stockBatchId, setStockBatchId] = useState<string | null>(null);
   const [stockWarning, setStockWarning] = useState(false);
-  const [undoState, setUndoState] = useState<"idle" | "pending" | "done" | "error">("idle");
+  const [createdOrderNumber, setCreatedOrderNumber] = useState<string | null>(null);
 
   function updateField<K extends keyof ReceiptCustomerForm>(key: K, value: ReceiptCustomerForm[K]) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -74,23 +70,10 @@ export function ReceiptBuilderForm({ products }: { products: Product[] }) {
     });
   }
 
-  async function undoStockBatch() {
-    if (!stockBatchId) return;
-    setUndoState("pending");
-    try {
-      const res = await fetch(`/api/admin/stock/${stockBatchId}`, { method: "DELETE" });
-      setUndoState(res.ok ? "done" : "error");
-    } catch {
-      setUndoState("error");
-    }
-  }
-
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSubmitError(null);
-    setStockBatchId(null);
     setStockWarning(false);
-    setUndoState("idle");
 
     const payload = {
       items: items.map(({ slug, quantity }) => ({ slug, quantity })),
@@ -118,20 +101,17 @@ export function ReceiptBuilderForm({ products }: { products: Product[] }) {
         return;
       }
 
-      if (res.headers.get("X-Stock-Warning")) {
+      const body = (await res.json()) as { orderNumber: string; stockWarning: boolean };
+
+      if (body.stockWarning) {
+        // No redirige: el dueño tiene que leer el aviso y corregir el stock a mano.
         setStockWarning(true);
-      } else {
-        setStockBatchId(res.headers.get("X-Stock-Batch-Id"));
+        setCreatedOrderNumber(body.orderNumber);
+        return;
       }
 
-      const blob = await res.blob();
-      const filename = filenameFromContentDisposition(res.headers.get("Content-Disposition"));
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = filename;
-      link.click();
-      URL.revokeObjectURL(url);
+      router.push(`/admin?nuevo=${encodeURIComponent(body.orderNumber)}`);
+      router.refresh();
     } catch {
       setSubmitError("No pudimos conectar con el servidor.");
     } finally {
@@ -199,37 +179,27 @@ export function ReceiptBuilderForm({ products }: { products: Product[] }) {
 
       <button
         type="submit"
-        disabled={isSubmitting || items.length === 0}
+        disabled={isSubmitting || items.length === 0 || createdOrderNumber !== null}
         className="focus-ring w-full rounded-lg bg-accent px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-accent-light disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {isSubmitting ? "Generando…" : "Generar comprobante"}
+        {isSubmitting ? "Guardando…" : "Guardar pedido y generar comprobante"}
       </button>
 
       {stockWarning && (
-        <p className="rounded-lg border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-warning">
-          El comprobante se generó, pero no pudimos descontar el stock automáticamente. Ajustalo
-          a mano desde la ficha del producto.
-        </p>
-      )}
-
-      {stockBatchId && undoState !== "done" && (
-        <p className="text-xs text-muted">
-          ¿Generaste este comprobante dos veces?{" "}
-          <button
-            type="button"
-            onClick={undoStockBatch}
-            disabled={undoState === "pending"}
-            className="focus-ring rounded text-accent-light hover:underline disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {undoState === "pending" ? "Deshaciendo…" : "Deshacer el descuento de stock"}
-          </button>
-          {undoState === "error" && (
-            <span className="ml-1 text-danger">No pudimos deshacerlo, probá de nuevo.</span>
-          )}
-        </p>
-      )}
-      {undoState === "done" && (
-        <p className="text-xs text-success">Descuento de stock deshecho.</p>
+        <div className="rounded-lg border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-warning">
+          <p>
+            El pedido {createdOrderNumber} quedó guardado, pero no pudimos descontar el stock.
+            Restalo a mano con &ldquo;Ajustar stock&rdquo; en la ficha del producto.
+          </p>
+          <div className="mt-2 flex flex-wrap gap-4">
+            <Link href="/admin/productos" className="focus-ring rounded underline">
+              Ir a productos
+            </Link>
+            <Link href="/admin" className="focus-ring rounded underline">
+              Ir a pedidos
+            </Link>
+          </div>
+        </div>
       )}
     </form>
   );

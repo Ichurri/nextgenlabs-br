@@ -21,7 +21,8 @@ export default async function NuevoReciboPage() {
       <h1 className="mt-1 text-xl font-semibold">Nuevo comprobante</h1>
       <p className="mt-2 text-sm text-muted">
         Pegá el mensaje de pedido que te mandó el comprador por WhatsApp, revisá lo que
-        entendimos y generá el PDF. No se guarda ningún pedido en el sistema.
+        entendimos y guardalo. El pedido queda en la lista de Pedidos, con su comprobante en PDF
+        y el stock ya descontado.
       </p>
       <div className="mt-6">
         <ReceiptBuilderForm products={products} />

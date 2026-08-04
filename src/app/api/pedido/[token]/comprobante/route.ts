@@ -5,7 +5,7 @@ import { renderOrderReceiptPdf } from "@/lib/pdf/OrderReceipt";
 export const runtime = "nodejs";
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ token: string }> }
 ) {
   const { token } = await params;
@@ -18,10 +18,13 @@ export async function GET(
 
   const pdfBuffer = await renderOrderReceiptPdf(order);
 
+  const url = new URL(request.url);
+  const disposition = url.searchParams.get("descargar") === "1" ? "attachment" : "inline";
+
   return new Response(new Uint8Array(pdfBuffer), {
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `inline; filename="Pedido-${order.orderNumber}.pdf"`,
+      "Content-Disposition": `${disposition}; filename="Pedido-${order.orderNumber}.pdf"`,
       "Cache-Control": "private, no-store",
     },
   });

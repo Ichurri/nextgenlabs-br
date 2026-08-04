@@ -15,7 +15,7 @@ const PAGE_SIZE = 25;
 export default async function AdminPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; nuevo?: string }>;
 }) {
   await requireSession();
 
@@ -68,6 +68,12 @@ export default async function AdminPage({
         </div>
       </div>
 
+      {params.nuevo && (
+        <p className="mt-6 rounded-lg border border-success/40 bg-success/10 px-4 py-3 text-sm text-success">
+          Pedido {params.nuevo} guardado. Bajá el comprobante y mandáselo por WhatsApp.
+        </p>
+      )}
+
       {error ? (
         <p className="mt-8 text-sm text-danger">
           No pudimos cargar los pedidos. Probá de nuevo.
@@ -77,7 +83,11 @@ export default async function AdminPage({
       ) : (
         <div className="mt-6 space-y-4">
           {orders.map((order) => (
-            <OrderCard key={order.id} order={order} />
+            <OrderCard
+              key={order.id}
+              order={order}
+              highlight={order.order_number === params.nuevo}
+            />
           ))}
         </div>
       )}
