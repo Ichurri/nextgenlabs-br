@@ -179,13 +179,8 @@ describe("buildCustomerStatusMessage", () => {
   it("el mensaje cambia según el estado", () => {
     const paid = buildCustomerStatusMessage("NGL-1", "paid");
     const shipped = buildCustomerStatusMessage("NGL-1", "shipped");
-    const pending = buildCustomerStatusMessage("NGL-1", "pending");
-    const cancelled = buildCustomerStatusMessage("NGL-1", "cancelled");
 
     expect(paid).not.toBe(shipped);
-    // cancelled y pending no autogeneran un mensaje específico: usan el
-    // mismo genérico, esa conversación la escribe el dueño con sus palabras.
-    expect(pending).toBe(cancelled);
   });
 });
 

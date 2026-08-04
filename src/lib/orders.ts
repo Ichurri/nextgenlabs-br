@@ -1,6 +1,7 @@
 import { randomBytes, randomInt } from "node:crypto";
 import { isInStock, type Catalog } from "@/lib/products.types";
 import { round2 } from "@/lib/money";
+import { normalizeText } from "@/lib/whatsapp-parse";
 import { SHIPPING } from "@/config/shipping";
 
 export type OrderLine = {
@@ -29,11 +30,16 @@ export class OrderValidationError extends Error {}
  * el caller (getCatalog(), Fase 10) en vez de leerlo él mismo. El servidor
  * nunca confía en montos que manda el cliente, así que esta función es la
  * única fuente de verdad para el dinero de un pedido (Fase 5 y 6).
+ *
+ * `city` es texto libre (lo tipea/corrige el admin): se compara sin
+ * mayúsculas ni acentos, así que "cochabamba", "Cochabamba " o "COCHABAMBA"
+ * matchean igual.
  */
 export function calculateOrderTotals(
   items: { slug: string; quantity: number }[],
   catalog: Catalog,
-  discount = 0 // la Fase 6 pasa un valor acá; la Fase 5 siempre 0
+  discount = 0, // la Fase 6 pasa un valor acá; la Fase 5 siempre 0
+  city?: string | null
 ): OrderTotals {
   if (items.length === 0) {
     throw new OrderValidationError("El carrito está vacío.");
@@ -73,7 +79,9 @@ export function calculateOrderTotals(
   // conservador para el negocio).
   const freeShipping =
     SHIPPING.freeOver !== null && subtotalAfterDiscount >= SHIPPING.freeOver;
-  const shipping = freeShipping ? 0 : SHIPPING.nationalCost;
+  const isCochabamba = city != null && normalizeText(city) === "cochabamba";
+  const baseCost = isCochabamba ? SHIPPING.cochabambaCost : SHIPPING.nationalCost;
+  const shipping = freeShipping ? 0 : baseCost;
 
   const total = round2(subtotalAfterDiscount + shipping);
 

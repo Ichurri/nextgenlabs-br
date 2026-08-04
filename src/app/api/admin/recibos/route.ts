@@ -17,7 +17,6 @@ const receiptSchema = z.object({
   items: z.array(orderItemInputSchema).min(1, "El comprobante no tiene ítems."),
   customer: customerSchema,
   discountCode: z.string().trim().min(1).max(40).optional(),
-  isPaid: z.boolean(),
 });
 
 /**
@@ -46,7 +45,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const { items, customer, discountCode: rawDiscountCode, isPaid } = parsed.data;
+  const { items, customer, discountCode: rawDiscountCode } = parsed.data;
 
   // El servidor jamás confía en montos que vengan del body: acá se
   // recalcula todo desde el catálogo. Primera pasada sin descuento: hace
@@ -54,7 +53,7 @@ export async function POST(request: Request) {
   const catalog = await getCatalog();
   let baseTotals;
   try {
-    baseTotals = calculateOrderTotals(items, catalog);
+    baseTotals = calculateOrderTotals(items, catalog, 0, customer.city);
   } catch (error) {
     if (error instanceof OrderValidationError) {
       return NextResponse.json({ error: error.message }, { status: 400 });
@@ -93,7 +92,7 @@ export async function POST(request: Request) {
 
   // Segunda pasada: con el descuento evaluado, para que el umbral de envío
   // gratis se calcule sobre subtotal-después-de-descuento.
-  const totals = calculateOrderTotals(items, catalog, discountAmount);
+  const totals = calculateOrderTotals(items, catalog, discountAmount, customer.city);
   const orderNumber = generateOrderNumber();
 
   // Reclama el uso ANTES de renderizar: si el código se agotó entre la
@@ -121,7 +120,7 @@ export async function POST(request: Request) {
       receipt_number: orderNumber,
       receipt_total: totals.total,
       customer_name: customer.name,
-      is_paid: isPaid,
+      is_paid: true,
     });
 
     if (insertError) {
@@ -136,7 +135,9 @@ export async function POST(request: Request) {
   const receipt: ReceiptData = {
     orderNumber,
     createdAt: new Date().toISOString(),
-    status: isPaid ? "paid" : "pending",
+    // Todo comprobante generado acá ya está pagado — no hay estado "pendiente"
+    // en este flujo (ver ORDER_STATUSES en orders-data.ts).
+    status: "paid",
     customerName: customer.name,
     customerPhone: customer.phone,
     customerCity: customer.city,

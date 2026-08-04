@@ -13,10 +13,8 @@ export const metadata: Metadata = {
 const PAGE_SIZE = 25;
 
 const STATUS_FILTERS = [
-  { value: "pending", label: "Pendientes" },
   { value: "paid", label: "Pagados" },
   { value: "shipped", label: "Despachados" },
-  { value: "cancelled", label: "Cancelados" },
   { value: "all", label: "Todos" },
 ] as const;
 
@@ -34,7 +32,7 @@ export default async function AdminPage({
   await requireSession();
 
   const params = await searchParams;
-  const status: StatusFilter = isStatusFilter(params.status) ? params.status : "pending";
+  const status: StatusFilter = isStatusFilter(params.status) ? params.status : "paid";
   const page = Math.max(1, Number.parseInt(params.page ?? "1", 10) || 1);
   const from = (page - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;

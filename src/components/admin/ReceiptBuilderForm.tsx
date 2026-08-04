@@ -24,7 +24,7 @@ export function ReceiptBuilderForm({ products }: { products: Product[] }) {
   const [unmatched, setUnmatched] = useState<string[]>([]);
   const [form, setForm] = useState<ReceiptCustomerForm>(emptyForm);
   const [discountCode, setDiscountCode] = useState("");
-  const [isPaid, setIsPaid] = useState(false);
+  const [discountCodeLocked, setDiscountCodeLocked] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [stockBatchId, setStockBatchId] = useState<string | null>(null);
@@ -47,6 +47,9 @@ export function ReceiptBuilderForm({ products }: { products: Product[] }) {
       note: "",
     });
     setDiscountCode(result.code ?? "");
+    // Si el código vino del mensaje, no se puede tocar en esta pantalla: así
+    // el descuento aplicado siempre traza al que escribió el comprador.
+    setDiscountCodeLocked(result.code !== null);
     setSubmitError(null);
     setParsed(true);
   }
@@ -99,7 +102,6 @@ export function ReceiptBuilderForm({ products }: { products: Product[] }) {
         note: form.note,
       },
       ...(discountCode.trim() ? { discountCode: discountCode.trim() } : {}),
-      isPaid,
     };
 
     setIsSubmitting(true);
@@ -186,8 +188,7 @@ export function ReceiptBuilderForm({ products }: { products: Product[] }) {
         onChange={updateField}
         discountCode={discountCode}
         onDiscountCodeChange={setDiscountCode}
-        isPaid={isPaid}
-        onIsPaidChange={setIsPaid}
+        discountCodeLocked={discountCodeLocked}
       />
 
       {submitError && (

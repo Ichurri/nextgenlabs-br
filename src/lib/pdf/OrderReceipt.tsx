@@ -121,10 +121,8 @@ const styles = StyleSheet.create({
 });
 
 const STATUS_LABEL: Record<ReceiptData["status"], string> = {
-  pending: "Pendiente de pago",
   paid: "Pagado",
   shipped: "Despachado",
-  cancelled: "Cancelado",
 };
 
 function formatOrderDate(iso: string): string {

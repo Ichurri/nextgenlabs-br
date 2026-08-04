@@ -13,18 +13,17 @@ type Props = {
   onChange: <K extends keyof ReceiptCustomerForm>(key: K, value: ReceiptCustomerForm[K]) => void;
   discountCode: string;
   onDiscountCodeChange: (value: string) => void;
-  isPaid: boolean;
-  onIsPaidChange: (value: boolean) => void;
+  /** true cuando el código vino del mensaje pegado: no se puede editar acá. */
+  discountCodeLocked: boolean;
 };
 
-/** Datos del comprador (el WhatsApp nunca viene en el mensaje, lo escribe el admin), código y estado de pago. */
+/** Datos del comprador (el WhatsApp nunca viene en el mensaje, lo escribe el admin) y código de descuento. */
 export function ReceiptCustomerFields({
   form,
   onChange,
   discountCode,
   onDiscountCodeChange,
-  isPaid,
-  onIsPaidChange,
+  discountCodeLocked,
 }: Props) {
   return (
     <>
@@ -56,24 +55,19 @@ export function ReceiptCustomerFields({
         />
       </Field>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Código de descuento (opcional)">
-          <input
-            value={discountCode}
-            onChange={(e) => onDiscountCodeChange(e.target.value.toUpperCase())}
-            className={inputClass}
-          />
-        </Field>
-        <label className="flex items-center gap-2 self-end pb-3 text-sm">
-          <input
-            type="checkbox"
-            checked={isPaid}
-            onChange={(e) => onIsPaidChange(e.target.checked)}
-            className="focus-ring h-4 w-4 rounded border-border"
-          />
-          Ya está pagado
-        </label>
-      </div>
+      <Field label="Código de descuento (opcional)">
+        <input
+          value={discountCode}
+          onChange={(e) => onDiscountCodeChange(e.target.value.toUpperCase())}
+          disabled={discountCodeLocked}
+          className={`${inputClass} disabled:cursor-not-allowed disabled:opacity-60`}
+        />
+        {discountCodeLocked && (
+          <span className="mt-1 block text-xs text-muted">
+            Viene del mensaje, no se puede editar acá.
+          </span>
+        )}
+      </Field>
     </>
   );
 }

@@ -84,19 +84,13 @@ export function buildOrderWhatsAppUrl(items: CartItem[], details: OrderMessageDe
 // manda nada automáticamente (00-contexto.md §3, no hay API de WhatsApp
 // Business).
 
-/**
- * Texto del aviso según el estado del pedido. `pending` y `cancelled` usan
- * el genérico: esa conversación (sobre todo cancelar) la escribe el dueño
- * con sus propias palabras, no se autogenera.
- */
+/** Texto del aviso según el estado del pedido. */
 export function buildCustomerStatusMessage(orderNumber: string, status: OrderStatus): string {
   switch (status) {
     case "paid":
       return `Confirmamos tu pago del pedido ${orderNumber}. Ya lo estamos preparando.`;
     case "shipped":
       return `Tu pedido ${orderNumber} ya fue despachado.`;
-    default:
-      return `Hola, te escribo por tu pedido ${orderNumber}.`;
   }
 }
 

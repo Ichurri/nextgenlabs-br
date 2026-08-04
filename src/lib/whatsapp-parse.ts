@@ -69,7 +69,12 @@ function extractField(lines: string[], label: string): string | null {
  */
 export function parseOrderMessage(text: string, products: Product[]): ParsedOrderMessage {
   const { byFull, byName } = buildProductIndex(products);
-  const lines = text.split("\n");
+  // NFC: algunos teclados (sobre todo iOS) mandan las vocales acentuadas
+  // descompuestas ("o" + acento combinante en vez de "ó" precompuesta). Los
+  // regex de extractField() abajo solo reconocen la forma precompuesta —sin
+  // este normalize, "Dirección"/"Código" pegados desde esos teclados no
+  // matchean y el campo queda vacío.
+  const lines = text.normalize("NFC").split("\n");
 
   const itemsBySlug = new Map<string, number>();
   const unmatched: string[] = [];

@@ -1,6 +1,8 @@
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
-const ORDER_STATUSES = ["pending", "paid", "shipped", "cancelled"] as const;
+// Un pedido nace pagado (ver /api/admin/recibos) y el estado no se cambia a
+// mano desde el panel: no hay "pending" ni "cancelled".
+const ORDER_STATUSES = ["paid", "shipped"] as const;
 export type OrderStatus = (typeof ORDER_STATUSES)[number];
 
 // El CHECK constraint de Postgres garantiza estos tres valores, pero

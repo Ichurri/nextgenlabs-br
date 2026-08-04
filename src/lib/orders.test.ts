@@ -69,6 +69,43 @@ describe("calculateOrderTotals", () => {
   });
 });
 
+describe("calculateOrderTotals — envío por ciudad", () => {
+  it("sin ciudad, cobra el envío nacional", () => {
+    const totals = calculateOrderTotals([{ slug: "normal", quantity: 1 }], fixtureCatalog);
+    expect(totals.shipping).toBe(25);
+  });
+
+  it("Cochabamba no paga envío", () => {
+    const totals = calculateOrderTotals(
+      [{ slug: "normal", quantity: 1 }],
+      fixtureCatalog,
+      0,
+      "Cochabamba"
+    );
+    expect(totals.shipping).toBe(0);
+  });
+
+  it("el match de Cochabamba ignora mayúsculas, acentos y espacios", () => {
+    const totals = calculateOrderTotals(
+      [{ slug: "normal", quantity: 1 }],
+      fixtureCatalog,
+      0,
+      "  cochabamba "
+    );
+    expect(totals.shipping).toBe(0);
+  });
+
+  it("otra ciudad paga el envío nacional", () => {
+    const totals = calculateOrderTotals(
+      [{ slug: "normal", quantity: 1 }],
+      fixtureCatalog,
+      0,
+      "Santa Cruz de la Sierra"
+    );
+    expect(totals.shipping).toBe(25);
+  });
+});
+
 describe("calculateOrderTotals — umbral de envío gratis", () => {
   beforeEach(() => {
     vi.resetModules();

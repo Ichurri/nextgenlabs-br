@@ -1,16 +1,21 @@
-import { formatPrice, formatRelativeDays, daysSince } from "@/lib/format";
-import { parseOrderStatus } from "@/lib/orders-data";
+import { formatPrice, formatRelativeDays } from "@/lib/format";
+import { parseOrderStatus, type OrderStatus } from "@/lib/orders-data";
 import { buildCustomerWhatsAppUrl } from "@/lib/whatsapp";
 import type { Database } from "@/types/database";
-import { OrderStatusControl } from "@/components/admin/OrderStatusControl";
 
 export type OrderWithItems = Database["public"]["Tables"]["orders"]["Row"] & {
   order_items: Database["public"]["Tables"]["order_items"]["Row"][];
 };
 
-// Un pendiente de más de esto se destaca: probablemente quedó abandonado,
-// no es "recién hecho, esperando el depósito" (C2, 00-contexto.md).
-const STALE_PENDING_DAYS = 3;
+const STATUS_LABEL: Record<OrderStatus, string> = {
+  paid: "Pagado",
+  shipped: "Despachado",
+};
+
+const STATUS_BADGE_CLASS: Record<OrderStatus, string> = {
+  paid: "border-success bg-success/10 text-success",
+  shipped: "border-accent bg-accent/10 text-accent-light",
+};
 
 export function OrderCard({ order }: { order: OrderWithItems }) {
   const status = parseOrderStatus(order.status);
@@ -18,30 +23,21 @@ export function OrderCard({ order }: { order: OrderWithItems }) {
     dateStyle: "short",
     timeStyle: "short",
   });
-  const isStalePending = status === "pending" && daysSince(order.created_at) >= STALE_PENDING_DAYS;
 
   return (
-    <article
-      className={`rounded-xl border bg-surface p-4 sm:p-5 ${
-        isStalePending ? "border-danger/40" : "border-border"
-      }`}
-    >
+    <article className="rounded-xl border border-border bg-surface p-4 sm:p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="font-mono text-sm font-semibold">{order.order_number}</p>
           <p className="text-xs text-muted">
-            {createdAt} ·{" "}
-            <span className={isStalePending ? "font-medium text-danger" : undefined}>
-              {formatRelativeDays(order.created_at)}
-            </span>
+            {createdAt} · {formatRelativeDays(order.created_at)}
           </p>
         </div>
-        <OrderStatusControl
-          orderId={order.id}
-          status={status}
-          orderNumber={order.order_number}
-          customerPhone={order.customer_phone}
-        />
+        <span
+          className={`rounded-full border px-3 py-1 text-xs font-medium ${STATUS_BADGE_CLASS[status]}`}
+        >
+          {STATUS_LABEL[status]}
+        </span>
       </div>
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2">

@@ -106,6 +106,24 @@ describe("parseOrderMessage", () => {
     });
   });
 
+  it("acentos en forma NFD (típico de teclados iOS) igual matchean Dirección y Código", () => {
+    // .normalize("NFD") descompone "ó" (U+00F3) en "o" (U+006F) + acento
+    // combinante (U+0301) — lo que mandan algunos teclados. Sin el
+    // normalize("NFC") de parseOrderMessage, este mensaje no matcheaba.
+    const message = buildOrderMessage(items, {
+      discountCode: "MAFE10",
+      name: "Carla Comprador",
+      city: "Cochabamba",
+      address: "Av. Siempre Viva 123",
+    }).normalize("NFD");
+
+    const parsed = parseOrderMessage(message, fixtureProducts);
+
+    expect(parsed.code).toBe("MAFE10");
+    expect(parsed.city).toBe("Cochabamba");
+    expect(parsed.address).toBe("Av. Siempre Viva 123");
+  });
+
   it("suma cantidades cuando el mismo producto aparece en dos líneas", () => {
     const parsed = parseOrderMessage(
       "• Producto Normal 10 MG x1 — Bs 100\n• Producto Normal 10 MG x2 — Bs 200",
