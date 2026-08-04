@@ -11,7 +11,8 @@ import {
 } from "@/lib/orders";
 import { normalizeCode, evaluateDiscount, mapDiscountCodeRow, type DiscountCode } from "@/lib/discounts";
 import { supabaseAdmin } from "@/lib/supabase-admin";
-import { getCatalog } from "@/lib/products-data";
+import { getAdminCatalog } from "@/lib/products-data";
+import type { Catalog } from "@/lib/products.types";
 
 const receiptSchema = z.object({
   items: z.array(orderItemInputSchema).min(1, "El comprobante no tiene ítems."),
@@ -49,7 +50,14 @@ export async function POST(request: Request) {
   // El servidor jamás confía en montos que vengan del body: acá se
   // recalcula todo desde el catálogo. Primera pasada sin descuento: hace
   // falta el subtotal crudo para evaluar el código contra min_order_total.
-  const catalog = await getCatalog();
+  //
+  // El comprobante es de una venta que YA ocurrió por WhatsApp: se valida
+  // contra el catálogo fresco del panel (el mismo que llena el selector de
+  // ReceiptItemsEditor), no contra el cacheado del sitio público. Así el
+  // precio y el stock son los de este segundo, y un producto archivado se
+  // puede facturar igual.
+  const { products, categories } = await getAdminCatalog();
+  const catalog: Catalog = { products, categories: categories.map((c) => c.name) };
   let baseTotals;
   try {
     baseTotals = calculateOrderTotals(items, catalog, 0, customer.city);
