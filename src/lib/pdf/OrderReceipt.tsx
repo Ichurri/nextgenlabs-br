@@ -122,7 +122,6 @@ const styles = StyleSheet.create({
 
 const STATUS_LABEL: Record<ReceiptData["status"], string> = {
   paid: "Pagado",
-  shipped: "Despachado",
 };
 
 function formatOrderDate(iso: string): string {

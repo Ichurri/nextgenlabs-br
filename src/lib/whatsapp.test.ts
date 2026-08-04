@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  buildCustomerStatusMessage,
+  buildCustomerReceiptMessage,
   buildCustomerWhatsAppUrl,
   buildOrderMessage,
   buildOrderWhatsAppUrl,
@@ -163,44 +163,29 @@ describe("buildOrderWhatsAppUrl", () => {
   });
 });
 
-describe("buildCustomerStatusMessage", () => {
-  it("incluye el número de pedido para el estado paid", () => {
-    const message = buildCustomerStatusMessage("NGL-260727-K4XQ", "paid");
-    expect(message).toContain("NGL-260727-K4XQ");
-    expect(message).toMatch(/pago/i);
-  });
-
-  it("incluye el número de pedido para el estado shipped", () => {
-    const message = buildCustomerStatusMessage("NGL-260727-K4XQ", "shipped");
-    expect(message).toContain("NGL-260727-K4XQ");
-    expect(message).toMatch(/despachado/i);
-  });
-
-  it("el mensaje cambia según el estado", () => {
-    const paid = buildCustomerStatusMessage("NGL-1", "paid");
-    const shipped = buildCustomerStatusMessage("NGL-1", "shipped");
-
-    expect(paid).not.toBe(shipped);
+describe("buildCustomerReceiptMessage", () => {
+  it("es el texto acordado con el dueño, sin número de pedido", () => {
+    expect(buildCustomerReceiptMessage()).toBe(
+      "Gracias por confiar en nosotros, acá está tu comprobante de recibo."
+    );
   });
 });
 
 describe("buildCustomerWhatsAppUrl", () => {
   it("apunta a wa.me con el teléfono del comprador (no el del negocio)", () => {
-    const url = buildCustomerWhatsAppUrl("69437674", "NGL-1", "paid");
-    expect(url.startsWith("https://wa.me/69437674?text=")).toBe(true);
+    expect(buildCustomerWhatsAppUrl("69437674").startsWith("https://wa.me/69437674?text=")).toBe(
+      true
+    );
   });
 
   it("el teléfono queda correctamente escapado en la URL", () => {
-    const url = buildCustomerWhatsAppUrl("+591 69437674", "NGL-1", "paid");
+    const url = buildCustomerWhatsAppUrl("+591 69437674");
     expect(url).toContain(encodeURIComponent("+591 69437674"));
     expect(url).not.toContain(" ");
   });
 
-  it("codifica el mensaje correspondiente al estado en el parámetro text", () => {
-    const url = buildCustomerWhatsAppUrl("69437674", "NGL-1", "shipped");
-    const encodedMessage = url.split("?text=")[1];
-    expect(decodeURIComponent(encodedMessage)).toBe(
-      buildCustomerStatusMessage("NGL-1", "shipped")
-    );
+  it("codifica el mensaje en el parámetro text", () => {
+    const url = buildCustomerWhatsAppUrl("69437674");
+    expect(decodeURIComponent(url.split("?text=")[1])).toBe(buildCustomerReceiptMessage());
   });
 });

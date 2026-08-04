@@ -1,7 +1,6 @@
 import { buildWhatsAppUrl, siteConfig } from "@/config/site";
 import { cartTotal, type CartItem } from "@/lib/cart";
 import { formatPrice } from "@/lib/format";
-import type { OrderStatus } from "@/lib/orders-data";
 
 // ─── Comprador → negocio ───────────────────────────────────────────────
 // wa.me apunta al número DEL NEGOCIO (WHATSAPP_NUMBER en config/site.ts).
@@ -78,27 +77,18 @@ export function buildOrderWhatsAppUrl(items: CartItem[], details: OrderMessageDe
 
 // ─── Negocio → comprador ────────────────────────────────────────────────
 // wa.me apunta acá al número DEL COMPRADOR (customer_phone, ya normalizado a
-// solo dígitos por phoneSchema en orders.schema.ts), no al del negocio. El
-// dueño ve el botón "Avisar al comprador" en el panel después de cambiar el
-// estado de un pedido, revisa el texto y aprieta "enviar" a mano — nunca se
-// manda nada automáticamente (00-contexto.md §3, no hay API de WhatsApp
-// Business).
+// solo dígitos por phoneSchema en orders.schema.ts), no al del negocio.
+//
+// WhatsApp no deja adjuntar archivos por deep link: este helper solo abre el
+// chat con el texto listo. El PDF lo adjunta el dueño a mano, por eso la
+// tarjeta del pedido pone el botón de descarga al lado de este enlace.
 
-/** Texto del aviso según el estado del pedido. */
-export function buildCustomerStatusMessage(orderNumber: string, status: OrderStatus): string {
-  switch (status) {
-    case "paid":
-      return `Confirmamos tu pago del pedido ${orderNumber}. Ya lo estamos preparando.`;
-    case "shipped":
-      return `Tu pedido ${orderNumber} ya fue despachado.`;
-  }
+/** Único mensaje al comprador: el comprobante va adjunto a mano. */
+export function buildCustomerReceiptMessage(): string {
+  return "Gracias por confiar en nosotros, acá está tu comprobante de recibo.";
 }
 
-export function buildCustomerWhatsAppUrl(
-  phoneDigits: string,
-  orderNumber: string,
-  status: OrderStatus
-): string {
-  const message = buildCustomerStatusMessage(orderNumber, status);
+export function buildCustomerWhatsAppUrl(phoneDigits: string): string {
+  const message = buildCustomerReceiptMessage();
   return `https://wa.me/${encodeURIComponent(phoneDigits)}?text=${encodeURIComponent(message)}`;
 }
