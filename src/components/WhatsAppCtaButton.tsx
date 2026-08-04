@@ -12,6 +12,8 @@ type WhatsAppCtaButtonProps = {
   className?: string;
   /** Nombre del evento de analítica disparado al hacer clic (@vercel/analytics). */
   analyticsEvent?: string;
+  /** Efecto secundario extra al hacer clic (ej. vaciar el carrito al finalizar pedido). */
+  onClick?: () => void;
 };
 
 const variantClasses: Record<NonNullable<WhatsAppCtaButtonProps["variant"]>, string> = {
@@ -37,6 +39,7 @@ export function WhatsAppCtaButton({
   fullWidth = true,
   className = "",
   analyticsEvent,
+  onClick,
 }: WhatsAppCtaButtonProps) {
   const widthClass = variant === "solid" ? (fullWidth ? "w-full" : "w-auto") : "";
 
@@ -46,7 +49,10 @@ export function WhatsAppCtaButton({
       target="_blank"
       rel="noopener noreferrer"
       aria-label={label ?? "Contactar por WhatsApp"}
-      onClick={analyticsEvent ? () => track(analyticsEvent) : undefined}
+      onClick={() => {
+        if (analyticsEvent) track(analyticsEvent);
+        onClick?.();
+      }}
       className={`focus-ring ${variantClasses[variant]} ${widthClass} ${className}`.trim()}
     >
       <WhatsAppIcon className={iconSizeByVariant[variant]} />

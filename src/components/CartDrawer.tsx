@@ -18,6 +18,7 @@ export function CartDrawer() {
     closeDrawer,
     setQuantity,
     removeItem,
+    clear,
     customerName,
     setCustomerName,
     customerCity,
@@ -248,6 +249,7 @@ export function CartDrawer() {
                 label="Finalizar pedido por WhatsApp"
                 variant="solid"
                 analyticsEvent="whatsapp_click_checkout"
+                onClick={clear}
               />
               <Link
                 href="/carrito"

@@ -239,6 +239,7 @@ export default function CarritoPage() {
                   label="Finalizar pedido por WhatsApp"
                   variant="solid"
                   analyticsEvent="whatsapp_click_checkout"
+                  onClick={clear}
                 />
               </div>
               <Link
