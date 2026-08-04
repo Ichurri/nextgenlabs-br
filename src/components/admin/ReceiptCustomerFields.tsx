@@ -48,9 +48,6 @@ export function ReceiptCustomerFields({
             disabled
             className={`${inputClass} disabled:cursor-not-allowed disabled:opacity-60`}
           />
-          <span className="mt-1 block text-xs text-muted">
-            Viene del mensaje (solo existe para Cochabamba), no se puede editar acá.
-          </span>
         </Field>
       </div>
       <Field label="Nota (opcional)">
