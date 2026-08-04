@@ -21,7 +21,7 @@ export default function ContactoPage() {
       </p>
 
       <div className="mt-10 grid gap-4 sm:grid-cols-2">
-        <div className="rounded-xl border border-border bg-surface p-6">
+        <div className="flex flex-col rounded-xl border border-border bg-surface p-6">
           <h2 className="text-sm font-semibold tracking-wide">WhatsApp</h2>
           {/* TODO: reemplazar número visible en siteConfig.contact.whatsappDisplay */}
           <p className="mt-1 text-sm text-muted">
@@ -33,15 +33,15 @@ export default function ContactoPage() {
             variant="solid"
             fullWidth={false}
             analyticsEvent="whatsapp_click_contact"
-            className="mt-4"
+            className="mt-auto pt-4"
           />
         </div>
 
-        <div className="rounded-xl border border-border bg-surface p-6">
+        <div className="flex flex-col rounded-xl border border-border bg-surface p-6">
           <h2 className="text-sm font-semibold tracking-wide">Correo</h2>
           {/* TODO: reemplazar correo en siteConfig.contact.email */}
           <p className="mt-1 text-sm text-muted">{siteConfig.contact.email}</p>
-          <p className="mt-4 text-xs text-muted">
+          <p className="mt-auto pt-4 text-xs text-muted">
             {siteConfig.contact.city}
           </p>
         </div>
