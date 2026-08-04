@@ -29,7 +29,11 @@ export function ReceiptCustomerFields({
     <>
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Nombre completo">
-          <input value={form.name} onChange={(e) => onChange("name", e.target.value)} className={inputClass} />
+          <input
+            value={form.name}
+            disabled
+            className={`${inputClass} disabled:cursor-not-allowed disabled:opacity-60`}
+          />
         </Field>
         <Field label="WhatsApp">
           <input
@@ -40,7 +44,11 @@ export function ReceiptCustomerFields({
           />
         </Field>
         <Field label="Ciudad">
-          <input value={form.city} onChange={(e) => onChange("city", e.target.value)} className={inputClass} />
+          <input
+            value={form.city}
+            disabled
+            className={`${inputClass} disabled:cursor-not-allowed disabled:opacity-60`}
+          />
         </Field>
         <Field label="Dirección">
           <input
