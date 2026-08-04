@@ -42,8 +42,15 @@ export function ReceiptCustomerFields({
         <Field label="Ciudad">
           <input value={form.city} onChange={(e) => onChange("city", e.target.value)} className={inputClass} />
         </Field>
-        <Field label="Dirección (opcional)">
-          <input value={form.address} onChange={(e) => onChange("address", e.target.value)} className={inputClass} />
+        <Field label="Dirección">
+          <input
+            value={form.address}
+            disabled
+            className={`${inputClass} disabled:cursor-not-allowed disabled:opacity-60`}
+          />
+          <span className="mt-1 block text-xs text-muted">
+            Viene del mensaje (solo existe para Cochabamba), no se puede editar acá.
+          </span>
         </Field>
       </div>
       <Field label="Nota (opcional)">
