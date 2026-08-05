@@ -24,3 +24,13 @@ export function formatRelativeDays(iso: string, now: Date = new Date()): string 
   if (diffDays === 1) return "ayer";
   return `hace ${diffDays} días`;
 }
+
+/** Fecha en horario boliviano (UTC−4 fijo). Ver la trampa de timestamptz en fase-6 §11. */
+export function formatBoliviaDate(iso: string): string {
+  return new Intl.DateTimeFormat("es-BO", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    timeZone: "America/La_Paz",
+  }).format(new Date(iso));
+}
