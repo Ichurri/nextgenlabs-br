@@ -2,9 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { requireSession } from "@/lib/dal";
 import { supabaseAdmin } from "@/lib/supabase-admin";
-import { formatPrice } from "@/lib/format";
+import { formatPrice, formatBoliviaDate as formatBoliviaDateBase } from "@/lib/format";
 import { parseDiscountType } from "@/lib/discounts";
+import { buildCodeShareUrl, buildCodeSalesUrl } from "@/lib/discount-links";
 import { DiscountCodeToggle } from "@/components/admin/DiscountCodeToggle";
+import { RegenerateCodeLink } from "@/components/admin/RegenerateCodeLink";
+import { CopyableLink } from "@/components/CopyableLink";
 import type { DiscountCodeFields } from "@/lib/discount-code.schema";
 
 export const metadata: Metadata = {
@@ -19,12 +22,7 @@ function toDateInputValue(iso: string | null): string | null {
 
 function formatBoliviaDate(iso: string | null): string {
   if (!iso) return "Sin vencimiento";
-  return new Intl.DateTimeFormat("es-BO", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    timeZone: "America/La_Paz",
-  }).format(new Date(iso));
+  return formatBoliviaDateBase(iso);
 }
 
 export default async function AdminCodigosPage() {
@@ -32,6 +30,15 @@ export default async function AdminCodigosPage() {
 
   const { data, error } = await supabaseAdmin.from("discount_code_attribution").select("*");
   const codes = data ?? [];
+
+  // El token vive solo en la tabla base y NO en discount_code_attribution: la
+  // vista arranca con `dc.*`, que se expandió al crearse y no incluye la
+  // columna nueva. Meterlo ahí obligaría a recrear la vista, y no hace falta
+  // — esta consulta son dos columnas de una tabla de diez filas.
+  const { data: tokenRows } = await supabaseAdmin
+    .from("discount_codes")
+    .select("id, public_token");
+  const tokensById = new Map((tokenRows ?? []).map((row) => [row.id, row.public_token]));
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10">
@@ -65,7 +72,9 @@ export default async function AdminCodigosPage() {
         <Link href="/admin" className="underline">
           Pedidos
         </Link>
-        .
+        . El <strong>link privado de ventas</strong> de cada código es para la persona dueña
+        del código: ahí ve sus ventas y su monto, nada más. Si se filtra, tocá &ldquo;Generar link
+        nuevo&rdquo;.
       </p>
 
       {error ? (
@@ -149,8 +158,22 @@ export default async function AdminCodigosPage() {
                   <Stat label="Facturado (pagado)" value={formatPrice(Number(c.paid_revenue_total ?? 0))} />
                 </div>
 
-                <div className="mt-4 border-t border-border pt-3">
+                <div className="mt-4 space-y-3 border-t border-border pt-3">
+                  <CopyableLink
+                    url={buildCodeShareUrl(c.code)}
+                    label="Link para compartir (aplica el descuento solo)"
+                  />
+                  {tokensById.get(c.id) && (
+                    <CopyableLink
+                      url={buildCodeSalesUrl(tokensById.get(c.id)!)}
+                      label="Link privado de ventas (pasáselo solo a esta persona)"
+                    />
+                  )}
+                </div>
+
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3">
                   <DiscountCodeToggle id={c.id} fields={fields} />
+                  <RegenerateCodeLink id={c.id} />
                 </div>
               </article>
             );
