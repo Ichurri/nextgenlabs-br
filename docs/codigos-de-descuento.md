@@ -40,6 +40,24 @@ aplica solo apenas entra:
 tusitio.com/catalogo?codigo=MAFE10
 ```
 
+## Pasarle a la persona su link de ventas
+
+Cada código tiene un **link privado** donde la persona ve, ella sola, cuántas ventas trajo su
+código y por cuánto. No necesita contraseña ni cuenta: el link es la llave.
+
+En `/admin/codigos`, en la tarjeta del código, copiá **Link privado de ventas** y mandáselo por
+WhatsApp. Ahí la persona ve:
+
+- cuántas ventas trajo su código y el monto total,
+- la lista de esas ventas con fecha y monto,
+- su link para compartir, listo para copiar.
+
+**Lo que no ve**: nombres, teléfonos ni direcciones de compradores, qué producto se vendió, ni
+nada de los demás códigos. Tampoco ve el nombre que vos le pusiste en "De quién es".
+
+Si el link se le escapa a alguien más, tocá **Generar link nuevo** en esa misma tarjeta: el
+anterior deja de funcionar en el acto y le pasás el nuevo.
+
 ## El comprador ya no paga en el sitio
 
 Desde que el pedido se coordina por WhatsApp, el código que aplica el comprador en el carrito es
@@ -53,15 +71,14 @@ Cada código en la lista, y en el **Reporte** (`/admin/codigos/reporte`), muestr
 Desde que el comprobante lo generás vos en vez de que el pedido se cree solo, "generado" y
 "pagado" suman tanto pedidos históricos como comprobantes nuevos:
 
-- **Pedidos generados** / **Descuento (generado)**: todo pedido o comprobante que se creó con
-  ese código, aunque nunca se haya cobrado. Este número **sobreestima** — nadie marca solo el
-  sistema cuándo entra la plata, eso lo hacés vos a mano viendo tu banco.
-- **Pedidos pagados** / **Facturado (pagado)**: solo lo que marcaste como **Pagado** — en la
-  pantalla de **Pedidos** para pedidos históricos, o con el check **"ya está pagado"** al generar
-  el comprobante. Este es el número real.
+- **Pedidos generados** / **Descuento (generado)**: todo pedido creado con ese código. Incluye
+  pedidos históricos que quedaron sin cobrar, así que puede sobreestimar.
+- **Pedidos pagados** / **Facturado (pagado)**: las ventas cobradas. Desde que el comprobante lo
+  generás vos, todo lo que registrás nace pagado, así que este número y el de arriba solo se
+  separan por pedidos viejos.
 
-**Si le vas a pagar una comisión a alguien por los pedidos que trajo, usá siempre "Pagados",
-nunca "Generados".**
+**Si le vas a pagar una comisión a alguien, usá siempre "Pagados".** Es el mismo número que ve la
+persona en su link de ventas.
 
 ## Tres ejemplos para arrancar
 
