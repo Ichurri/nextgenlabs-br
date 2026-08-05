@@ -25,6 +25,7 @@ export type Database = {
           max_uses: number | null
           min_order_total: number | null
           owner_label: string
+          public_token: string
           starts_at: string | null
           type: string
           used_count: number
@@ -40,6 +41,7 @@ export type Database = {
           max_uses?: number | null
           min_order_total?: number | null
           owner_label: string
+          public_token?: string
           starts_at?: string | null
           type: string
           used_count?: number
@@ -55,6 +57,7 @@ export type Database = {
           max_uses?: number | null
           min_order_total?: number | null
           owner_label?: string
+          public_token?: string
           starts_at?: string | null
           type?: string
           used_count?: number
@@ -413,6 +416,31 @@ export type Database = {
           value: number | null
         }
         Relationships: []
+      }
+      discount_code_sales: {
+        Row: {
+          code_id: string | null
+          id: string | null
+          is_paid: boolean | null
+          sale_total: number | null
+          sold_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discount_redemptions_code_id_fkey"
+            columns: ["code_id"]
+            isOneToOne: false
+            referencedRelation: "discount_code_attribution"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "discount_redemptions_code_id_fkey"
+            columns: ["code_id"]
+            isOneToOne: false
+            referencedRelation: "discount_codes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       orders_overview: {
         Row: {
