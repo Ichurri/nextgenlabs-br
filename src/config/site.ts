@@ -14,7 +14,7 @@ export const siteConfig = {
   shortName: "Nextgen Labs",
   description:
     "Nextgen Labs — péptidos exclusivamente para uso de investigación en Bolivia. Distribuidor oficial de Onyx Research. Calidad verificada, pureza garantizada y transparencia total.",
-  url: "https://nextgenlabsbo.vercel.app",
+  url: "https://www.nextgenlabsbo.com",
   locale: "es_BO",
   currency: "Bs",
 
