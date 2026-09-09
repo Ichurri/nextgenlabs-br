@@ -73,7 +73,7 @@ Edita el array `products` en [`src/data/products.ts`](src/data/products.ts):
   price: 350,                  // en Bs. Usa 0 para mostrar "Precio a consultar"
   purity: "≥99% HPLC",
   form: "Liofilizado",
-  category: "Péptidos",        // "Péptidos" | "Blends" | "SARMs" | "Otros"
+  category: "Péptidos",        // "Péptidos" | "Blends" | "Otros"
   image: "/products/mi-producto.webp",
   highlights: [                // viñetas de beneficios
     "Primer beneficio…",

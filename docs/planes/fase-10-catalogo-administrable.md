@@ -190,7 +190,7 @@ compilando igual.
 
 **La semilla va dentro de la migración**, con `on conflict (slug) do nothing` para que sea
 idempotente:
-- Las 4 categorías actuales, con `sort_order` 1..4 en este orden: Péptidos, Blends, SARMs, Otros.
+- Las 4 categorías actuales, con `sort_order` 1..4 en este orden: Péptidos, Blends, Otros.
 - Los **12 productos** de `src/data/products.ts` tal como están al momento de ejecutar, campo por
   campo. `inStock !== false` se traduce a `stock_qty = 10` (número arbitrario que el dueño corrige
   en el Bloque E); `inStock === false` a `stock_qty = 0`. Los productos con `price = 0` van con

@@ -56,5 +56,5 @@ export const fixtureProducts: Product[] = [normalProduct, agotadoProduct, consul
 
 export const fixtureCatalog: Catalog = {
   products: fixtureProducts,
-  categories: ["Péptidos", "Blends", "SARMs", "Otros"],
+  categories: ["Péptidos", "Blends", "Otros"],
 };
