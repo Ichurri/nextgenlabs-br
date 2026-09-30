@@ -36,7 +36,7 @@ type CartState = {
   // siempre, para completar a mano dentro de WhatsApp.
   customerName: string;
   customerCity: string;
-  // Solo tiene sentido cuando customerCity === "Cochabamba" (ver
+  // Estado legado preservado para compatibilidade com carrinhos salvos.
   // CustomerFields.tsx): en el resto de las ciudades no se ofrece elegir
   // entre envío a domicilio y recojo, así que estos dos campos quedan sin
   // usar — buildOrderMessage() los ignora salvo en ese caso puntual.

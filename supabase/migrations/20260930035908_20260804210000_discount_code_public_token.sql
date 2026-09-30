@@ -27,7 +27,7 @@ alter table discount_codes
 -- is_paid: mismo criterio que la columna "Pagados" de
 -- discount_code_attribution. El coalesce es necesario acá y no allá porque
 -- un FILTER trata NULL como falso, pero una columna de select devolvería NULL.
-create view discount_code_sales as
+create view discount_code_sales with (security_invoker = true) as
 select
   dr.id,
   dr.code_id,
@@ -43,6 +43,6 @@ left join orders o on o.id = dr.order_id;
 -- vista sin security_invoker se evalúa con los permisos de su dueño — o sea
 -- que el RLS de discount_redemptions/orders NO la protege. Estos revokes
 -- cierran eso. Son idempotentes: si el grant no existía, no pasa nada.
-revoke all on discount_code_sales       from anon, authenticated;
-revoke all on discount_code_attribution from anon, authenticated;
-revoke all on orders_overview           from anon, authenticated;
+revoke all on discount_code_sales       from public, anon, authenticated;
+revoke all on discount_code_attribution from public, anon, authenticated;
+revoke all on orders_overview           from public, anon, authenticated;

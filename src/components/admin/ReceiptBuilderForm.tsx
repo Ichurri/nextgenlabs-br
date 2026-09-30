@@ -128,7 +128,7 @@ export function ReceiptBuilderForm({ products }: { products: Product[] }) {
             value={rawMessage}
             onChange={(e) => setRawMessage(e.target.value)}
             rows={12}
-            placeholder={"Hola Nextgen Labs, quiero hacer un pedido:\n\n• Producto Dosis xN — Bs …"}
+            placeholder={"Olá Nextgen Labs, quero fazer um pedido:\n\n• Producto Dosis xN — R$ …"}
             className={inputClass}
           />
         </label>

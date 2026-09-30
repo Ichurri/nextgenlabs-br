@@ -1,9 +1,6 @@
-/** Configuración de envío. */
+/** Frete provisório por pedido, confirmado com o cliente pelo WhatsApp. */
 export const SHIPPING = {
-  nationalCost: 25,
-  // El negocio está en Cochabamba: entrega/recojo local sin costo de envío.
-  cochabambaCost: 0,
-  // null = nunca hay envío gratis. Un número = gratis desde ese subtotal.
+  nationalCost: 35,
   freeOver: null as number | null,
-  label: "Envío nacional",
+  label: "Frete",
 } as const;

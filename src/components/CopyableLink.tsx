@@ -35,7 +35,7 @@ export function CopyableLink({ url, label }: { url: string; label: string }) {
           onClick={handleCopy}
           className="focus-ring shrink-0 rounded-lg border border-border px-3 py-2 text-xs font-medium transition hover:bg-surface-2"
         >
-          {copied ? "¡Copiado!" : "Copiar"}
+          {copied ? "Copiado!" : "Copiar"}
         </button>
       </div>
     </div>

@@ -15,7 +15,7 @@ export function LegalPage({
     <div className="mx-auto max-w-3xl px-4 py-14 sm:px-6">
       <p className="eyebrow mb-2">{eyebrow}</p>
       <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{title}</h1>
-      <p className="mt-2 text-xs text-muted">Última actualización: {updated}</p>
+      <p className="mt-2 text-xs text-muted">Última atualização: {updated}</p>
 
       <div className="mt-10 space-y-8">
         {sections.map((section) => (

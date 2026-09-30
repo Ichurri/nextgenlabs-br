@@ -18,8 +18,7 @@ export function Footer() {
               className="h-10 w-auto object-contain"
             />
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted">
-              Péptidos exclusivamente para uso de investigación. Distribuidor
-              oficial de{" "}
+              Compostos destinados exclusivamente à pesquisa laboratorial. Conheça{" "}
               <a
                 href={siteConfig.partner.url}
                 target="_blank"
@@ -27,46 +26,43 @@ export function Footer() {
                 className="focus-ring rounded text-accent-light hover:underline"
               >
                 {siteConfig.partner.name}
-              </a>{" "}
-              en Bolivia.
+              </a>.
             </p>
           </div>
 
           <div>
-            <h3 className="mb-4 text-sm font-semibold tracking-wide">Tienda</h3>
+            <h3 className="mb-4 text-sm font-semibold tracking-wide">Loja</h3>
             <ul className="space-y-2 text-sm text-muted">
               <li><Link href="/catalogo" className="focus-ring rounded hover:text-foreground">Catálogo</Link></li>
-              <li><Link href="/carrito" className="focus-ring rounded hover:text-foreground">Carrito</Link></li>
-              <li><Link href="/envios" className="focus-ring rounded hover:text-foreground">Envíos</Link></li>
-              <li><Link href="/contacto" className="focus-ring rounded hover:text-foreground">Contacto</Link></li>
-              <li><Link href="/preguntas-frecuentes" className="focus-ring rounded hover:text-foreground">Preguntas frecuentes</Link></li>
+              <li><Link href="/carrito" className="focus-ring rounded hover:text-foreground">Carrinho</Link></li>
+              <li><Link href="/envios" className="focus-ring rounded hover:text-foreground">Frete</Link></li>
+              <li><Link href="/contacto" className="focus-ring rounded hover:text-foreground">Contato</Link></li>
+              <li><Link href="/preguntas-frecuentes" className="focus-ring rounded hover:text-foreground">Perguntas frequentes</Link></li>
             </ul>
           </div>
 
           <div>
             <h3 className="mb-4 text-sm font-semibold tracking-wide">Legal</h3>
             <ul className="space-y-2 text-sm text-muted">
-              <li><Link href="/terminos" className="focus-ring rounded hover:text-foreground">Términos y condiciones</Link></li>
-              <li><Link href="/privacidad" className="focus-ring rounded hover:text-foreground">Política de privacidad</Link></li>
+              <li><Link href="/terminos" className="focus-ring rounded hover:text-foreground">Termos e condições</Link></li>
+              <li><Link href="/privacidad" className="focus-ring rounded hover:text-foreground">Política de privacidade</Link></li>
             </ul>
           </div>
         </div>
 
         <div className="mt-10 rounded-lg border border-border bg-surface-2 p-4">
           <p className="text-xs leading-relaxed text-muted">
-            <span className="font-semibold text-foreground">Aviso legal:</span>{" "}
-            Productos exclusivamente para uso de investigación. No aptos para
-            consumo humano ni uso diagnóstico o terapéutico. La venta está
-            dirigida únicamente a fines de investigación científica.
+            <span className="font-semibold text-foreground">Aviso:</span>{" "}
+            Produtos destinados exclusivamente à pesquisa laboratorial. Não destinados ao consumo humano nem ao uso diagnóstico ou terapêutico.
           </p>
         </div>
 
         <div className="mt-8 flex flex-col items-center justify-between gap-3 border-t border-border pt-6 text-xs text-muted sm:flex-row">
           <p>
-            © {year} {siteConfig.name}. Todos los derechos reservados.
+            © {year} {siteConfig.name}. Todos os direitos reservados.
           </p>
           <p>
-            Distribuidor oficial de {siteConfig.partner.name}.
+            Catálogo {siteConfig.partner.name}.
           </p>
           <a
             href="https://www.instagram.com/loop.digital.corp/"

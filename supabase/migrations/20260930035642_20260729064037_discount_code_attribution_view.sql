@@ -10,7 +10,7 @@
 -- sistema cuándo se cobra un pedido — está documentado en 00-contexto.md
 -- §2. Mostrar los dos números en vez de uno solo evita que el dueño le
 -- pague comisión a alguien sobre pedidos que nunca se cobraron.
-create or replace view discount_code_attribution as
+create or replace view discount_code_attribution with (security_invoker = true) as
 select
   dc.*,
   count(dr.id)::integer as redemption_count,
@@ -23,3 +23,6 @@ left join discount_redemptions dr on dr.code_id = dc.id
 left join orders o on o.id = dr.order_id
 group by dc.id
 order by dc.created_at desc;
+
+revoke all on discount_code_attribution from public, anon, authenticated;
+grant select on discount_code_attribution to service_role;

@@ -1,36 +1,33 @@
-import { siteConfig } from "@/config/site";
-
-/**
- * Formatea un monto en bolivianos (Bs). Sin decimales por defecto,
- * usando separador de miles boliviano.
- */
+/** Formata preços do catálogo brasileiro em reais. */
 export function formatPrice(amount: number): string {
-  const formatted = new Intl.NumberFormat("es-BO", {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
   }).format(amount);
-  return `${siteConfig.currency} ${formatted}`;
 }
 
-/** Días completos transcurridos desde una fecha ISO hasta `now`. */
+/** Dias completos transcorridos desde uma data ISO até `now`. */
 export function daysSince(iso: string, now: Date = new Date()): number {
   return Math.floor((now.getTime() - new Date(iso).getTime()) / (1000 * 60 * 60 * 24));
 }
 
-/** "hoy", "ayer" o "hace N días" a partir de una fecha ISO. */
+/** "hoje", "ontem" ou "há N dias" desde uma data ISO. */
 export function formatRelativeDays(iso: string, now: Date = new Date()): string {
   const diffDays = daysSince(iso, now);
-  if (diffDays <= 0) return "hoy";
-  if (diffDays === 1) return "ayer";
-  return `hace ${diffDays} días`;
+  if (diffDays <= 0) return "hoje";
+  if (diffDays === 1) return "ontem";
+  return `há ${diffDays} dias`;
 }
 
-/** Fecha en horario boliviano (UTC−4 fijo). Ver la trampa de timestamptz en fase-6 §11. */
-export function formatBoliviaDate(iso: string): string {
-  return new Intl.DateTimeFormat("es-BO", {
+/** Data civil de São Paulo, inclusive perto da meia-noite UTC. */
+export function formatBrazilDate(iso: string): string {
+  return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
-    timeZone: "America/La_Paz",
+    timeZone: "America/Sao_Paulo",
   }).format(new Date(iso));
 }
+
+// Compatibilidade temporária com importações existentes durante a tradução.
+export const formatBoliviaDate = formatBrazilDate;

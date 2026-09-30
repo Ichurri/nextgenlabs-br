@@ -23,7 +23,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const product = await getProductBySlug(slug);
-  if (!product) return { title: "Producto no encontrado" };
+  if (!product) return { title: "Produto não encontrado" };
   return {
     title: `${product.name} ${product.dose}`,
     description: product.description ?? product.highlights.join(" · "),
@@ -53,7 +53,7 @@ export default async function ProductPage({
     ...(product.price > 0 && {
       offers: {
         "@type": "Offer",
-        priceCurrency: "BOB",
+        priceCurrency: "BRL",
         price: product.price,
         availability: inStock
           ? "https://schema.org/InStock"
@@ -71,7 +71,7 @@ export default async function ProductPage({
       />
       <nav className="mb-8 text-sm text-muted">
         <Link href="/catalogo" className="focus-ring rounded transition hover:text-foreground">
-          ← Volver al catálogo
+          ← Voltar ao catálogo
         </Link>
       </nav>
 
@@ -83,7 +83,7 @@ export default async function ProductPage({
         <div className="relative aspect-square overflow-hidden rounded-2xl border border-border bg-surface-2 md:aspect-auto">
           <Image
             src={product.image}
-            alt={`Vial de ${product.name} ${product.dose}`}
+            alt={`Frasco de ${product.name} ${product.dose}`}
             fill
             sizes="(max-width: 768px) 100vw, 50vw"
             className={`object-cover ${inStock ? "" : "opacity-50 grayscale"}`}
@@ -94,12 +94,12 @@ export default async function ProductPage({
           </span>
           {product.isNew && inStock && (
             <span className="absolute bottom-4 left-4 rounded-md bg-success px-2.5 py-1 text-xs font-bold text-white">
-              Nuevo
+              Novo
             </span>
           )}
           {!inStock && (
             <span className="absolute bottom-4 left-4 rounded-md border border-border bg-background/90 px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-foreground backdrop-blur">
-              Agotado
+              Esgotado
             </span>
           )}
         </div>
@@ -124,7 +124,7 @@ export default async function ProductPage({
           </div>
 
           <p className="mt-6 text-3xl font-bold">
-            {product.price > 0 ? formatPrice(product.price) : "Precio a consultar"}
+            {product.price > 0 ? formatPrice(product.price) : "Preço sob consulta"}
           </p>
 
           {product.description && (
@@ -146,10 +146,10 @@ export default async function ProductPage({
           {/* Aviso destacado */}
           <div className="mt-6 rounded-lg border border-accent/30 bg-accent/5 px-4 py-3">
             <p className="text-xs font-semibold uppercase tracking-wider text-accent-light">
-              Solo para uso de investigación
+              Exclusivamente para pesquisa
             </p>
             <p className="mt-1 text-xs leading-relaxed text-muted">
-              No apto para consumo humano ni uso diagnóstico o terapéutico.
+              Não destinado ao consumo humano nem ao uso diagnóstico ou terapêutico.
             </p>
           </div>
 
@@ -159,16 +159,16 @@ export default async function ProductPage({
                 disabled
                 className="w-full cursor-not-allowed rounded-lg border border-border px-6 py-3.5 text-sm font-semibold text-muted"
               >
-                Agotado — vuelve pronto
+                Esgotado — volte em breve
               </button>
             ) : product.price > 0 ? (
               <AddToCartControls product={product} />
             ) : (
               <WhatsAppCtaButton
                 href={buildWhatsAppUrl(
-                  `Hola Nextgen Labs, quiero consultar el precio de ${product.name} ${product.dose}.`
+                  `Olá Nextgen Labs, gostaria de consultar o preço de ${product.name} ${product.dose}.`
                 )}
-                label="Consultar precio por WhatsApp"
+                label="Consultar preço pelo WhatsApp"
                 variant="solid"
                 analyticsEvent="whatsapp_click_consult"
               />
@@ -178,19 +178,18 @@ export default async function ProductPage({
           {/* COA */}
           <div className="mt-8 rounded-xl border border-border bg-surface p-5">
             <h2 className="text-sm font-semibold tracking-wide">
-              Certificado de Análisis (COA)
+              Certificado de Análise (COA)
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-muted">
-              Cada lote se analiza de forma independiente para verificar su
-              identidad y pureza.
+              Consulte o certificado de análise disponível para o lote deste produto.
             </p>
             {product.coaUrl ? (
               <ProductCoaViewer coaUrl={product.coaUrl} productName={product.name} />
             ) : (
               // PLACEHOLDER: sin COA cargado todavía para este lote.
               <p className="mt-4 inline-flex items-center gap-2 rounded-lg border border-dashed border-border px-4 py-2 text-sm text-muted">
-                COA disponible bajo solicitud — {/* TODO: enlazar PDF del lote */}
-                consúltalo por WhatsApp.
+                COA sob consulta — {/* TODO: enlazar PDF del lote */}
+                fale conosco pelo WhatsApp.
               </p>
             )}
           </div>
@@ -200,7 +199,7 @@ export default async function ProductPage({
       {relatedProducts.length > 0 && (
         <section className="mt-20">
           <h2 className="mb-6 text-xl font-bold tracking-tight sm:text-2xl">
-            Productos relacionados
+            Produtos relacionados
           </h2>
           <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
             {relatedProducts.map((related) => (

@@ -5,7 +5,7 @@ import { siteConfig } from "@/config/site";
 
 export const ogImageSize = { width: 1200, height: 630 };
 export const ogImageContentType = "image/png";
-export const ogImageAlt = `${siteConfig.name} — Péptidos para investigación en Bolivia`;
+export const ogImageAlt = `${siteConfig.name} — Peptídeos para pesquisa no Brasil`;
 
 /**
  * Genera la imagen de marca por defecto usada como OG/Twitter image en todo
@@ -44,7 +44,7 @@ export async function renderBrandOgImage() {
             marginBottom: 36,
           }}
         >
-          PÉPTIDOS PARA INVESTIGACIÓN · BOLIVIA
+          PEPTÍDEOS PARA PESQUISA · BRASIL
         </div>
         {/* eslint-disable-next-line @next/next/no-img-element -- ImageResponse (satori) requires a raw <img>, not next/image */}
         <img src={logoSrc} alt="" width={420} height={98} />
@@ -58,7 +58,7 @@ export async function renderBrandOgImage() {
             textAlign: "center",
           }}
         >
-          Calidad verificada. Transparencia total.
+          Qualidade verificada. Transparência total.
         </div>
         <div
           style={{

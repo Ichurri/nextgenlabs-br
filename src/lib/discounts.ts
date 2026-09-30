@@ -11,7 +11,7 @@ export function parseDiscountType(type: string): DiscountType {
   if ((DISCOUNT_TYPES as readonly string[]).includes(type)) {
     return type as DiscountType;
   }
-  throw new Error(`Tipo de descuento desconocido: "${type}".`);
+  throw new Error(`Tipo de desconto desconhecido: "${type}".`);
 }
 
 /** Espejo camelCase de una fila de discount_codes — desacoplado de Supabase para que esta lógica sea pura y fácil de testear. */
@@ -47,16 +47,17 @@ export function normalizeCode(input: string): string {
   return input.toUpperCase().replace(/\s+/g, "");
 }
 
-/**
- * Convierte una fecha "YYYY-MM-DD" (la que da un <input type="date"> del
- * panel) al final de ese día en hora boliviana, como ISO timestamptz.
- * Bolivia es UTC−4 fijo, sin horario de verano — nunca cambia, así que
- * hardcodear el offset acá es seguro. Sin esto, guardar "2026-12-31" tal
- * cual lo interpreta Postgres como medianoche UTC, que son las 20:00 del
- * 30 en Bolivia: el código vencería un día antes de lo que el dueño escribió.
- */
-export function endOfDayBolivia(dateOnly: string): string {
-  return new Date(`${dateOnly}T23:59:59-04:00`).toISOString();
+/** Fim do dia civil em São Paulo, respeitando o fuso IANA da data informada. */
+export function endOfDayBrazil(dateOnly: string): string {
+  const localAsUtc = Date.parse(`${dateOnly}T23:59:59Z`);
+  const approximate = new Date(localAsUtc + 3 * 60 * 60 * 1000);
+  const offset = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Sao_Paulo",
+    timeZoneName: "shortOffset",
+  }).formatToParts(approximate).find((part) => part.type === "timeZoneName")?.value ?? "GMT";
+  const match = offset.match(/^GMT([+-])(\d{1,2})(?::(\d{2}))?$/);
+  const minutes = match ? (match[1] === "+" ? 1 : -1) * (Number(match[2]) * 60 + Number(match[3] ?? 0)) : 0;
+  return new Date(localAsUtc - minutes * 60_000).toISOString();
 }
 
 type DiscountCodeRow = Database["public"]["Tables"]["discount_codes"]["Row"];
@@ -85,7 +86,7 @@ export function mapDiscountCodeRow(row: DiscountCodeRow): DiscountCode {
 }
 
 /**
- * "MAFE10 · 10% de descuento" para mostrar en recibos/comprobantes — el
+ * "MAFE10 · 10% de desconto" para mostrar en recibos/comprobantes — el
  * código real usado, no solo la tasa. Cualquiera de los dos puede faltar
  * (código viejo sin discountCode persistido): se muestra lo que haya.
  */
@@ -96,12 +97,12 @@ export function formatDiscountDetail(
   return [code, label].filter((value): value is string => Boolean(value)).join(" · ");
 }
 
-function formatBoliviaDate(iso: string): string {
-  return new Intl.DateTimeFormat("es-BO", {
+function formatBrazilDate(iso: string): string {
+  return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
-    timeZone: "America/La_Paz",
+    timeZone: "America/Sao_Paulo",
   }).format(new Date(iso));
 }
 
@@ -120,38 +121,38 @@ export function evaluateDiscount(
     return {
       valid: false,
       reason: "not_found",
-      message: "No encontramos ese código. Revisá que esté bien escrito.",
+      message: "Cupom não encontrado. Confira o código informado.",
     };
   }
   if (!code.isActive) {
-    return { valid: false, reason: "inactive", message: "Este código ya no está activo." };
+    return { valid: false, reason: "inactive", message: "Este cupom não está ativo." };
   }
   if (code.startsAt !== null && now < new Date(code.startsAt)) {
     return {
       valid: false,
       reason: "not_started",
-      message: "Este código todavía no está disponible.",
+      message: "Este cupom ainda não está disponível.",
     };
   }
   if (code.expiresAt !== null && now > new Date(code.expiresAt)) {
     return {
       valid: false,
       reason: "expired",
-      message: `Este código venció el ${formatBoliviaDate(code.expiresAt)}.`,
+      message: `Este cupom venceu em ${formatBrazilDate(code.expiresAt)}.`,
     };
   }
   if (code.maxUses !== null && code.usedCount >= code.maxUses) {
     return {
       valid: false,
       reason: "exhausted",
-      message: "Este código ya alcanzó su límite de usos.",
+      message: "Este cupom atingiu o limite de usos.",
     };
   }
   if (code.minOrderTotal !== null && subtotal < code.minOrderTotal) {
     return {
       valid: false,
       reason: "below_minimum",
-      message: `Este código aplica desde ${formatPrice(code.minOrderTotal)}.`,
+      message: `Este cupom vale para compras a partir de ${formatPrice(code.minOrderTotal)}.`,
     };
   }
 
@@ -160,10 +161,10 @@ export function evaluateDiscount(
   if (code.type === "percent") {
     amount = round2(subtotal * (code.value / 100));
     if (code.maxDiscount !== null) amount = Math.min(amount, code.maxDiscount);
-    label = `${code.value}% de descuento`;
+    label = `${code.value}% de desconto`;
   } else {
     amount = Math.min(code.value, subtotal);
-    label = `${formatPrice(code.value)} de descuento`;
+    label = `${formatPrice(code.value)} de desconto`;
   }
 
   // El descuento nunca supera el subtotal — sea cual sea el tipo o el tope.

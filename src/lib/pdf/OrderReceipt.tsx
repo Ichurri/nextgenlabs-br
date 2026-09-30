@@ -121,14 +121,15 @@ const styles = StyleSheet.create({
 });
 
 const STATUS_LABEL: Record<ReceiptData["status"], string> = {
-  paid: "Pagado",
+  paid: "Pago",
 };
 
 function formatOrderDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("es-BO", {
+  return new Date(iso).toLocaleDateString("pt-BR", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
+    timeZone: "America/Sao_Paulo",
   });
 }
 
@@ -154,7 +155,7 @@ function OrderReceiptDocument({
           <Image src={{ data: logoData, format: "png" }} style={styles.logo} />
           <View>
             <Text style={styles.headerTitle}>{siteConfig.name.toUpperCase()}</Text>
-            <Text style={styles.headerTitle}>COMPROBANTE DE PEDIDO</Text>
+            <Text style={styles.headerTitle}>COMPROVANTE DE PEDIDO</Text>
           </View>
         </View>
 
@@ -165,11 +166,11 @@ function OrderReceiptDocument({
               <Text style={[styles.value, styles.bold]}>{order.orderNumber}</Text>
             </View>
             <View>
-              <Text style={styles.label}>Fecha</Text>
+              <Text style={styles.label}>Data</Text>
               <Text style={styles.value}>{formatOrderDate(order.createdAt)}</Text>
             </View>
             <View>
-              <Text style={styles.label}>Estado</Text>
+              <Text style={styles.label}>Status</Text>
               <Text style={styles.value}>{STATUS_LABEL[order.status]}</Text>
             </View>
           </View>
@@ -182,11 +183,11 @@ function OrderReceiptDocument({
               <Text style={styles.value}>{order.customerPhone}</Text>
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.label}>Ciudad</Text>
+              <Text style={styles.label}>Cidade</Text>
               <Text style={styles.value}>{order.customerCity}</Text>
               {order.customerAddress && (
                 <>
-                  <Text style={[styles.label, { marginTop: 6 }]}>Dirección</Text>
+                  <Text style={[styles.label, { marginTop: 6 }]}>Endereço</Text>
                   <Text style={styles.value}>{order.customerAddress}</Text>
                 </>
               )}
@@ -196,8 +197,8 @@ function OrderReceiptDocument({
           <View style={styles.table}>
             <View style={styles.tableHeaderRow}>
               <Text style={[styles.colProduct, styles.tableHeaderText]}>PRODUCTO</Text>
-              <Text style={[styles.colQty, styles.tableHeaderText]}>CANT.</Text>
-              <Text style={[styles.colUnit, styles.tableHeaderText]}>P. UNIT.</Text>
+              <Text style={[styles.colQty, styles.tableHeaderText]}>QTD.</Text>
+              <Text style={[styles.colUnit, styles.tableHeaderText]}>PREÇO UNIT.</Text>
               <Text style={[styles.colTotal, styles.tableHeaderText]}>TOTAL</Text>
             </View>
             {order.items.map((item) => (
@@ -220,7 +221,7 @@ function OrderReceiptDocument({
             {order.discount > 0 && (
               <View style={styles.totalsRow}>
                 <View>
-                  <Text style={styles.label}>Descuento</Text>
+                  <Text style={styles.label}>Desconto</Text>
                   {discountDetail && (
                     <Text style={styles.totalsRowDetail}>{discountDetail}</Text>
                   )}
@@ -229,7 +230,7 @@ function OrderReceiptDocument({
               </View>
             )}
             <View style={styles.totalsRow}>
-              <Text style={styles.label}>Envío</Text>
+              <Text style={styles.label}>Frete</Text>
               <Text style={styles.value}>{formatPrice(order.shipping)}</Text>
             </View>
             <View style={styles.grandTotalRow}>
@@ -241,10 +242,10 @@ function OrderReceiptDocument({
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            Este documento es un comprobante de pedido y NO constituye factura fiscal.
+            Este documento comprova o pedido e não substitui nota fiscal.
           </Text>
           <Text style={styles.footerText}>
-            Productos para uso exclusivo de investigación. No apto para consumo humano.
+            Produtos destinados exclusivamente à pesquisa. Não destinados ao consumo humano.
           </Text>
         </View>
       </Page>

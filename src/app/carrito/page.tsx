@@ -4,10 +4,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { useCart, cartTotal, resolveCartItems } from "@/lib/cart";
 import { formatPrice } from "@/lib/format";
+import { SHIPPING } from "@/config/shipping";
 import { buildOrderWhatsAppUrl } from "@/lib/whatsapp";
 import { QtyStepper } from "@/components/CartDrawer";
 import { WhatsAppCtaButton } from "@/components/WhatsAppCtaButton";
-import { CustomerFields, LOCAL_DELIVERY_CITY } from "@/components/CustomerFields";
+import { CustomerFields } from "@/components/CustomerFields";
 import { useDiscountField } from "@/lib/use-discount-field";
 import { useCatalog } from "@/components/CatalogProvider";
 
@@ -28,10 +29,7 @@ export default function CarritoPage() {
   } = useCart();
   const catalog = useCatalog();
   const resolvedItems = resolveCartItems(items, catalog);
-  // La línea "Dirección" del mensaje solo existe para Cochabamba con envío a
-  // domicilio elegido — ver el comentario en OrderMessageDetails (whatsapp.ts).
-  const messageAddress =
-    customerCity === LOCAL_DELIVERY_CITY && customerWantsDelivery ? customerAddress : undefined;
+  const messageAddress = customerAddress.trim() || undefined;
 
   // El auto-apply de `?codigo=` lo hace CartDrawer (siempre montado en el
   // layout, ver use-discount-field.ts): acá solo se lee/edita el estado
@@ -48,17 +46,17 @@ export default function CarritoPage() {
   } = useDiscountField(resolvedItems);
 
   const subtotal = cartTotal(resolvedItems);
-  const total = Math.max(0, subtotal - (appliedDiscount?.amount ?? 0));
+  const total = Math.max(0, subtotal - (appliedDiscount?.amount ?? 0)) + (resolvedItems.length ? SHIPPING.nationalCost : 0);
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-14 sm:px-6">
       <h1 className="mb-8 text-3xl font-bold tracking-tight sm:text-4xl">
-        Tu carrito
+        Seu carrinho
       </h1>
 
       {resolvedItems.length === 0 ? (
         <div className="rounded-xl border border-border bg-surface p-12 text-center">
-          <p className="text-muted">Tu carrito está vacío.</p>
+          <p className="text-muted">Seu carrinho está vazio.</p>
           <Link
             href="/catalogo"
             className="focus-ring mt-5 inline-block rounded-lg bg-accent px-6 py-3 text-sm font-semibold text-white transition hover:bg-accent-light"
@@ -96,7 +94,7 @@ export default function CarritoPage() {
                         </Link>
                         <p className="text-sm text-muted">{item.dose}</p>
                         {!item.inStock && (
-                          <p className="text-sm font-medium text-danger">Agotado</p>
+                          <p className="text-sm font-medium text-danger">Esgotado</p>
                         )}
                       </div>
                       <span className="font-semibold">
@@ -112,7 +110,7 @@ export default function CarritoPage() {
                         onClick={() => removeItem(item.slug)}
                         className="focus-ring rounded text-sm text-muted transition hover:text-danger"
                       >
-                        Quitar
+                        Remover
                       </button>
                     </div>
                   </div>
@@ -124,17 +122,17 @@ export default function CarritoPage() {
               onClick={clear}
               className="focus-ring mt-4 rounded text-sm text-muted transition hover:text-foreground"
             >
-              Vaciar carrito
+              Esvaziar carrinho
             </button>
           </div>
 
           {/* Resumen */}
           <aside className="lg:col-span-1">
             <div className="sticky top-24 rounded-xl border border-border bg-surface p-6">
-              <h2 className="text-lg font-semibold">Resumen del pedido</h2>
+              <h2 className="text-lg font-semibold">Resumo do pedido</h2>
 
               <div className="mt-4 border-t border-border pt-4">
-                <p className="eyebrow mb-2">Tus datos</p>
+                <p className="eyebrow mb-2">Seus dados</p>
                 <CustomerFields
                   name={customerName}
                   onNameChange={setCustomerName}
@@ -157,7 +155,7 @@ export default function CarritoPage() {
                     <button
                       type="button"
                       onClick={removeDiscount}
-                      aria-label="Quitar código de descuento"
+                      aria-label="Remover cupom de desconto"
                       className="focus-ring rounded text-muted transition hover:text-foreground"
                     >
                       ✕
@@ -174,7 +172,7 @@ export default function CarritoPage() {
                           void applyDiscountCode(discountInput);
                         }
                       }}
-                      placeholder="Código de descuento"
+                      placeholder="Cupom de desconto"
                       className={`focus-ring w-full rounded-lg border bg-surface-2 px-4 py-3 text-sm outline-none transition ${
                         discountState === "error" ? "border-danger" : "border-border"
                       }`}
@@ -200,18 +198,20 @@ export default function CarritoPage() {
                   )}
                   {appliedDiscount && (
                     <span className="text-muted">
-                      Monto informativo: el admin lo confirma al generar el comprobante.
+                      Valor informativo: o desconto será confirmado no atendimento.
                     </span>
                   )}
                 </p>
               </div>
 
-              {appliedDiscount && (
-                <div className="mt-4 flex items-center justify-between border-t border-border pt-4 text-sm text-muted">
-                  <span>Subtotal</span>
-                  <span>{formatPrice(subtotal)}</span>
-                </div>
-              )}
+              <div className="mt-4 flex items-center justify-between border-t border-border pt-4 text-sm text-muted">
+                <span>Subtotal</span>
+                <span>{formatPrice(subtotal)}</span>
+              </div>
+              <div className="mt-1 flex items-center justify-between text-sm text-muted">
+                <span>Frete</span>
+                <span>{formatPrice(SHIPPING.nationalCost)}</span>
+              </div>
               <div
                 className={`flex items-center justify-between text-lg font-bold ${
                   appliedDiscount ? "mt-1" : "mt-4 border-t border-border pt-4"
@@ -221,10 +221,9 @@ export default function CarritoPage() {
                 <span>{formatPrice(total)}</span>
               </div>
               <p className="mt-3 text-xs leading-relaxed text-muted">
-                No hay pago en línea. Coordinás por WhatsApp los datos de
-                entrega, el método de pago y el costo de envío.{" "}
+                O pagamento e a entrega são combinados pelo WhatsApp. O frete estimado é de R$ 35.{" "}
                 <Link href="/envios" className="focus-ring rounded text-accent-light hover:underline">
-                  Ver cobertura y tiempos de envío
+                  Ver informações de frete
                 </Link>
                 .
               </p>
@@ -232,11 +231,12 @@ export default function CarritoPage() {
                 <WhatsAppCtaButton
                   href={buildOrderWhatsAppUrl(resolvedItems, {
                     discountCode: appliedDiscount?.code,
+                    discountAmount: appliedDiscount?.amount,
                     name: customerName,
                     city: customerCity,
                     address: messageAddress,
                   })}
-                  label="Finalizar pedido por WhatsApp"
+                  label="Finalizar pedido pelo WhatsApp"
                   variant="solid"
                   analyticsEvent="whatsapp_click_checkout"
                   onClick={clear}
@@ -246,7 +246,7 @@ export default function CarritoPage() {
                 href="/catalogo"
                 className="focus-ring mt-3 block rounded text-center text-sm text-muted transition hover:text-foreground"
               >
-                Seguir viendo productos
+                Continuar comprando
               </Link>
             </div>
           </aside>

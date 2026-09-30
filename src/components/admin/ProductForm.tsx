@@ -132,7 +132,7 @@ export function ProductForm({ mode, productId, categories, initialValues }: Prop
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Field label="Precio (Bs. 0 = a consultar)">
+        <Field label="Preço (R$; 0 = sob consulta)">
           <input
             type="number"
             value={values.price}

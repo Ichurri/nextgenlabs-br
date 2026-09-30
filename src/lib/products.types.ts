@@ -7,7 +7,7 @@ export type Product = {
   slug: string;
   name: string;
   dose: string;
-  price: number; // en Bs. 0 = "Precio a consultar"
+  price: number; // em BRL; 0 = preço sob consulta
   purity: string;
   form: string;
   category: string; // nombre de la categoría, no id

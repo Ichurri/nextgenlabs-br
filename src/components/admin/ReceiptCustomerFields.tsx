@@ -39,7 +39,7 @@ export function ReceiptCustomerFields({
           <input
             value={form.phone}
             onChange={(e) => onChange("phone", e.target.value)}
-            placeholder="69437674"
+            placeholder="(11) 98765-4321"
             className={inputClass}
           />
         </Field>

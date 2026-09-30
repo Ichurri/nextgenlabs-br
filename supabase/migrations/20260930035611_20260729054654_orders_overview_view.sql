@@ -5,7 +5,7 @@
 -- protegida como las tablas base sin necesidad de revokes adicionales.
 --
 -- No expone `token` — es lo que protege el comprobante.
-create or replace view orders_overview as
+create or replace view orders_overview with (security_invoker = true) as
 select
   o.id,
   o.order_number,
@@ -23,3 +23,6 @@ from orders o
 join order_items oi on oi.order_id = o.id
 group by o.id
 order by o.created_at desc;
+
+revoke all on orders_overview from public, anon, authenticated;
+grant select on orders_overview to service_role;

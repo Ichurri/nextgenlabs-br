@@ -5,9 +5,10 @@ import Image from "next/image";
 import { useEffect } from "react";
 import { useCart, cartTotal, cartCount, resolveCartItems } from "@/lib/cart";
 import { formatPrice } from "@/lib/format";
+import { SHIPPING } from "@/config/shipping";
 import { buildOrderWhatsAppUrl } from "@/lib/whatsapp";
 import { WhatsAppCtaButton } from "@/components/WhatsAppCtaButton";
-import { CustomerFields, LOCAL_DELIVERY_CITY } from "@/components/CustomerFields";
+import { CustomerFields } from "@/components/CustomerFields";
 import { useDiscountField } from "@/lib/use-discount-field";
 import { useCatalog } from "@/components/CatalogProvider";
 
@@ -40,10 +41,7 @@ export function CartDrawer() {
   const catalog = useCatalog();
   const resolvedItems = resolveCartItems(items, catalog);
   const count = cartCount(resolvedItems);
-  // La línea "Dirección" del mensaje solo existe para Cochabamba con envío a
-  // domicilio elegido — ver el comentario en OrderMessageDetails (whatsapp.ts).
-  const messageAddress =
-    customerCity === LOCAL_DELIVERY_CITY && customerWantsDelivery ? customerAddress : undefined;
+  const messageAddress = customerAddress.trim() || undefined;
 
   // CartDrawer está siempre montado (root layout): es el único consumidor
   // del auto-apply de `?codigo=` para todo el sitio, ver use-discount-field.ts.
@@ -59,7 +57,7 @@ export function CartDrawer() {
   } = useDiscountField(resolvedItems, { autoApply: true });
 
   const subtotal = cartTotal(resolvedItems);
-  const total = Math.max(0, subtotal - (appliedDiscount?.amount ?? 0));
+  const total = Math.max(0, subtotal - (appliedDiscount?.amount ?? 0)) + (resolvedItems.length ? SHIPPING.nationalCost : 0);
 
   return (
     <>
@@ -75,18 +73,18 @@ export function CartDrawer() {
       <aside
         role="dialog"
         aria-modal="true"
-        aria-label="Carrito de compras"
+        aria-label="Carrinho de compras"
         className={`fixed right-0 top-0 z-[61] flex h-full w-full max-w-md flex-col border-l border-border bg-surface shadow-2xl transition-transform duration-300 ${
           isDrawerOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
           <h2 className="text-lg font-semibold">
-            Tu carrito {count > 0 && <span className="text-muted">({count})</span>}
+            Seu carrinho {count > 0 && <span className="text-muted">({count})</span>}
           </h2>
           <button
             onClick={closeDrawer}
-            aria-label="Cerrar carrito"
+            aria-label="Fechar carrinho"
             className="focus-ring rounded-lg p-3 text-muted transition hover:bg-surface-2 hover:text-foreground"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
@@ -98,7 +96,7 @@ export function CartDrawer() {
 
         {resolvedItems.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
-            <p className="text-muted">Tu carrito está vacío.</p>
+            <p className="text-muted">Seu carrinho está vazio.</p>
             <Link
               href="/catalogo"
               onClick={closeDrawer}
@@ -128,12 +126,12 @@ export function CartDrawer() {
                           <p className="text-sm font-semibold leading-tight">{item.name}</p>
                           <p className="text-xs text-muted">{item.dose}</p>
                           {!item.inStock && (
-                            <p className="text-xs font-medium text-danger">Agotado</p>
+                            <p className="text-xs font-medium text-danger">Esgotado</p>
                           )}
                         </div>
                         <button
                           onClick={() => removeItem(item.slug)}
-                          aria-label={`Quitar ${item.name}`}
+                          aria-label={`Remover ${item.name}`}
                           className="focus-ring rounded p-1 text-muted transition hover:text-danger"
                         >
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
@@ -159,7 +157,7 @@ export function CartDrawer() {
 
             <div className="border-t border-border px-5 py-4">
               <div className="mb-3">
-                <p className="eyebrow mb-1.5 text-[0.65rem]">Tus datos</p>
+                <p className="eyebrow mb-1.5 text-[0.65rem]">Seus dados</p>
                 <CustomerFields
                   name={customerName}
                   onNameChange={setCustomerName}
@@ -181,7 +179,7 @@ export function CartDrawer() {
                   <button
                     type="button"
                     onClick={removeDiscount}
-                    aria-label="Quitar código de descuento"
+                    aria-label="Remover cupom de desconto"
                     className="focus-ring rounded text-muted transition hover:text-foreground"
                   >
                     ✕
@@ -198,7 +196,7 @@ export function CartDrawer() {
                         void applyDiscountCode(discountInput);
                       }
                     }}
-                    placeholder="Código de descuento"
+                    placeholder="Cupom de desconto"
                     className={`focus-ring w-full rounded-lg border bg-surface-2 px-3 py-2 text-xs outline-none transition ${
                       discountState === "error" ? "border-danger" : "border-border"
                     }`}
@@ -224,17 +222,19 @@ export function CartDrawer() {
                 )}
                 {appliedDiscount && (
                   <span className="text-muted">
-                    Monto informativo: el admin lo confirma al generar el comprobante.
+                    Valor informativo: o desconto será confirmado no atendimento.
                   </span>
                 )}
               </p>
 
-              {appliedDiscount && (
-                <div className="mb-1 flex items-center justify-between text-xs text-muted">
-                  <span>Subtotal</span>
-                  <span>{formatPrice(subtotal)}</span>
-                </div>
-              )}
+              <div className="mb-1 flex items-center justify-between text-xs text-muted">
+                <span>Subtotal</span>
+                <span>{formatPrice(subtotal)}</span>
+              </div>
+              <div className="mb-1 flex items-center justify-between text-xs text-muted">
+                <span>Frete</span>
+                <span>{formatPrice(SHIPPING.nationalCost)}</span>
+              </div>
               <div className="mb-3 flex items-center justify-between text-base font-semibold">
                 <span>Total</span>
                 <span>{formatPrice(total)}</span>
@@ -242,11 +242,12 @@ export function CartDrawer() {
               <WhatsAppCtaButton
                 href={buildOrderWhatsAppUrl(resolvedItems, {
                   discountCode: appliedDiscount?.code,
+                    discountAmount: appliedDiscount?.amount,
                   name: customerName,
                   city: customerCity,
                   address: messageAddress,
                 })}
-                label="Finalizar pedido por WhatsApp"
+                label="Finalizar pedido pelo WhatsApp"
                 variant="solid"
                 analyticsEvent="whatsapp_click_checkout"
                 onClick={clear}
@@ -256,14 +257,14 @@ export function CartDrawer() {
                 onClick={closeDrawer}
                 className="focus-ring mt-2 block rounded text-center text-xs text-muted transition hover:text-foreground"
               >
-                Ver carrito completo
+                Ver carrinho completo
               </Link>
               <Link
                 href="/envios"
                 onClick={closeDrawer}
                 className="focus-ring mt-1 block rounded text-center text-xs text-muted transition hover:text-foreground"
               >
-                Cobertura y tiempos de envío
+                Informações de frete
               </Link>
             </div>
           </>
@@ -285,7 +286,7 @@ export function QtyStepper({
       <button
         type="button"
         onClick={() => onChange(value - 1)}
-        aria-label="Disminuir cantidad"
+        aria-label="Diminuir quantidade"
         className="focus-ring flex h-11 w-11 items-center justify-center rounded-l-lg text-lg leading-none text-muted transition [touch-action:manipulation] hover:text-foreground active:bg-surface-2"
       >
         −
@@ -296,7 +297,7 @@ export function QtyStepper({
       <button
         type="button"
         onClick={() => onChange(value + 1)}
-        aria-label="Aumentar cantidad"
+        aria-label="Aumentar quantidade"
         className="focus-ring flex h-11 w-11 items-center justify-center rounded-r-lg text-lg leading-none text-muted transition [touch-action:manipulation] hover:text-foreground active:bg-surface-2"
       >
         +

@@ -7,10 +7,10 @@ import type { Product } from "@/lib/products.types";
 type SortKey = "catalogo" | "nombre" | "precio-asc" | "precio-desc";
 
 const sortOptions: { value: SortKey; label: string }[] = [
-  { value: "catalogo", label: "Orden del catálogo" },
+  { value: "catalogo", label: "Ordem do catálogo" },
   { value: "nombre", label: "Nombre (A–Z)" },
-  { value: "precio-asc", label: "Precio (menor a mayor)" },
-  { value: "precio-desc", label: "Precio (mayor a menor)" },
+  { value: "precio-asc", label: "Preço (menor para maior)" },
+  { value: "precio-desc", label: "Preço (maior para menor)" },
 ];
 
 export function CatalogClient({
@@ -49,7 +49,7 @@ export function CatalogClient({
     } else if (sort === "precio-desc") {
       result.sort((a, b) => b.price - a.price);
     } else if (sort === "nombre") {
-      result.sort((a, b) => a.name.localeCompare(b.name, "es"));
+      result.sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
     }
 
     return result;
@@ -72,8 +72,8 @@ export function CatalogClient({
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Buscar por nombre, categoría o beneficio…"
-            aria-label="Buscar productos"
+            placeholder="Buscar por nome, categoria ou característica…"
+            aria-label="Buscar produtos"
             className="focus-ring w-full rounded-lg border border-border bg-surface py-2.5 pl-10 pr-3 text-sm text-foreground outline-none transition placeholder:text-muted focus:border-accent"
           />
         </div>
@@ -111,7 +111,7 @@ export function CatalogClient({
       {/* Resultados */}
       {filtered.length === 0 ? (
         <p className="py-16 text-center text-muted">
-          No se encontraron productos para tu búsqueda.
+          Nenhum produto encontrado para sua busca.
         </p>
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">

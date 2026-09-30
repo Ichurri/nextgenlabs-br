@@ -6,10 +6,10 @@ import { useState } from "react";
 import { useCart, cartCount } from "@/lib/cart";
 
 const navLinks = [
-  { href: "/", label: "Inicio" },
+  { href: "/", label: "Início" },
   { href: "/catalogo", label: "Catálogo" },
   { href: "/preguntas-frecuentes", label: "FAQ" },
-  { href: "/contacto", label: "Contacto" },
+  { href: "/contacto", label: "Contato" },
 ];
 
 export function Header() {
@@ -21,7 +21,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-border/80 bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
-        <Link href="/" className="focus-ring rounded flex items-center gap-2" aria-label="Nextgen Labs — inicio">
+        <Link href="/" className="focus-ring rounded flex items-center gap-2" aria-label="Nextgen Labs — início">
           <Image
             src="/logo.svg"
             alt="Nextgen Labs"
@@ -47,7 +47,7 @@ export function Header() {
         <div className="flex items-center gap-2">
           <button
             onClick={openDrawer}
-            aria-label="Abrir carrito"
+            aria-label="Abrir carrinho"
             className="focus-ring relative rounded-lg border border-border p-3 text-foreground transition hover:bg-surface-2"
           >
             <CartIcon />
@@ -60,7 +60,7 @@ export function Header() {
 
           <button
             onClick={() => setMobileOpen((v) => !v)}
-            aria-label="Abrir menú"
+            aria-label="Abrir menu"
             aria-expanded={mobileOpen}
             className="focus-ring rounded-lg border border-border p-3 text-foreground transition hover:bg-surface-2 md:hidden"
           >

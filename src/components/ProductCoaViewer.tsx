@@ -69,12 +69,12 @@ export function ProductCoaViewer({ coaUrl, productName }: ProductCoaViewerProps)
           >
             <div className="flex items-center justify-between border-b border-border px-4 py-3">
               <p className="text-sm font-semibold">
-                Certificado de Análisis · {productName}
+                Certificado de Análise · {productName}
               </p>
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                aria-label="Cerrar COA"
+                aria-label="Fechar COA"
                 className="focus-ring rounded-lg p-3 text-muted transition hover:bg-surface-2 hover:text-foreground"
               >
                 <CloseIcon />
@@ -100,8 +100,7 @@ export function ProductCoaViewer({ coaUrl, productName }: ProductCoaViewerProps)
             ) : (
               <div className="flex flex-col items-center justify-center gap-5 bg-surface-2 px-6 py-16 text-center">
                 <p className="max-w-sm text-sm leading-relaxed text-muted">
-                  Tu navegador no puede mostrar el PDF aquí. Ábrelo directamente
-                  para verlo o descargarlo.
+                  Seu navegador não consegue mostrar o PDF aqui. Abra o arquivo para visualizar ou baixar.
                 </p>
                 <CoaActions coaUrl={coaUrl} productName={productName} size="lg" />
               </div>
@@ -134,7 +133,7 @@ function CoaActions({
         className={`focus-ring inline-flex items-center justify-center gap-2 rounded-lg border border-border font-semibold text-foreground transition hover:bg-surface-2 ${sizeClasses}`}
       >
         <DownloadIcon className={iconClasses} />
-        Descargar PDF
+        Baixar PDF
       </a>
       <a
         href={coaUrl}
@@ -143,7 +142,7 @@ function CoaActions({
         className={`focus-ring inline-flex items-center justify-center gap-2 rounded-lg border border-border font-semibold text-foreground transition hover:bg-surface-2 ${sizeClasses}`}
       >
         <ExternalLinkIcon className={iconClasses} />
-        Abrir en pestaña nueva
+        Abrir em nova aba
       </a>
     </>
   );

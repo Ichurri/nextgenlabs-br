@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { requireApiSession } from "@/lib/dal";
 import { supabaseAdmin } from "@/lib/supabase-admin";
-import { normalizeCode, endOfDayBolivia } from "@/lib/discounts";
+import { normalizeCode, endOfDayBrazil } from "@/lib/discounts";
 import { discountCodeFieldsSchema } from "@/lib/discount-code.schema";
 
 export const runtime = "nodejs";
@@ -44,7 +44,7 @@ export async function PATCH(
       owner_label: data.ownerLabel,
       is_active: data.isActive,
       max_uses: data.maxUses,
-      expires_at: data.expiresAt ? endOfDayBolivia(data.expiresAt) : null,
+      expires_at: data.expiresAt ? endOfDayBrazil(data.expiresAt) : null,
       min_order_total: data.minOrderTotal,
       max_discount: data.maxDiscount,
     })

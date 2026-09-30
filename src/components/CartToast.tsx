@@ -43,7 +43,7 @@ export function CartToast() {
         {/* key=addNonce fuerza un remount del texto para que el lector de
             pantalla vuelva a anunciarlo aunque se repita el mismo producto. */}
         <div className="min-w-0" key={addNonce}>
-          <p className="text-sm font-semibold leading-tight">Añadido al carrito</p>
+          <p className="text-sm font-semibold leading-tight">Adicionado ao carrinho</p>
           {lastAddedName && (
             <p className="truncate text-xs text-muted">{lastAddedName}</p>
           )}
@@ -55,7 +55,7 @@ export function CartToast() {
           }}
           className="focus-ring ml-1 shrink-0 rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-accent-light"
         >
-          Ver carrito
+          Ver carrinho
         </button>
       </div>
     </div>

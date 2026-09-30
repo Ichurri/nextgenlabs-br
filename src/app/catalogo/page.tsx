@@ -6,7 +6,7 @@ import { getCatalog } from "@/lib/products-data";
 export const metadata: Metadata = {
   title: "Catálogo",
   description:
-    "Catálogo de péptidos, blends y SARMs para uso exclusivo de investigación. Pureza verificada y respaldada por COA.",
+    "Catálogo de peptídeos e combinações para pesquisa laboratorial. Preços em reais e pedidos pelo WhatsApp.",
 };
 
 export default async function CatalogoPage({
@@ -23,14 +23,14 @@ export default async function CatalogoPage({
       <header className="mb-10">
         <p className="eyebrow mb-2">Catálogo</p>
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-          Todos los compuestos
+          Todos os compostos
         </h1>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted">
-          Todos los productos son{" "}
+          Todos os produtos são{" "}
           <span className="font-medium text-foreground">
-            exclusivamente para uso de investigación
+            destinados exclusivamente à pesquisa laboratorial
           </span>
-          . No aptos para consumo humano. Los pedidos se coordinan por WhatsApp.
+          . Não destinados ao consumo humano. Os pedidos são combinados pelo WhatsApp.
         </p>
       </header>
 

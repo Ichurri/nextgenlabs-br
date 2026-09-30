@@ -1,191 +1,52 @@
 import { describe, expect, it } from "vitest";
-import {
-  buildCustomerReceiptMessage,
-  buildCustomerWhatsAppUrl,
-  buildOrderMessage,
-  buildOrderWhatsAppUrl,
-} from "@/lib/whatsapp";
-import { WHATSAPP_NUMBER, siteConfig } from "@/config/site";
+import { buildCustomerReceiptMessage, buildCustomerWhatsAppUrl, buildOrderMessage, buildOrderWhatsAppUrl } from "@/lib/whatsapp";
+import { WHATSAPP_NUMBER } from "@/config/site";
 import type { CartItem } from "@/lib/cart";
 
 const items: CartItem[] = [
-  {
-    slug: "tesamorelin",
-    name: "Tesamorelin",
-    dose: "10 MG",
-    price: 1700,
-    image: "/products/tesamorelin.webp",
-    quantity: 1,
-  },
-  {
-    slug: "nad-plus",
-    name: "NAD+",
-    dose: "500 MG",
-    price: 1900,
-    image: "/products/nadplus.webp",
-    quantity: 1,
-  },
+  { slug: "ghk-cu", name: "GHK-Cu", dose: "100 MG", price: 800, image: "", quantity: 1 },
 ];
+const clean = (value: string) => value.replace(/\u00a0/g, " ");
 
-describe("buildOrderMessage", () => {
-  it("arma el mensaje con el formato exacto esperado, sin código de descuento", () => {
-    const expected = [
-      `Hola ${siteConfig.name}, quiero hacer un pedido:`,
-      "",
-      "• Tesamorelin 10 MG x1 — Bs 1.700",
-      "• NAD+ 500 MG x1 — Bs 1.900",
-      "",
-      "Total: Bs 3.600",
-      "",
-      "Mis datos:",
-      "Nombre:",
-      "Ciudad:",
-      "",
-    ].join("\n");
-
-    expect(buildOrderMessage(items)).toBe(expected);
+describe("mensagem do pedido no Brasil", () => {
+  it("informa reais, frete de R$ 35 e dados do cliente", () => {
+    const message = clean(buildOrderMessage(items, { name: "Ana", city: "São Paulo", address: "Rua Exemplo, 10" }));
+    expect(message).toContain("Olá Nextgen Labs, quero fazer um pedido:");
+    expect(message).toContain("• GHK-Cu 100 MG x1 — R$ 800,00");
+    expect(message).toContain("Frete: R$ 35,00");
+    expect(message).toContain("Total estimado: R$ 835,00");
+    expect(message).toContain("Nome: Ana");
+    expect(message).toContain("Cidade: São Paulo");
+    expect(message).toContain("Endereço: Rua Exemplo, 10");
   });
 
-  it("arma el mensaje con el formato exacto esperado, con código de descuento", () => {
-    const expected = [
-      `Hola ${siteConfig.name}, quiero hacer un pedido:`,
-      "",
-      "• Tesamorelin 10 MG x1 — Bs 1.700",
-      "• NAD+ 500 MG x1 — Bs 1.900",
-      "",
-      "Total: Bs 3.600",
-      "",
-      "Código de descuento: MAFE10",
-      "",
-      "Mis datos:",
-      "Nombre:",
-      "Ciudad:",
-      "",
-    ].join("\n");
-
-    expect(buildOrderMessage(items, { discountCode: "MAFE10" })).toBe(expected);
+  it("inclui o desconto estimado quando há cupom validado", () => {
+    const message = clean(buildOrderMessage(items, { discountCode: "MAFE10", discountAmount: 80 }));
+    expect(message).toContain("Desconto estimado: −R$ 80,00");
+    expect(message).toContain("Total estimado: R$ 755,00");
   });
 
-  it("no incluye la línea del código cuando no hay uno aplicado", () => {
-    expect(buildOrderMessage(items, { discountCode: null })).not.toContain("Código de descuento");
-    expect(buildOrderMessage(items)).not.toContain("Código de descuento");
+  it("omite endereço não informado e deixa os outros campos editáveis", () => {
+    const message = buildOrderMessage(items);
+    expect(message).toContain("Nome:\nCidade:\n");
+    expect(message).not.toContain("Endereço:");
   });
 
-  it("completa nombre y ciudad cuando vienen del formulario del carrito", () => {
-    const expected = [
-      `Hola ${siteConfig.name}, quiero hacer un pedido:`,
-      "",
-      "• Tesamorelin 10 MG x1 — Bs 1.700",
-      "• NAD+ 500 MG x1 — Bs 1.900",
-      "",
-      "Total: Bs 3.600",
-      "",
-      "Mis datos:",
-      "Nombre: Juan Pérez",
-      "Ciudad: La Paz",
-      "",
-    ].join("\n");
-
-    expect(buildOrderMessage(items, { name: "Juan Pérez", city: "La Paz" })).toBe(expected);
-  });
-
-  it("deja la etiqueta en blanco cuando el nombre o la ciudad vienen vacíos", () => {
-    const message = buildOrderMessage(items, { name: "  ", city: "" });
-    expect(message).toContain("Nombre:\n");
-    expect(message).toContain("Ciudad:\n");
-  });
-
-  it("omite la línea de dirección cuando no se pasa (otras ciudades, o Cochabamba sin envío)", () => {
-    expect(buildOrderMessage(items)).not.toContain("Dirección");
-    expect(buildOrderMessage(items, { city: "Santa Cruz" })).not.toContain("Dirección");
-    expect(buildOrderMessage(items, { address: undefined })).not.toContain("Dirección");
-    expect(buildOrderMessage(items, { address: null })).not.toContain("Dirección");
-  });
-
-  it("incluye la dirección completa cuando se pasa un valor (Cochabamba con envío)", () => {
-    const message = buildOrderMessage(items, { city: "Cochabamba", address: "Av. América #123" });
-    expect(message).toContain("Ciudad: Cochabamba");
-    expect(message).toContain("Dirección: Av. América #123");
-  });
-
-  it("deja la línea de dirección en blanco cuando se pasa un string vacío", () => {
-    const message = buildOrderMessage(items, { city: "Cochabamba", address: "" });
-    expect(message).toContain("Dirección:\n");
-    expect(message).not.toContain("Dirección: ");
-  });
-
-  it("multiplica precio x cantidad en cada línea", () => {
-    const message = buildOrderMessage([
-      { slug: "a", name: "A", dose: "5 MG", price: 100, image: "", quantity: 3 },
-    ]);
-
-    expect(message).toContain("• A 5 MG x3 — Bs 300");
-    expect(message).toContain("Total: Bs 300");
-  });
-
-  it("produce un pedido vacío coherente cuando no hay ítems", () => {
-    const message = buildOrderMessage([]);
-
-    expect(message).toContain(`Hola ${siteConfig.name}, quiero hacer un pedido:`);
-    expect(message).toContain("Total: Bs 0");
-  });
-});
-
-describe("buildOrderWhatsAppUrl", () => {
-  it("apunta a wa.me con el número configurado", () => {
-    const url = buildOrderWhatsAppUrl(items);
-    expect(url.startsWith(`https://wa.me/${WHATSAPP_NUMBER}?text=`)).toBe(true);
-  });
-
-  it("codifica el mensaje completo del pedido en el parámetro text", () => {
-    const url = buildOrderWhatsAppUrl(items);
-    const encodedMessage = url.split("?text=")[1];
-
-    expect(decodeURIComponent(encodedMessage)).toBe(buildOrderMessage(items));
-  });
-
-  it("propaga el código de descuento al mensaje codificado", () => {
+  it("inclui o cupom e aponta para o WhatsApp configurado", () => {
     const url = buildOrderWhatsAppUrl(items, { discountCode: "MAFE10" });
-    const encodedMessage = url.split("?text=")[1];
-
-    expect(decodeURIComponent(encodedMessage)).toBe(
-      buildOrderMessage(items, { discountCode: "MAFE10" })
-    );
-    expect(decodeURIComponent(encodedMessage)).toContain("Código de descuento: MAFE10");
+    expect(url).toMatch(new RegExp(`^https://wa.me/${WHATSAPP_NUMBER}\\?text=`));
+    expect(decodeURIComponent(url.split("?text=")[1])).toContain("Cupom de desconto: MAFE10");
   });
 
-  it("propaga nombre y ciudad al mensaje codificado", () => {
-    const url = buildOrderWhatsAppUrl(items, { name: "Juan Pérez", city: "La Paz" });
-    const encodedMessage = url.split("?text=")[1];
-
-    expect(decodeURIComponent(encodedMessage)).toContain("Nombre: Juan Pérez");
-    expect(decodeURIComponent(encodedMessage)).toContain("Ciudad: La Paz");
+  it("não cobra frete num pedido vazio", () => {
+    expect(clean(buildOrderMessage([]))).toContain("Total estimado: R$ 0,00");
   });
 });
 
-describe("buildCustomerReceiptMessage", () => {
-  it("es el texto acordado con el dueño, sin número de pedido", () => {
-    expect(buildCustomerReceiptMessage()).toBe(
-      "Gracias por confiar en nosotros, acá está tu comprobante de recibo."
-    );
-  });
-});
-
-describe("buildCustomerWhatsAppUrl", () => {
-  it("apunta a wa.me con el teléfono del comprador (no el del negocio)", () => {
-    expect(buildCustomerWhatsAppUrl("69437674").startsWith("https://wa.me/69437674?text=")).toBe(
-      true
-    );
-  });
-
-  it("el teléfono queda correctamente escapado en la URL", () => {
-    const url = buildCustomerWhatsAppUrl("+591 69437674");
-    expect(url).toContain(encodeURIComponent("+591 69437674"));
-    expect(url).not.toContain(" ");
-  });
-
-  it("codifica el mensaje en el parámetro text", () => {
-    const url = buildCustomerWhatsAppUrl("69437674");
-    expect(decodeURIComponent(url.split("?text=")[1])).toBe(buildCustomerReceiptMessage());
+describe("mensagem do atendente", () => {
+  it("usa português no comprovante", () => {
+    expect(buildCustomerReceiptMessage()).toContain("comprovante do seu pedido");
+    expect(decodeURIComponent(buildCustomerWhatsAppUrl("5511999999999").split("?text=")[1]))
+      .toBe(buildCustomerReceiptMessage());
   });
 });

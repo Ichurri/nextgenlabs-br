@@ -3,60 +3,18 @@ import { LegalPage } from "@/components/LegalPage";
 import { WhatsAppCtaButton } from "@/components/WhatsAppCtaButton";
 import { buildWhatsAppUrl } from "@/config/site";
 
-export const metadata: Metadata = {
-  title: "Envíos",
-  description:
-    "Cobertura, tiempos de entrega y empaque discreto de Nextgen Labs. Coordinamos cada envío directamente por WhatsApp.",
-};
+export const metadata: Metadata = { title: "Frete", description: "Informações de frete da Nextgen Labs Brasil." };
 
-// PLACEHOLDER: cobertura, tiempos y costos de referencia. El cliente debe
-// validar estos datos con su operador logístico real antes de publicar.
 export default function EnviosPage() {
-  return (
-    <>
-      <LegalPage
-        eyebrow="Envíos"
-        title="Cobertura, tiempos y empaque"
-        updated="julio de 2026"
-        sections={[
-          {
-            heading: "Cobertura",
-            body: [
-              "Realizamos envíos a las principales ciudades de Bolivia: Santa Cruz de la Sierra, La Paz, Cochabamba, y otras capitales de departamento bajo coordinación previa.",
-              "Para zonas fuera de estas ciudades, escríbenos por WhatsApp y confirmamos disponibilidad y costo antes de cerrar tu pedido.",
-            ],
-          },
-          {
-            heading: "Tiempos de entrega",
-            body: [
-              "Despacho el mismo día para pedidos confirmados antes de las 2:00 pm (días hábiles).",
-              "Entrega estimada: 24–48 horas dentro de Santa Cruz de la Sierra; 2–5 días hábiles al resto del país, según courier y destino.",
-            ],
-          },
-          {
-            heading: "Empaque discreto",
-            body: [
-              "Todos los pedidos se despachan en empaque neutro, sin marcas ni referencias visibles al contenido, para proteger tu privacidad.",
-              "Los viales viajan protegidos y refrigerados cuando el compuesto lo requiere.",
-            ],
-          },
-          {
-            heading: "Coordinación por WhatsApp",
-            body: [
-              "No hay pago ni checkout en línea: el costo de envío, la dirección y el método de pago se coordinan directamente por WhatsApp al confirmar tu pedido.",
-            ],
-          },
-        ]}
-      />
-      <div className="mx-auto -mt-6 max-w-3xl px-4 pb-14 sm:px-6">
-        <WhatsAppCtaButton
-          href={buildWhatsAppUrl("Hola Nextgen Labs, tengo una consulta sobre envíos.")}
-          label="Consultar envío por WhatsApp"
-          variant="solid"
-          fullWidth={false}
-          analyticsEvent="whatsapp_click_contact"
-        />
-      </div>
-    </>
-  );
+  return <>
+    <LegalPage eyebrow="Frete" title="Entrega e atendimento" updated="setembro de 2026" sections={[
+      { heading: "Origem", body: ["O atendimento da loja brasileira é feito a partir de São Paulo."] },
+      { heading: "Valor do frete", body: ["O carrinho calcula R$ 35 de frete por pedido. O valor final e a disponibilidade para o destino informado são confirmados no atendimento por WhatsApp."] },
+      { heading: "Prazo e endereço", body: ["Informe sua cidade e, se desejar, seu endereço no carrinho. O prazo de entrega e os detalhes do envio serão confirmados antes da conclusão do pedido."] },
+      { heading: "Pagamento", body: ["O site não processa pagamentos online. O método de pagamento é combinado diretamente pelo WhatsApp."] },
+    ]} />
+    <div className="mx-auto -mt-6 max-w-3xl px-4 pb-14 sm:px-6">
+      <WhatsAppCtaButton href={buildWhatsAppUrl("Olá Nextgen Labs, gostaria de consultar o frete.")} label="Consultar frete pelo WhatsApp" variant="solid" fullWidth={false} analyticsEvent="whatsapp_click_contact" />
+    </div>
+  </>;
 }

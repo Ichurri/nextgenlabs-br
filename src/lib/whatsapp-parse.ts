@@ -99,15 +99,15 @@ export function parseOrderMessage(text: string, products: Product[]): ParsedOrde
     itemsBySlug.set(product.slug, (itemsBySlug.get(product.slug) ?? 0) + quantity);
   }
 
-  const rawCode = extractField(lines, "C[oó]digo de descuento");
+  const rawCode = extractField(lines, "(?:Cupom de desconto|C[oó]digo de descuento)");
   const code = rawCode ? normalizeCode(rawCode) : null;
 
   return {
     items: Array.from(itemsBySlug, ([slug, quantity]) => ({ slug, quantity })),
     unmatched,
     code,
-    name: extractField(lines, "Nombre"),
-    city: extractField(lines, "Ciudad"),
-    address: extractField(lines, "Direcci[oó]n"),
+    name: extractField(lines, "(?:Nome|Nombre)"),
+    city: extractField(lines, "(?:Cidade|Ciudad)"),
+    address: extractField(lines, "(?:Endere[cç]o|Direcci[oó]n)"),
   };
 }

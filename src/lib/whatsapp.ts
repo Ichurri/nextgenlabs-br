@@ -1,72 +1,44 @@
 import { buildWhatsAppUrl, siteConfig } from "@/config/site";
+import { SHIPPING } from "@/config/shipping";
 import { cartTotal, type CartItem } from "@/lib/cart";
 import { formatPrice } from "@/lib/format";
 
-// ─── Comprador → negocio ───────────────────────────────────────────────
-// wa.me apunta al número DEL NEGOCIO (WHATSAPP_NUMBER en config/site.ts).
-
 export type OrderMessageDetails = {
   discountCode?: string | null;
-  /** Del formulario de "Tus datos" en el carrito (Fase 9.1). Vacío u omitido → etiqueta en blanco, como antes. */
+  discountAmount?: number | null;
   name?: string | null;
   city?: string | null;
-  /**
-   * Solo Cochabamba ofrece elegir entre envío a domicilio y recojo (ver
-   * CustomerFields.tsx); en el resto de las ciudades no existe el concepto
-   * de dirección local. Por eso la línea "Dirección:" no es como
-   * Nombre/Ciudad (blanco vs. completo): se omite del todo salvo que el
-   * caller pase explícitamente un valor — `undefined`/`null` la saca por
-   * completo, `""` la deja en blanco para completar a mano.
-   */
   address?: string | null;
 };
 
-/**
- * Arma el texto del pedido para WhatsApp a partir de los ítems del carrito.
- * El formato es para humanos y el comprador puede editar el texto entero
- * antes de enviarlo — el admin lo pega en el panel y `parseOrderMessage()`
- * solo reconoce las líneas "• nombre dosis xN", la del código y las de
- * datos; los precios y el total son informativos, el parser los ignora.
- * Ejemplo de salida (con nombre, ciudad y envío a domicilio en Cochabamba):
- *
- *   Hola Nextgen Labs, quiero hacer un pedido:
- *
- *   • Tesamorelin 10 MG x2 — Bs 700
- *   • NAD+ 500 MG x1 — Bs 450
- *
- *   Total: Bs 1150
- *
- *   Código de descuento: MAFE10
- *
- *   Mis datos:
- *   Nombre: Juan Pérez
- *   Ciudad: Cochabamba
- *   Dirección: Av. América #123
- */
+/** Mensagem editável pelo cliente. O painel recalcula preços a partir do catálogo. */
 export function buildOrderMessage(items: CartItem[], details: OrderMessageDetails = {}): string {
-  const lines = items.map((i) => {
-    const lineTotal = formatPrice(i.price * i.quantity);
-    return `• ${i.name} ${i.dose} x${i.quantity} — ${lineTotal}`;
-  });
-
-  const total = formatPrice(cartTotal(items));
+  const lines = items.map((item) =>
+    `• ${item.name} ${item.dose} x${item.quantity} — ${formatPrice(item.price * item.quantity)}`
+  );
+  const subtotal = cartTotal(items);
+  const shipping = items.length > 0 ? SHIPPING.nationalCost : 0;
+  const discount = Math.min(subtotal, Math.max(0, details.discountAmount ?? 0));
   const name = details.name?.trim();
   const city = details.city?.trim();
-  const showAddress = details.address !== undefined && details.address !== null;
   const address = details.address?.trim();
+  const showAddress = details.address !== undefined && details.address !== null;
 
   return [
-    `Hola ${siteConfig.name}, quiero hacer un pedido:`,
+    `Olá ${siteConfig.name}, quero fazer um pedido:`,
     "",
     ...lines,
     "",
-    `Total: ${total}`,
+    `Subtotal dos produtos: ${formatPrice(subtotal)}`,
+    ...(discount > 0 ? [`Desconto estimado: −${formatPrice(discount)}`] : []),
+    `Frete: ${formatPrice(shipping)}`,
+    `Total estimado: ${formatPrice(subtotal - discount + shipping)}`,
     "",
-    ...(details.discountCode ? [`Código de descuento: ${details.discountCode}`, ""] : []),
-    "Mis datos:",
-    name ? `Nombre: ${name}` : "Nombre:",
-    city ? `Ciudad: ${city}` : "Ciudad:",
-    ...(showAddress ? [address ? `Dirección: ${address}` : "Dirección:"] : []),
+    ...(details.discountCode ? [`Cupom de desconto: ${details.discountCode}`, ""] : []),
+    "Meus dados:",
+    name ? `Nome: ${name}` : "Nome:",
+    city ? `Cidade: ${city}` : "Cidade:",
+    ...(showAddress ? [address ? `Endereço: ${address}` : "Endereço:"] : []),
     "",
   ].join("\n");
 }
@@ -75,20 +47,11 @@ export function buildOrderWhatsAppUrl(items: CartItem[], details: OrderMessageDe
   return buildWhatsAppUrl(buildOrderMessage(items, details));
 }
 
-// ─── Negocio → comprador ────────────────────────────────────────────────
-// wa.me apunta acá al número DEL COMPRADOR (customer_phone, ya normalizado a
-// solo dígitos por phoneSchema en orders.schema.ts), no al del negocio.
-//
-// WhatsApp no deja adjuntar archivos por deep link: este helper solo abre el
-// chat con el texto listo. El PDF lo adjunta el dueño a mano, por eso la
-// tarjeta del pedido pone el botón de descarga al lado de este enlace.
-
-/** Único mensaje al comprador: el comprobante va adjunto a mano. */
+/** O comprovante PDF é anexado manualmente pelo atendente no WhatsApp. */
 export function buildCustomerReceiptMessage(): string {
-  return "Gracias por confiar en nosotros, acá está tu comprobante de recibo.";
+  return "Obrigado por confiar em nós. Segue o comprovante do seu pedido.";
 }
 
 export function buildCustomerWhatsAppUrl(phoneDigits: string): string {
-  const message = buildCustomerReceiptMessage();
-  return `https://wa.me/${encodeURIComponent(phoneDigits)}?text=${encodeURIComponent(message)}`;
+  return `https://wa.me/${encodeURIComponent(phoneDigits)}?text=${encodeURIComponent(buildCustomerReceiptMessage())}`;
 }

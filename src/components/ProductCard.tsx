@@ -17,7 +17,7 @@ export function ProductCard({ product }: { product: Product }) {
   const items = useCart((s) => s.items);
 
   // Evita desajuste de hidratación: el carrito se rehidrata desde localStorage
-  // sólo en el cliente, así que hasta montar mostramos siempre "Añadir".
+  // sólo en el cliente, así que hasta montar mostramos siempre "Adicionar".
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const inCart = mounted
@@ -33,7 +33,7 @@ export function ProductCard({ product }: { product: Product }) {
       >
         <Image
           src={product.image}
-          alt={`Vial de ${product.name} ${product.dose}`}
+          alt={`Frasco de ${product.name} ${product.dose}`}
           fill
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           className={`object-cover transition duration-500 group-hover:scale-105 ${inStock ? "" : "opacity-50 grayscale"}`}
@@ -46,12 +46,12 @@ export function ProductCard({ product }: { product: Product }) {
         </span>
         {product.isNew && inStock && (
           <span className="absolute bottom-3 left-3 rounded-md bg-success px-2 py-1 text-[11px] font-bold tracking-wide text-white">
-            Nuevo
+            Novo
           </span>
         )}
         {!inStock && (
           <span className="absolute bottom-3 left-3 rounded-md border border-border bg-background/90 px-2 py-1 text-[11px] font-bold uppercase tracking-wide text-foreground backdrop-blur">
-            Agotado
+            Esgotado
           </span>
         )}
       </Link>
@@ -64,18 +64,18 @@ export function ProductCard({ product }: { product: Product }) {
           </h3>
         </Link>
         <p className="mt-1 text-[10px] font-medium uppercase tracking-wider text-muted">
-          Solo para uso de investigación
+          Exclusivamente para pesquisa
         </p>
 
         <div className="mt-4 flex flex-wrap items-center justify-between gap-x-2 gap-y-2">
           {!inStock ? (
             <>
-              <span className="text-sm font-semibold text-muted">No disponible</span>
+              <span className="text-sm font-semibold text-muted">Indisponível</span>
               <button
                 disabled
                 className="cursor-not-allowed rounded-lg border border-border px-3 py-2 text-xs font-semibold text-muted"
               >
-                Agotado
+                Esgotado
               </button>
             </>
           ) : product.price > 0 ? (
@@ -93,16 +93,16 @@ export function ProductCard({ product }: { product: Product }) {
                   onClick={() => addItem(product)}
                   className="focus-ring rounded-lg bg-accent px-3 py-2 text-xs font-semibold text-white transition hover:bg-accent-light"
                 >
-                  Añadir
+                  Adicionar
                 </button>
               )}
             </>
           ) : (
             <>
-              <span className="text-sm font-semibold text-muted">A consultar</span>
+              <span className="text-sm font-semibold text-muted">Sob consulta</span>
               <WhatsAppCtaButton
                 href={buildWhatsAppUrl(
-                  `Hola Nextgen Labs, quiero consultar el precio de ${product.name} ${product.dose}.`
+                  `Olá Nextgen Labs, gostaria de consultar o preço de ${product.name} ${product.dose}.`
                 )}
                 label="Consultar"
                 variant="compact"

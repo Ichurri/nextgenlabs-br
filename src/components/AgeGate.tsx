@@ -7,10 +7,10 @@ import { useFocusTrap } from "@/lib/useFocusTrap";
 const STORAGE_KEY = "nextgen-age-verified";
 
 const trustBadges = [
-  { label: "Probado por", value: "Terceros", Icon: ShieldIcon },
-  { label: "COA", value: "Aprobado", Icon: DocCheckIcon },
-  { label: "Analizado", value: "7 veces", Icon: LabIcon },
-  { label: "Despacho", value: "Mismo día", Icon: TruckIcon },
+  { label: "Testado por", value: "Terceiros", Icon: ShieldIcon },
+  { label: "COA", value: "Disponível", Icon: DocCheckIcon },
+  { label: "Analisado", value: "por lote", Icon: LabIcon },
+  { label: "Atendimento", value: "WhatsApp", Icon: TruckIcon },
 ];
 
 export function AgeGate() {
@@ -79,43 +79,42 @@ export function AgeGate() {
               id="age-gate-title"
               className="mb-3 text-xl font-semibold tracking-wide"
             >
-              Verificación de edad
+              Verificação de idade
             </h1>
             <p className="mb-6 text-sm leading-relaxed text-muted">
-              Este sitio contiene productos destinados{" "}
+              Este site apresenta produtos destinados{" "}
               <span className="font-medium text-foreground">
-                exclusivamente al uso de investigación
+                exclusivamente à pesquisa laboratorial
               </span>
-              . No aptos para consumo humano ni uso diagnóstico o terapéutico.
-              Debes ser mayor de 21 años para ingresar.
+              . Não destinados ao consumo humano nem ao uso diagnóstico ou terapêutico.
+              Você deve ter mais de 21 anos para acessar.
             </p>
             <div className="flex flex-col gap-3">
               <button
                 onClick={() => setStep(2)}
                 className="focus-ring w-full rounded-lg bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-accent-light"
               >
-                Soy mayor de 21 años · Continuar
+                Tenho mais de 21 anos · Continuar
               </button>
               <button
                 onClick={leave}
                 className="focus-ring w-full rounded-lg border border-border px-5 py-3 text-sm font-medium text-muted transition hover:bg-surface-2"
               >
-                Salir
+                Sair
               </button>
             </div>
             <p className="mt-6 text-xs text-muted/70">
-              Al continuar aceptas nuestros términos de uso y confirmas comprender
-              el carácter investigativo de los productos.
+              Ao continuar, você aceita os termos de uso e confirma que entende a finalidade de pesquisa dos produtos.
             </p>
           </>
         ) : (
           <>
-            <p className="eyebrow mb-2">Calidad verificada</p>
+            <p className="eyebrow mb-2">Informações do catálogo</p>
             <h1
               id="age-gate-title"
               className="mb-6 text-xl font-semibold tracking-wide"
             >
-              Nuestro estándar
+              Sobre os produtos
             </h1>
             <ul className="mb-7 grid grid-cols-2 gap-3 text-left">
               {trustBadges.map(({ label, value, Icon }) => (
@@ -136,13 +135,13 @@ export function AgeGate() {
                 onClick={enter}
                 className="focus-ring w-full rounded-lg bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-accent-light"
               >
-                Ingresar
+                Entrar
               </button>
               <button
                 onClick={() => setStep(1)}
                 className="focus-ring w-full rounded-lg border border-border px-5 py-3 text-sm font-medium text-muted transition hover:bg-surface-2"
               >
-                Volver
+                Voltar
               </button>
             </div>
           </>

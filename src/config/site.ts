@@ -1,30 +1,28 @@
 /**
  * Configuración global del sitio.
- * PLACEHOLDER: el cliente debe reemplazar estos valores antes de publicar.
+ * Dados específicos de domínio e contato devem ser configurados antes da publicação.
  */
 
-// Número de WhatsApp en formato internacional
-// (código de país + número, solo dígitos, sin "+", espacios ni guiones).
-// Ejemplo Bolivia: 59171234567
-export const WHATSAPP_NUMBER = "59175843284";
-// export const WHATSAPP_NUMBER = "59178184211";
+// WhatsApp em formato internacional, somente dígitos (sem + ou espaços).
+// Exemplo: 5511999999999
+export const WHATSAPP_NUMBER = "59169437674";
 
 export const siteConfig = {
   name: "Nextgen Labs",
   shortName: "Nextgen Labs",
   description:
-    "Nextgen Labs — péptidos exclusivamente para uso de investigación en Bolivia. Distribuidor oficial de Onyx Research. Calidad verificada, pureza garantizada y transparencia total.",
-  url: "https://www.nextgenlabsbo.com",
-  locale: "es_BO",
-  currency: "Bs",
+    "Nextgen Labs Brasil — compostos destinados exclusivamente à pesquisa laboratorial. Conheça o catálogo Onyx Research e consulte os certificados de análise.",
+  url: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+  locale: "pt_BR",
+  currency: "R$",
 
   contact: {
     email: "quiquequiroga@icloud.com",
-    city: "Cochabamba, Bolivia",
-    whatsappDisplay: "+591 69437674", // número visible
+    city: "São Paulo, Brasil",
+    whatsappDisplay: "+591 69437674",
   },
 
-  // Redes sociales: vacío = oculto. Agregar la URL real cuando exista.
+  // Redes sociais: campos vazios ficam ocultos.
   social: {
     instagram: "",
     facebook: "",

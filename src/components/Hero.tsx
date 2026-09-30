@@ -21,15 +21,14 @@ export function Hero() {
           priority
           className="mx-auto mb-8 h-auto w-56 object-contain sm:w-72"
         />
-        <p className="eyebrow mb-4">Péptidos para investigación · Bolivia</p>
+        <p className="eyebrow mb-4">Peptídeos para pesquisa · Brasil</p>
         <h1 className="text-balance text-4xl font-bold leading-tight tracking-tight sm:text-5xl md:text-6xl">
-          Calidad verificada.
+          Qualidade verificada.
           <br />
-          <span className="text-accent-light">Transparencia total.</span>
+          <span className="text-accent-light">Transparência total.</span>
         </h1>
         <p className="mx-auto mt-5 max-w-xl text-balance text-base leading-relaxed text-muted sm:text-lg">
-          Péptidos exclusivamente para uso de investigación, con pureza probada
-          de forma independiente. Distribuidor oficial de Onyx Research.
+          Compostos destinados exclusivamente à pesquisa laboratorial. Consulte as informações e os certificados disponíveis para cada produto.
         </p>
         <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Link
@@ -42,11 +41,11 @@ export function Hero() {
             href="#sobre"
             className="focus-ring w-full rounded-lg border border-white/20 bg-white/5 px-8 py-3.5 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/10 sm:w-auto"
           >
-            Conocer más
+            Saiba mais
           </Link>
         </div>
         <p className="mt-8 text-xs uppercase tracking-widest text-muted/80">
-          Solo para uso de investigación · No apto para consumo humano
+          Exclusivamente para pesquisa · Não destinado ao consumo humano
         </p>
       </div>
     </section>

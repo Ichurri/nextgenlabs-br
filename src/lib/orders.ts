@@ -1,7 +1,6 @@
 import { randomBytes, randomInt } from "node:crypto";
 import { isInStock, type Catalog } from "@/lib/products.types";
 import { round2 } from "@/lib/money";
-import { normalizeText } from "@/lib/whatsapp-parse";
 import { SHIPPING } from "@/config/shipping";
 
 export type OrderLine = {
@@ -31,33 +30,31 @@ export class OrderValidationError extends Error {}
  * nunca confía en montos que manda el cliente, así que esta función es la
  * única fuente de verdad para el dinero de un pedido (Fase 5 y 6).
  *
- * `city` es texto libre (lo tipea/corrige el admin): se compara sin
- * mayúsculas ni acentos, así que "cochabamba", "Cochabamba " o "COCHABAMBA"
- * matchean igual.
+ * A cidade é texto livre; o frete provisório é igual para todos os destinos.
  */
 export function calculateOrderTotals(
   items: { slug: string; quantity: number }[],
   catalog: Catalog,
   discount = 0, // la Fase 6 pasa un valor acá; la Fase 5 siempre 0
-  city?: string | null
+  _city?: string | null
 ): OrderTotals {
   if (items.length === 0) {
-    throw new OrderValidationError("El carrito está vacío.");
+    throw new OrderValidationError("O carrinho está vazio.");
   }
 
   const lines: OrderLine[] = items.map((item) => {
     const product = catalog.products.find((p) => p.slug === item.slug);
     if (!product) {
-      throw new OrderValidationError(`No encontramos el producto "${item.slug}".`);
+      throw new OrderValidationError(`Produto não encontrado: "${item.slug}".`);
     }
     if (product.price === 0) {
       throw new OrderValidationError(
-        `${product.name} es "precio a consultar" y no se puede pedir desde el checkout. Consultalo por WhatsApp.`
+        `${product.name} está sob consulta e não pode ser pedido pelo carrinho. Fale conosco pelo WhatsApp.`
       );
     }
     if (!isInStock(product)) {
       throw new OrderValidationError(
-        `${product.name} está agotado y no se puede pedir en este momento.`
+        `${product.name} está esgotado no momento.`
       );
     }
     return {
@@ -79,9 +76,7 @@ export function calculateOrderTotals(
   // conservador para el negocio).
   const freeShipping =
     SHIPPING.freeOver !== null && subtotalAfterDiscount >= SHIPPING.freeOver;
-  const isCochabamba = city != null && normalizeText(city) === "cochabamba";
-  const baseCost = isCochabamba ? SHIPPING.cochabambaCost : SHIPPING.nationalCost;
-  const shipping = freeShipping ? 0 : baseCost;
+  const shipping = freeShipping ? 0 : SHIPPING.nationalCost;
 
   const total = round2(subtotalAfterDiscount + shipping);
 

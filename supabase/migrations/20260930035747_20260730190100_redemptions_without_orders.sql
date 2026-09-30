@@ -13,7 +13,7 @@ alter table discount_redemptions
 -- La vista mantiene los mismos nombres y tipos de columna (requisito de
 -- create or replace); solo cambian las expresiones, para contar las dos
 -- fuentes: pedidos históricos y comprobantes sueltos.
-create or replace view discount_code_attribution as
+create or replace view discount_code_attribution with (security_invoker = true) as
 select
   dc.*,
   count(dr.id)::integer as redemption_count,

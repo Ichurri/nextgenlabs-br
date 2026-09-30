@@ -87,7 +87,7 @@ export function DiscountCodeForm({ mode, codeId, initialValues }: Props) {
             placeholder="Elegí un tipo"
           />
         </Field>
-        <Field label={values.type === "percent" ? "Valor (%)" : "Valor (Bs)"}>
+        <Field label={values.type === "percent" ? "Valor (%)" : "Valor (R$)"}>
           <input
             type="number"
             // "|| ''" en vez de directo: si se deja en 0 (nunca es un valor
@@ -149,7 +149,7 @@ export function DiscountCodeForm({ mode, codeId, initialValues }: Props) {
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Field label="Compra mínima en Bs (vacío = sin mínimo)">
+        <Field label="Compra mínima em R$ (vazio = sem mínimo)">
           <input
             type="number"
             value={values.minOrderTotal ?? ""}
@@ -162,7 +162,7 @@ export function DiscountCodeForm({ mode, codeId, initialValues }: Props) {
           />
         </Field>
         {values.type === "percent" && (
-          <Field label="Tope del descuento en Bs (vacío = sin tope)">
+          <Field label="Limite do desconto em R$ (vazio = sem limite)">
             <input
               type="number"
               value={values.maxDiscount ?? ""}
