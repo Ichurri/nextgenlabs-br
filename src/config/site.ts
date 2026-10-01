@@ -5,7 +5,7 @@
 
 // WhatsApp em formato internacional, somente dígitos (sem + ou espaços).
 // Exemplo: 5511999999999
-export const WHATSAPP_NUMBER = "59169437674";
+export const WHATSAPP_NUMBER = "5511919719980";
 
 export const siteConfig = {
   name: "Nextgen Labs",
